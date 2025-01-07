@@ -14,6 +14,7 @@ import { DescriptionStep } from "./listing/DescriptionStep";
 import { PriceStep } from "./listing/PriceStep";
 import { ImageStep } from "./listing/ImageStep";
 import { ListingFormData } from "@/types/listing";
+import { supabase } from "@/integrations/supabase/client";
 
 export const CreateListingDialog = ({ onListingCreated }: { onListingCreated: (listing: ListingFormData) => void }) => {
   const [step, setStep] = useState(1);
@@ -28,7 +29,7 @@ export const CreateListingDialog = ({ onListingCreated }: { onListingCreated: (l
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title || !formData.description || !formData.price) {
       toast({
         title: "Missing Information",
@@ -47,17 +48,68 @@ export const CreateListingDialog = ({ onListingCreated }: { onListingCreated: (l
       return;
     }
 
-    onListingCreated(formData);
-    setFormData({
-      title: "",
-      description: "",
-      price: "",
-      imageUrl: "",
-      isNegotiable: false,
-      shippingAvailable: false,
-    });
-    setStep(1);
-    setOpen(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to create a listing",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('listings')
+        .insert([
+          {
+            title: formData.title,
+            description: formData.description,
+            price: Number(formData.price),
+            image_url: formData.imageUrl || 'https://via.placeholder.com/400',
+            is_negotiable: formData.isNegotiable,
+            shipping_available: formData.shippingAvailable,
+            created_by: user.id,
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating listing:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create listing. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Listing created successfully!",
+      });
+
+      onListingCreated(formData);
+      setFormData({
+        title: "",
+        description: "",
+        price: "",
+        imageUrl: "",
+        isNegotiable: false,
+        shippingAvailable: false,
+      });
+      setStep(1);
+      setOpen(false);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderStep = () => {
