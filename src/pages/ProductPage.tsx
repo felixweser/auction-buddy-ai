@@ -84,11 +84,11 @@ const ProductPage = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
         <Button
-          variant="ghost"
-          className="mb-6 hover:bg-secondary"
+          variant="outline"
+          className="flex items-center gap-2 mb-6 hover:bg-secondary transition-colors"
           onClick={() => navigate("/")}
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           Back to Listings
         </Button>
 
