@@ -26,10 +26,23 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
 
   useEffect(() => {
     const fetchResults = async () => {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to search listings",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from("listings")
         .select("*")
         .textSearch('title', query)
+        .neq('created_by', user.id) // Filter out the current user's listings
         .order("created_at", { ascending: false });
 
       if (error) {
