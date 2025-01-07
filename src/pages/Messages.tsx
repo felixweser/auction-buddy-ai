@@ -11,7 +11,9 @@ interface Message {
   created_at: string;
   sender_id: string;
   listing_id: string;
-  listing_title: string;
+  listings: {
+    title: string;
+  };
 }
 
 interface ChatGroup {
@@ -59,7 +61,7 @@ const Messages = () => {
               created_at: message.created_at,
               sender_id: message.sender_id,
               listing_id: message.listing_id,
-              listing_title: message.listings.title
+              listings: message.listings
             });
           } else {
             acc.push({
@@ -71,7 +73,7 @@ const Messages = () => {
                 created_at: message.created_at,
                 sender_id: message.sender_id,
                 listing_id: message.listing_id,
-                listing_title: message.listings.title
+                listings: message.listings
               }]
             });
           }
