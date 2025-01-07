@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatDialog } from "@/components/ChatDialog";
-import { CreateListingDialog } from "@/components/CreateListingDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SearchBar } from "@/components/SearchBar";
 import { SearchResults } from "@/components/SearchResults";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface Listing {
   id: string;
@@ -26,6 +28,7 @@ const Index = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -82,15 +85,12 @@ const Index = () => {
             )}
           </main>
 
-          <CreateListingDialog onListingCreated={() => {
-            toast({
-              title: "Success",
-              description: "Listing created successfully",
-            });
-            if (hasSearched) {
-              handleSearch();
-            }
-          }} />
+          <Button 
+            className="fixed bottom-6 right-6"
+            onClick={() => navigate('/create-listing')}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Create Listing
+          </Button>
           
           {selectedListing && (
             <ChatDialog

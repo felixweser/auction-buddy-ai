@@ -6,6 +6,7 @@ import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import ProductPage from "./pages/ProductPage";
 import MyItems from "./pages/MyItems";
+import CreateListing from "./pages/CreateListing";
 import "./App.css";
 
 function App() {
@@ -52,6 +53,10 @@ function App() {
         <Route
           path="/my-items"
           element={session ? <MyItems /> : <Navigate to="/auth" />}
+        />
+        <Route
+          path="/create-listing"
+          element={session ? <CreateListing /> : <Navigate to="/auth" />}
         />
       </Routes>
     </Router>
