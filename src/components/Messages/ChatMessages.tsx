@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -18,13 +19,43 @@ interface ChatMessagesProps {
   currentUserId?: string;
 }
 
+interface UserProfile {
+  username: string | null;
+}
+
 export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const fetchUserProfiles = async () => {
+      // Get unique user IDs from messages
+      const userIds = [...new Set(messages.map(message => message.sender_id))];
+      
+      // Fetch profiles for all users
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds);
+
+      if (!error && data) {
+        const profiles = data.reduce((acc, profile) => ({
+          ...acc,
+          [profile.id]: { username: profile.username }
+        }), {});
+        setUserProfiles(profiles);
+      }
+    };
+
+    if (messages.length > 0) {
+      fetchUserProfiles();
     }
   }, [messages]);
 
@@ -43,6 +74,11 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
                   : 'bg-muted'
               }`}
             >
+              <p className="text-xs font-medium mb-1">
+                {message.sender_id === currentUserId 
+                  ? 'You'
+                  : userProfiles[message.sender_id]?.username || 'Unknown User'}
+              </p>
               <p>{message.content}</p>
               <p className="text-xs opacity-70 mt-1">
                 {new Date(message.created_at).toLocaleTimeString()}
