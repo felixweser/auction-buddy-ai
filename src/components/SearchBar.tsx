@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, Plus, Languages, MonitorSmartphone } from "lucide-react";
+import { Mic, Plus, MonitorSmartphone } from "lucide-react";
 import { PriceFilter } from "./PriceFilter";
+import { DistanceFilter } from "./DistanceFilter";
 
 interface SearchBarProps {
   searchQuery: string;
@@ -20,6 +21,8 @@ export const SearchBar = ({
   onPriceRangeChange,
 }: SearchBarProps) => {
   const [isPriceFilterOpen, setIsPriceFilterOpen] = React.useState(false);
+  const [isDistanceFilterOpen, setIsDistanceFilterOpen] = React.useState(false);
+  const [distanceRange, setDistanceRange] = React.useState([0, 25]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -55,9 +58,12 @@ export const SearchBar = ({
               <Plus className="h-4 w-4" />
               <span>Attach</span>
             </Button>
-            <Button variant="ghost" className="flex items-center gap-2 hover:text-white">
-              <Languages className="h-4 w-4" />
-              <span>Language</span>
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2 hover:text-white"
+              onClick={() => setIsDistanceFilterOpen(!isDistanceFilterOpen)}
+            >
+              <span>Distance</span>
             </Button>
             <Button variant="ghost" className="flex items-center gap-2 hover:text-white">
               <MonitorSmartphone className="h-4 w-4" />
@@ -68,6 +74,12 @@ export const SearchBar = ({
           {isPriceFilterOpen && (
             <div className="mt-4 p-4 bg-[#2A2A2A] rounded-lg">
               <PriceFilter value={priceRange} onChange={onPriceRangeChange} />
+            </div>
+          )}
+
+          {isDistanceFilterOpen && (
+            <div className="mt-4 p-4 bg-[#2A2A2A] rounded-lg">
+              <DistanceFilter value={distanceRange} onChange={setDistanceRange} />
             </div>
           )}
         </div>
