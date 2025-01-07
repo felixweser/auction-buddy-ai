@@ -4,7 +4,7 @@ import { DollarSign, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ListingCardProps {
-  id: number;
+  id: string;  // Changed from number to string to match UUID from Supabase
   title: string;
   description: string;
   price: number;
