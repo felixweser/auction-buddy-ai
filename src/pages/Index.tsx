@@ -7,7 +7,7 @@ import { CreateListingDialog } from "@/components/CreateListingDialog";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Listing {
-  id: number;
+  id: string;  // Changed from number to string to match Supabase UUID
   title: string;
   description: string;
   price: number;
