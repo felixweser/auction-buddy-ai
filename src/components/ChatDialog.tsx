@@ -7,8 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   content: string;
@@ -19,31 +21,63 @@ interface ChatDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   productTitle: string;
+  listingId: string;
+  sellerId: string;
 }
 
-export const ChatDialog = ({ open, onOpenChange, productTitle }: ChatDialogProps) => {
+export const ChatDialog = ({ open, onOpenChange, productTitle, listingId, sellerId }: ChatDialogProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      content: `Hello! I'm the AI assistant for ${productTitle}. How can I help you today?`,
+      content: `Hello! I'm interested in ${productTitle}. Is it still available?`,
       sender: "ai",
     },
   ]);
   const [input, setInput] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
+  const handleSend = async () => {
+    if (!input.trim() || !currentUserId) return;
+
+    // Add message to local state
     setMessages((prev) => [...prev, { content: input, sender: "user" }]);
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          content: "Thank you for your question! I'm simulating an AI response for now.",
-          sender: "ai",
-        },
-      ]);
-    }, 1000);
+
+    try {
+      // Save message to Supabase
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          content: input,
+          sender_id: currentUserId,
+          receiver_id: sellerId,
+          listing_id: listingId
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error sending message:", error);
+    }
+
     setInput("");
   };
 
