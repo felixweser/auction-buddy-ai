@@ -7,6 +7,7 @@ import { ListingItem } from "@/components/MyItems/ListingItem";
 import { useToast } from "@/hooks/use-toast";
 import { Listing } from "@/types/listing";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CreateListingDialog } from "@/components/CreateListingDialog";
 
 const MyItems = () => {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -67,6 +68,10 @@ const MyItems = () => {
     fetchMyListings(); // Refresh the list to ensure we have the latest data
   };
 
+  const handleListingCreated = () => {
+    fetchMyListings(); // Refresh the listings after creating a new one
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -111,6 +116,8 @@ const MyItems = () => {
             onUpdate={handleListingUpdate}
             isMobile={isMobile}
           />
+
+          <CreateListingDialog onListingCreated={handleListingCreated} />
         </div>
       </div>
     </SidebarProvider>
