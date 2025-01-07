@@ -1,4 +1,4 @@
-import { Search, User, Settings, LogOut } from "lucide-react";
+import { Search, User, Settings, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,11 +10,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { toggleSidebar, state } = useSidebar();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -56,6 +58,20 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
+          <div className="flex items-center justify-between p-4">
+            <h2 className="text-lg font-semibold">Menu</h2>
+            <button
+              onClick={toggleSidebar}
+              className="p-2 hover:bg-accent rounded-md transition-colors"
+              aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              {state === "expanded" ? (
+                <PanelLeftClose className="h-5 w-5" />
+              ) : (
+                <PanelLeft className="h-5 w-5" />
+              )}
+            </button>
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
