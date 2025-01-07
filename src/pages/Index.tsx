@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuctionCard } from "@/components/AuctionCard";
 import { ChatDialog } from "@/components/ChatDialog";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
+import { UserMenu } from "@/components/UserMenu";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   content: string;
@@ -16,7 +19,7 @@ interface Listing {
   currentBid: number;
   imageUrl: string;
   timeLeft: string;
-  createdBy: string; // Adding creator tracking
+  createdBy: string;
   messages: Message[];
 }
 
@@ -24,6 +27,18 @@ const Index = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const handleListingCreated = (formData: any) => {
     const newListing: Listing = {
@@ -33,7 +48,7 @@ const Index = () => {
       currentBid: Number(formData.price),
       imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?auto=format&fit=crop&q=80",
       timeLeft: "30 days",
-      createdBy: "current-user", // In a real app, this would be the actual user ID
+      createdBy: "current-user",
       messages: [],
     };
     setListings([...listings, newListing]);
@@ -47,11 +62,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-primary">Marketplace</h1>
-          <p className="text-muted-foreground mt-2">
-            Buy and sell items with AI-powered assistance
-          </p>
+        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Marketplace</h1>
+            <p className="text-muted-foreground mt-2">
+              Buy and sell items with AI-powered assistance
+            </p>
+          </div>
+          <UserMenu />
         </div>
       </header>
 
