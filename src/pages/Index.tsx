@@ -1,36 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { ChatDialog } from "@/components/ChatDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SearchBar } from "@/components/SearchBar";
-import { SearchResults } from "@/components/SearchResults";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-interface Listing {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  image_url: string;
-  is_negotiable: boolean;
-  created_by: string;
-}
-
 const Index = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!searchQuery.trim()) {
       toast({
         title: "Error",
@@ -40,27 +23,7 @@ const Index = () => {
       return;
     }
 
-    const { data, error } = await supabase
-      .from("listings")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch listings",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setListings(data || []);
-    setHasSearched(true);
-  };
-
-  const handleChat = (listing: Listing) => {
-    setSelectedListing(listing);
-    setChatOpen(true);
+    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
@@ -79,18 +42,6 @@ const Index = () => {
                 priceRange={priceRange}
                 onPriceRangeChange={setPriceRange}
               />
-
-              {hasSearched && (
-                <div className="mt-12">
-                  <h2 className="text-2xl font-semibold mb-4">
-                    Search results for "{searchQuery}"
-                  </h2>
-                  <SearchResults 
-                    listings={listings}
-                    onChat={handleChat}
-                  />
-                </div>
-              )}
             </div>
           </main>
 
@@ -100,14 +51,6 @@ const Index = () => {
           >
             <Plus className="mr-2 h-4 w-4" /> Create Listing
           </Button>
-          
-          {selectedListing && (
-            <ChatDialog
-              open={chatOpen}
-              onOpenChange={setChatOpen}
-              productTitle={selectedListing.title}
-            />
-          )}
         </div>
       </div>
     </SidebarProvider>
