@@ -3,6 +3,12 @@ import { AuctionCard } from "@/components/AuctionCard";
 import { ChatDialog } from "@/components/ChatDialog";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
 
+interface Message {
+  content: string;
+  sender: "user" | "ai";
+  timestamp: Date;
+}
+
 interface Listing {
   id: number;
   title: string;
@@ -10,6 +16,8 @@ interface Listing {
   currentBid: number;
   imageUrl: string;
   timeLeft: string;
+  createdBy: string; // Adding creator tracking
+  messages: Message[];
 }
 
 const Index = () => {
@@ -25,6 +33,8 @@ const Index = () => {
       currentBid: Number(formData.price),
       imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?auto=format&fit=crop&q=80",
       timeLeft: "30 days",
+      createdBy: "current-user", // In a real app, this would be the actual user ID
+      messages: [],
     };
     setListings([...listings, newListing]);
   };
