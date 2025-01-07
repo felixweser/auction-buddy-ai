@@ -56,6 +56,7 @@ export function AppSidebar() {
 
   return (
     <>
+      {/* Mobile toggle button - fixed position */}
       <button
         onClick={toggleSidebar}
         className="fixed left-4 top-4 z-50 p-2 bg-background hover:bg-accent rounded-md transition-colors border shadow-sm md:hidden"
@@ -67,21 +68,29 @@ export function AppSidebar() {
           <PanelLeft className="h-5 w-5" />
         )}
       </button>
+
+      {/* Desktop toggle button - fixed position when sidebar is collapsed */}
+      <button
+        onClick={toggleSidebar}
+        className={`fixed left-4 top-4 z-50 p-2 bg-background hover:bg-accent rounded-md transition-all duration-200 border shadow-sm hidden md:flex
+          ${state === "expanded" ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+      >
+        <PanelLeft className="h-5 w-5" />
+      </button>
+
       <Sidebar>
         <SidebarContent>
           <SidebarGroup>
             <div className="flex items-center justify-between p-4">
               <h2 className="text-lg font-semibold">Menu</h2>
+              {/* In-sidebar toggle button - only visible when sidebar is expanded */}
               <button
                 onClick={toggleSidebar}
                 className="p-2 hover:bg-accent rounded-md transition-colors hidden md:block"
                 aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
               >
-                {state === "expanded" ? (
-                  <PanelLeftClose className="h-5 w-5" />
-                ) : (
-                  <PanelLeft className="h-5 w-5" />
-                )}
+                <PanelLeftClose className="h-5 w-5" />
               </button>
             </div>
             <SidebarGroupContent>
