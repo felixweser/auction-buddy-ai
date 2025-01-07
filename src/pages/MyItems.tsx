@@ -13,39 +13,39 @@ const MyItems = () => {
   const [editedListing, setEditedListing] = useState<Listing | null>(null);
   const { toast } = useToast();
 
+  const fetchMyListings = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to view your items",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+      .eq("created_by", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch your listings",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setListings(data || []);
+  };
+
   useEffect(() => {
-    const fetchMyListings = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to view your items",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("listings")
-        .select("*")
-        .eq("created_by", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch your listings",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setListings(data || []);
-    };
-
     fetchMyListings();
-  }, [toast]);
+  }, []);
 
   const handleListingClick = (listing: Listing) => {
     setSelectedListing(listing);
@@ -55,6 +55,14 @@ const MyItems = () => {
   const handleCloseEdit = () => {
     setSelectedListing(null);
     setEditedListing(null);
+  };
+
+  const handleListingUpdate = (updatedListing: Listing) => {
+    setListings(listings.map(listing => 
+      listing.id === updatedListing.id ? updatedListing : listing
+    ));
+    handleCloseEdit();
+    fetchMyListings(); // Refresh the list to ensure we have the latest data
   };
 
   return (
@@ -98,6 +106,7 @@ const MyItems = () => {
             editedListing={editedListing}
             setEditedListing={setEditedListing}
             onClose={handleCloseEdit}
+            onUpdate={handleListingUpdate}
           />
         </div>
       </div>

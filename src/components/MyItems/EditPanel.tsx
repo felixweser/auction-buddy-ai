@@ -12,6 +12,7 @@ interface EditPanelProps {
   editedListing: Listing | null;
   setEditedListing: (listing: Listing | null) => void;
   onClose: () => void;
+  onUpdate: (listing: Listing) => void;
 }
 
 export const EditPanel = ({
@@ -19,13 +20,14 @@ export const EditPanel = ({
   editedListing,
   setEditedListing,
   onClose,
+  onUpdate,
 }: EditPanelProps) => {
   const { toast } = useToast();
 
   const handleSave = async () => {
     if (!editedListing) return;
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("listings")
       .update({
         title: editedListing.title,
@@ -33,7 +35,9 @@ export const EditPanel = ({
         price: editedListing.price,
         is_negotiable: editedListing.is_negotiable,
       })
-      .eq("id", editedListing.id);
+      .eq("id", editedListing.id)
+      .select()
+      .single();
 
     if (error) {
       toast({
@@ -48,7 +52,8 @@ export const EditPanel = ({
       title: "Success",
       description: "Your listing has been updated successfully!",
     });
-    onClose();
+    
+    onUpdate(data as Listing);
   };
 
   return (
