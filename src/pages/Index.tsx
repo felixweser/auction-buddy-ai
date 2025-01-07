@@ -70,6 +70,7 @@ const Index = () => {
         <div className="flex-1 bg-background">
           <main className="container mx-auto px-4 flex items-center justify-center min-h-screen">
             <div className="w-full max-w-2xl">
+              <h1 className="text-4xl font-bold mb-8 text-center">Großanzeigen</h1>
               <SearchBar
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
