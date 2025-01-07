@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { ProfileSetup } from "@/components/ProfileSetup";
 import { AuctionCard } from "@/components/AuctionCard";
 import { ChatDialog } from "@/components/ChatDialog";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
@@ -16,7 +18,7 @@ interface Listing {
   currentBid: number;
   imageUrl: string;
   timeLeft: string;
-  createdBy: string; // Adding creator tracking
+  createdBy: string;
   messages: Message[];
 }
 
@@ -24,6 +26,32 @@ const Index = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+        
+        setProfileComplete(!!profile?.username);
+      }
+    };
+
+    checkProfile();
+  }, []);
+
+  if (profileComplete === false) {
+    return <ProfileSetup />;
+  }
+
+  if (profileComplete === null) {
+    return <div>Loading...</div>;
+  }
 
   const handleListingCreated = (formData: any) => {
     const newListing: Listing = {
