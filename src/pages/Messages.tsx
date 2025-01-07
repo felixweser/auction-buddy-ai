@@ -13,6 +13,7 @@ interface Message {
   content: string;
   created_at: string;
   sender_id: string;
+  receiver_id: string;
   listing_id: string;
   listings: {
     title: string;
@@ -48,6 +49,7 @@ const Messages = () => {
             content,
             created_at,
             sender_id,
+            receiver_id,
             listing_id,
             listings (
               title
@@ -110,10 +112,10 @@ const Messages = () => {
       if (!selectedChatGroup) return;
 
       // Find the other user in the conversation (not the current user)
-      const mostRecentMessage = selectedChatGroup.messages[0];
+      const mostRecentMessage = selectedChatGroup.messages[selectedChatGroup.messages.length - 1];
       const receiver_id = mostRecentMessage.sender_id === currentUserId
-        ? mostRecentMessage.receiver_id // If we sent the last message, use its receiver_id
-        : mostRecentMessage.sender_id;  // If we received the last message, use its sender_id
+        ? mostRecentMessage.receiver_id
+        : mostRecentMessage.sender_id;
 
       const { error } = await supabase
         .from('messages')

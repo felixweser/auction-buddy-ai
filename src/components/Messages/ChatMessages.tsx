@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
   content: string;
   created_at: string;
   sender_id: string;
+  receiver_id: string;
   listing_id: string;
   listings: {
     title: string;
