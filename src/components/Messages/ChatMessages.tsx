@@ -24,15 +24,16 @@ interface UserProfile {
 }
 
 export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    // Scroll to bottom when new messages arrive
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  }, [messages]);
+    scrollToBottom();
+  }, [messages]); // Scroll when messages change
 
   useEffect(() => {
     const fetchUserProfiles = async () => {
@@ -60,7 +61,7 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
   }, [messages]);
 
   return (
-    <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+    <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
         {messages.map((message) => (
           <div
@@ -86,6 +87,7 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} /> {/* Invisible element to scroll to */}
       </div>
     </ScrollArea>
   );
