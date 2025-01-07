@@ -9,7 +9,7 @@ interface DistanceFilterProps {
 export const DistanceFilter = ({ value, onChange }: DistanceFilterProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="font-medium text-white">Distance Range</h3>
+      <h3 className="font-medium text-foreground">Distance Range</h3>
       <Slider
         value={value}
         onValueChange={onChange}
@@ -17,7 +17,7 @@ export const DistanceFilter = ({ value, onChange }: DistanceFilterProps) => {
         step={1}
         className="mt-2"
       />
-      <div className="flex justify-between text-sm text-gray-400">
+      <div className="flex justify-between text-sm text-muted-foreground">
         <span>{value[0]} km</span>
         <span>{value[1]} km</span>
       </div>
