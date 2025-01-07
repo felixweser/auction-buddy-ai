@@ -38,10 +38,22 @@ export const CreateListingDialog = ({ onListingCreated }: { onListingCreated: (l
       });
       return;
     }
+
+    if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      toast({
+        title: "Invalid Price",
+        description: "Please enter a valid price greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
     onListingCreated(formData);
-    toast({
-      title: "Success",
-      description: "Your listing has been created",
+    setFormData({
+      title: "",
+      description: "",
+      price: "",
+      imageUrl: "",
     });
   };
 
@@ -74,14 +86,14 @@ export const CreateListingDialog = ({ onListingCreated }: { onListingCreated: (l
           <div>
             <Input
               type="number"
-              placeholder="Price"
+              placeholder="Price (VB)"
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             />
           </div>
           <div>
             <Input
-              placeholder="Image URL"
+              placeholder="Image URL (optional)"
               value={formData.imageUrl}
               onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
             />

@@ -1,34 +1,32 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, DollarSign } from "lucide-react";
+import { DollarSign, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface AuctionCardProps {
+interface ListingCardProps {
   id: number;
   title: string;
   description: string;
-  currentBid: number;
+  price: number;
   imageUrl: string;
-  timeLeft: string;
-  onBid: () => void;
+  isNegotiable: boolean;
   onChat: () => void;
 }
 
-export const AuctionCard = ({
+export const ListingCard = ({
   id,
   title,
   description,
-  currentBid,
+  price,
   imageUrl,
-  timeLeft,
-  onBid,
+  isNegotiable,
   onChat,
-}: AuctionCardProps) => {
+}: ListingCardProps) => {
   const navigate = useNavigate();
 
   return (
     <Card 
-      className="auction-card overflow-hidden cursor-pointer"
+      className="listing-card overflow-hidden cursor-pointer"
       onClick={() => navigate(`/product/${id}`)}
     >
       <div className="aspect-square overflow-hidden">
@@ -45,32 +43,23 @@ export const AuctionCard = ({
       <CardContent>
         <div className="flex items-center gap-2 text-primary">
           <DollarSign className="w-4 h-4" />
-          <span className="font-bold">${currentBid}</span>
-        </div>
-        <div className="flex items-center gap-2 text-muted-foreground mt-2">
-          <Clock className="w-4 h-4" />
-          <span className="text-sm">{timeLeft}</span>
+          <span className="font-bold">${price}</span>
+          {isNegotiable && (
+            <span className="text-sm text-muted-foreground">(VB)</span>
+          )}
         </div>
       </CardContent>
-      <CardFooter className="gap-2">
-        <Button 
-          onClick={(e) => {
-            e.stopPropagation();
-            onBid();
-          }} 
-          className="flex-1 bid-button"
-        >
-          Place Bid
-        </Button>
+      <CardFooter>
         <Button 
           onClick={(e) => {
             e.stopPropagation();
             onChat();
           }} 
-          variant="outline" 
-          className="flex-1"
+          className="w-full"
+          variant="outline"
         >
-          Ask Question
+          <MessageCircle className="w-4 h-4 mr-2" />
+          {isNegotiable ? "Negotiate Price" : "Contact Seller"}
         </Button>
       </CardFooter>
     </Card>

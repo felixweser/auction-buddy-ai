@@ -1,25 +1,19 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileSetup } from "@/components/ProfileSetup";
-import { AuctionCard } from "@/components/AuctionCard";
+import { ListingCard } from "@/components/ListingCard";
 import { ChatDialog } from "@/components/ChatDialog";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
-
-interface Message {
-  content: string;
-  sender: "user" | "ai";
-  timestamp: Date;
-}
+import { useToast } from "@/components/ui/use-toast";
 
 interface Listing {
   id: number;
   title: string;
   description: string;
-  currentBid: number;
-  imageUrl: string;
-  timeLeft: string;
-  createdBy: string;
-  messages: Message[];
+  price: number;
+  image_url: string;
+  is_negotiable: boolean;
+  created_by: string;
 }
 
 const Index = () => {
@@ -27,6 +21,7 @@ const Index = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -42,8 +37,75 @@ const Index = () => {
       }
     };
 
+    const fetchListings = async () => {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch listings",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setListings(data || []);
+    };
+
     checkProfile();
-  }, []);
+    fetchListings();
+  }, [toast]);
+
+  const handleListingCreated = async (formData: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a listing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase.from("listings").insert({
+      title: formData.title,
+      description: formData.description,
+      price: formData.price,
+      image_url: formData.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+      is_negotiable: true,
+      created_by: user.id,
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create listing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Refresh listings
+    const { data: newListings } = await supabase
+      .from("listings")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    setListings(newListings || []);
+    
+    toast({
+      title: "Success",
+      description: "Listing created successfully",
+    });
+  };
+
+  const handleChat = (listing: Listing) => {
+    setSelectedListing(listing);
+    setChatOpen(true);
+  };
 
   if (profileComplete === false) {
     return <ProfileSetup />;
@@ -53,32 +115,13 @@ const Index = () => {
     return <div>Loading...</div>;
   }
 
-  const handleListingCreated = (formData: any) => {
-    const newListing: Listing = {
-      id: listings.length + 1,
-      title: formData.title,
-      description: formData.description,
-      currentBid: Number(formData.price),
-      imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1452780212940-6f5c0d14d848?auto=format&fit=crop&q=80",
-      timeLeft: "30 days",
-      createdBy: "current-user", // In a real app, this would be the actual user ID
-      messages: [],
-    };
-    setListings([...listings, newListing]);
-  };
-
-  const handleChat = (listing: Listing) => {
-    setSelectedListing(listing);
-    setChatOpen(true);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-primary">Marketplace</h1>
           <p className="text-muted-foreground mt-2">
-            Buy and sell items with AI-powered assistance
+            Buy and sell items with chat-based price negotiation
           </p>
         </div>
       </header>
@@ -86,15 +129,14 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {listings.map((listing) => (
-            <AuctionCard
+            <ListingCard
               key={listing.id}
               id={listing.id}
               title={listing.title}
               description={listing.description}
-              currentBid={listing.currentBid}
-              imageUrl={listing.imageUrl}
-              timeLeft={listing.timeLeft}
-              onBid={() => {}}
+              price={listing.price}
+              imageUrl={listing.image_url}
+              isNegotiable={listing.is_negotiable}
               onChat={() => handleChat(listing)}
             />
           ))}
