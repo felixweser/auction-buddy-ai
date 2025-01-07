@@ -36,10 +36,15 @@ const Messages = () => {
 
   const fetchMessages = async () => {
     try {
+      console.log("Fetching messages...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log("No user found");
+        return;
+      }
       
       setCurrentUserId(user.id);
+      console.log("Current user ID:", user.id);
 
       const { data, error } = await supabase
         .from('messages')
@@ -57,7 +62,12 @@ const Messages = () => {
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching messages:", error);
+        throw error;
+      }
+
+      console.log("Fetched messages:", data);
 
       // Group messages by listing
       const groupedChats = data.reduce((acc: ChatGroup[], message: Message) => {
@@ -74,8 +84,10 @@ const Messages = () => {
         return acc;
       }, []);
 
+      console.log("Grouped chats:", groupedChats);
       setChats(groupedChats);
     } catch (error) {
+      console.error("Error in fetchMessages:", error);
       toast({
         title: "Error",
         description: "Failed to load messages",
@@ -86,7 +98,64 @@ const Messages = () => {
     }
   };
 
+  const handleSendMessage = async () => {
+    if (!selectedChat || !newMessage.trim() || !currentUserId) {
+      console.log("Cannot send message:", { selectedChat, newMessage, currentUserId });
+      return;
+    }
+
+    try {
+      console.log("Sending message...");
+      const selectedChatGroup = chats.find(chat => chat.listing_id === selectedChat);
+      if (!selectedChatGroup) {
+        console.log("No chat group found for:", selectedChat);
+        return;
+      }
+
+      // Find the other user in the conversation (not the current user)
+      const mostRecentMessage = selectedChatGroup.messages[selectedChatGroup.messages.length - 1];
+      const receiver_id = mostRecentMessage.sender_id === currentUserId
+        ? mostRecentMessage.receiver_id
+        : mostRecentMessage.sender_id;
+
+      console.log("Sending message to receiver:", receiver_id);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          content: newMessage,
+          sender_id: currentUserId,
+          receiver_id,
+          listing_id: selectedChat
+        })
+        .select();
+
+      if (error) {
+        console.error("Error sending message:", error);
+        throw error;
+      }
+
+      console.log("Message sent successfully:", data);
+      setNewMessage("");
+      // Fetch messages immediately after sending
+      await fetchMessages();
+
+      toast({
+        title: "Success",
+        description: "Message sent successfully",
+      });
+    } catch (error) {
+      console.error("Error in handleSendMessage:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
+    console.log("Initial fetch of messages");
     fetchMessages();
 
     // Set up real-time subscription for new messages
@@ -106,48 +175,13 @@ const Messages = () => {
       )
       .subscribe();
 
+    console.log("Subscribed to real-time updates");
+
     return () => {
+      console.log("Cleaning up subscription");
       supabase.removeChannel(channel);
     };
   }, []);
-
-  const handleSendMessage = async () => {
-    if (!selectedChat || !newMessage.trim() || !currentUserId) return;
-
-    try {
-      const selectedChatGroup = chats.find(chat => chat.listing_id === selectedChat);
-      if (!selectedChatGroup) return;
-
-      // Find the other user in the conversation (not the current user)
-      const mostRecentMessage = selectedChatGroup.messages[selectedChatGroup.messages.length - 1];
-      const receiver_id = mostRecentMessage.sender_id === currentUserId
-        ? mostRecentMessage.receiver_id
-        : mostRecentMessage.sender_id;
-
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          content: newMessage,
-          sender_id: currentUserId,
-          receiver_id,
-          listing_id: selectedChat
-        });
-
-      if (error) throw error;
-
-      setNewMessage("");
-      toast({
-        title: "Success",
-        description: "Message sent successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (loading) {
     return (
