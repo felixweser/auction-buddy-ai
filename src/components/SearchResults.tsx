@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ListingCard } from "@/components/ListingCard";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { ChatDialog } from "@/components/ChatDialog";
 
 interface Listing {
   id: string;
@@ -12,14 +15,45 @@ interface Listing {
 }
 
 interface SearchResultsProps {
-  listings: Listing[];
-  onChat: (listing: Listing) => void;
+  query: string;
 }
 
-export const SearchResults = ({ listings, onChat }: SearchResultsProps) => {
+export const SearchResults = ({ query }: SearchResultsProps) => {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("*")
+        .textSearch('title', query)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch listings",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setListings(data || []);
+    };
+
+    fetchResults();
+  }, [query, toast]);
+
+  const handleChat = (listing: Listing) => {
+    setSelectedListing(listing);
+    setChatOpen(true);
+  };
+
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-semibold mb-6">Search Results</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {listings.map((listing) => (
           <ListingCard
@@ -30,7 +64,7 @@ export const SearchResults = ({ listings, onChat }: SearchResultsProps) => {
             price={listing.price}
             imageUrl={listing.image_url}
             isNegotiable={listing.is_negotiable}
-            onChat={() => onChat(listing)}
+            onChat={() => handleChat(listing)}
           />
         ))}
       </div>
@@ -40,6 +74,14 @@ export const SearchResults = ({ listings, onChat }: SearchResultsProps) => {
             No items found matching your search criteria.
           </p>
         </div>
+      )}
+
+      {selectedListing && (
+        <ChatDialog
+          open={chatOpen}
+          onOpenChange={setChatOpen}
+          productTitle={selectedListing.title}
+        />
       )}
     </div>
   );
