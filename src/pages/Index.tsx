@@ -5,9 +5,11 @@ import { ListingCard } from "@/components/ListingCard";
 import { ChatDialog } from "@/components/ChatDialog";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 interface Listing {
-  id: string;  // Changed from number to string to match Supabase UUID
+  id: string;
   title: string;
   description: string;
   price: number;
@@ -116,48 +118,58 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-primary">Marketplace</h1>
-          <p className="text-muted-foreground mt-2">
-            Buy and sell items with chat-based price negotiation
-          </p>
-        </div>
-      </header>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 bg-background">
+          <header className="border-b">
+            <div className="container mx-auto flex items-center justify-between px-4 py-6">
+              <div>
+                <h1 className="text-3xl font-bold text-primary">Marketplace</h1>
+                <p className="text-muted-foreground mt-2">
+                  Buy and sell items with chat-based price negotiation
+                </p>
+              </div>
+              <SidebarTrigger />
+            </div>
+          </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {listings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              id={listing.id}
-              title={listing.title}
-              description={listing.description}
-              price={listing.price}
-              imageUrl={listing.image_url}
-              isNegotiable={listing.is_negotiable}
-              onChat={() => handleChat(listing)}
+          <main className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {listings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  id={listing.id}
+                  title={listing.title}
+                  description={listing.description}
+                  price={listing.price}
+                  imageUrl={listing.image_url}
+                  isNegotiable={listing.is_negotiable}
+                  onChat={() => handleChat(listing)}
+                />
+              ))}
+            </div>
+            {listings.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  No listings yet. Create your first listing!
+                </p>
+              </div>
+            )}
+          </main>
+
+          <CreateListingDialog onListingCreated={handleListingCreated} />
+          
+          {selectedListing && (
+            <ChatDialog
+              open={chatOpen}
+              onOpenChange={setChatOpen}
+              productTitle={selectedListing.title}
             />
-          ))}
+          )}
         </div>
-        {listings.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No listings yet. Create your first listing!</p>
-          </div>
-        )}
-      </main>
-
-      <CreateListingDialog onListingCreated={handleListingCreated} />
-      
-      {selectedListing && (
-        <ChatDialog
-          open={chatOpen}
-          onOpenChange={setChatOpen}
-          productTitle={selectedListing.title}
-        />
-      )}
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
