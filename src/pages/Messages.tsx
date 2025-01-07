@@ -4,7 +4,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle } from "lucide-react";
-import { SidebarInset } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 interface Message {
   id: string;
@@ -98,87 +99,93 @@ const Messages = () => {
 
   if (loading) {
     return (
-      <SidebarInset>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-muted-foreground">Loading messages...</p>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-muted-foreground">Loading messages...</p>
+          </div>
         </div>
-      </SidebarInset>
+      </SidebarProvider>
     );
   }
 
   return (
-    <SidebarInset>
-      <div className="p-6 h-full">
-        <h1 className="text-3xl font-bold mb-6">Messages</h1>
-        
-        {chats.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No messages yet</p>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-[300px,1fr] gap-6 h-[calc(100vh-200px)]">
-            {/* Chat List */}
-            <div className="border rounded-lg bg-card">
-              <ScrollArea className="h-full">
-                <div className="p-4 space-y-2">
-                  {chats.map((chat) => (
-                    <Button
-                      key={chat.listing_id}
-                      variant={selectedChat === chat.listing_id ? "secondary" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => setSelectedChat(chat.listing_id)}
-                    >
-                      <div className="truncate">
-                        <p className="font-medium">{chat.listing_title}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {chat.messages[0].content}
-                        </p>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 p-6">
+          <h1 className="text-3xl font-bold mb-6">Messages</h1>
+          
+          {chats.length === 0 ? (
+            <div className="text-center py-12">
+              <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No messages yet</p>
             </div>
-
-            {/* Chat Messages */}
-            <div className="border rounded-lg bg-card p-4">
-              <ScrollArea className="h-full">
-                {selectedChat ? (
-                  <div className="space-y-4">
-                    {chats
-                      .find(chat => chat.listing_id === selectedChat)
-                      ?.messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.sender_id === (supabase.auth.getUser() as any).data?.user?.id ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
-                              message.sender_id === (supabase.auth.getUser() as any).data?.user?.id
-                                ? 'bg-primary text-primary-foreground ml-auto'
-                                : 'bg-muted'
-                            }`}
-                          >
-                            <p>{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {new Date(message.created_at).toLocaleTimeString()}
-                            </p>
-                          </div>
+          ) : (
+            <div className="grid md:grid-cols-[300px,1fr] gap-6 h-[calc(100vh-200px)]">
+              {/* Chat List */}
+              <div className="border rounded-lg bg-card">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-2">
+                    {chats.map((chat) => (
+                      <Button
+                        key={chat.listing_id}
+                        variant={selectedChat === chat.listing_id ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setSelectedChat(chat.listing_id)}
+                      >
+                        <div className="truncate">
+                          <p className="font-medium">{chat.listing_title}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {chat.messages[0].content}
+                          </p>
                         </div>
-                      ))}
+                      </Button>
+                    ))}
                   </div>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-muted-foreground">
-                    Select a conversation to view messages
-                  </div>
-                )}
-              </ScrollArea>
+                </ScrollArea>
+              </div>
+
+              {/* Chat Messages */}
+              <div className="border rounded-lg bg-card p-4">
+                <ScrollArea className="h-full">
+                  {selectedChat ? (
+                    <div className="space-y-4">
+                      {chats
+                        .find(chat => chat.listing_id === selectedChat)
+                        ?.messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${message.sender_id === (supabase.auth.getUser() as any).data?.user?.id ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-[70%] rounded-lg p-3 ${
+                                message.sender_id === (supabase.auth.getUser() as any).data?.user?.id
+                                  ? 'bg-primary text-primary-foreground ml-auto'
+                                  : 'bg-muted'
+                              }`}
+                            >
+                              <p>{message.content}</p>
+                              <p className="text-xs opacity-70 mt-1">
+                                {new Date(message.created_at).toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground">
+                      Select a conversation to view messages
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </SidebarInset>
+    </SidebarProvider>
   );
 };
 
