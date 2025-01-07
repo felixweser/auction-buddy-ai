@@ -68,21 +68,23 @@ const Index = () => {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex-1 bg-background">
-          <main className="container mx-auto px-4 py-8">
-            <SearchBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onSearch={handleSearch}
-              priceRange={priceRange}
-              onPriceRangeChange={setPriceRange}
-            />
-
-            {hasSearched && (
-              <SearchResults 
-                listings={listings}
-                onChat={handleChat}
+          <main className="container mx-auto px-4 flex items-center justify-center min-h-screen">
+            <div className="w-full max-w-2xl">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onSearch={handleSearch}
+                priceRange={priceRange}
+                onPriceRangeChange={setPriceRange}
               />
-            )}
+
+              {hasSearched && (
+                <SearchResults 
+                  listings={listings}
+                  onChat={handleChat}
+                />
+              )}
+            </div>
           </main>
 
           <Button 
