@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Send } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -28,6 +29,7 @@ const Messages = () => {
   const [chats, setChats] = useState<ChatGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,7 +97,62 @@ const Messages = () => {
     };
 
     fetchMessages();
+
+    // Set up real-time subscription for new messages
+    const subscription = supabase
+      .channel('messages')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'messages' 
+      }, fetchMessages)
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [toast]);
+
+  const handleSendMessage = async () => {
+    if (!selectedChat || !newMessage.trim()) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get the receiver_id from the most recent message in the chat
+      const selectedChatGroup = chats.find(chat => chat.listing_id === selectedChat);
+      if (!selectedChatGroup) return;
+
+      const mostRecentMessage = selectedChatGroup.messages[0];
+      const receiver_id = mostRecentMessage.sender_id === user.id 
+        ? mostRecentMessage.sender_id 
+        : user.id;
+
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          content: newMessage,
+          sender_id: user.id,
+          receiver_id,
+          listing_id: selectedChat
+        });
+
+      if (error) throw error;
+
+      setNewMessage("");
+      toast({
+        title: "Success",
+        description: "Message sent successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -148,8 +205,8 @@ const Messages = () => {
               </div>
 
               {/* Chat Messages */}
-              <div className="border rounded-lg bg-card p-4">
-                <ScrollArea className="h-full">
+              <div className="border rounded-lg bg-card flex flex-col">
+                <ScrollArea className="flex-1 p-4">
                   {selectedChat ? (
                     <div className="space-y-4">
                       {chats
@@ -180,6 +237,23 @@ const Messages = () => {
                     </div>
                   )}
                 </ScrollArea>
+
+                {/* Message Input */}
+                {selectedChat && (
+                  <div className="p-4 border-t">
+                    <div className="flex gap-2">
+                      <Input
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                      />
+                      <Button size="icon" onClick={handleSendMessage}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
