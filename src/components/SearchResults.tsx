@@ -94,6 +94,8 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
           open={chatOpen}
           onOpenChange={setChatOpen}
           productTitle={selectedListing.title}
+          listingId={selectedListing.id}
+          sellerId={selectedListing.created_by}
         />
       )}
     </div>

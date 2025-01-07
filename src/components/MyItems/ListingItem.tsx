@@ -70,6 +70,8 @@ export const ListingItem = ({ listing, onClick }: ListingItemProps) => {
         open={isChatOpen} 
         onOpenChange={setIsChatOpen}
         productTitle={listing.title}
+        listingId={listing.id}
+        sellerId={listing.created_by}
       />
     </div>
   );

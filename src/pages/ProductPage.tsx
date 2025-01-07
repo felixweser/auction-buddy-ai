@@ -2,8 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useState, useEffect } from "react";
-import { ArrowLeft, MessageCircle, DollarSign, Calendar, User } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft, MessageCircle, DollarSign, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -145,6 +144,8 @@ const ProductPage = () => {
         open={chatOpen}
         onOpenChange={setChatOpen}
         productTitle={listing.title}
+        listingId={listing.id}
+        sellerId={listing.created_by}
       />
     </div>
   );
