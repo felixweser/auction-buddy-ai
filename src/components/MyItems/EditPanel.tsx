@@ -13,6 +13,7 @@ interface EditPanelProps {
   setEditedListing: (listing: Listing | null) => void;
   onClose: () => void;
   onUpdate: (listing: Listing) => void;
+  isMobile: boolean;
 }
 
 export const EditPanel = ({
@@ -21,6 +22,7 @@ export const EditPanel = ({
   setEditedListing,
   onClose,
   onUpdate,
+  isMobile,
 }: EditPanelProps) => {
   const { toast } = useToast();
 
@@ -58,14 +60,14 @@ export const EditPanel = ({
 
   return (
     <Sheet open={!!listing} onOpenChange={() => onClose()}>
-      <SheetContent className="w-full sm:max-w-xl">
+      <SheetContent className="w-full sm:max-w-xl" side={isMobile ? "bottom" : "right"}>
         <SheetHeader>
           <SheetTitle>Edit Listing</SheetTitle>
         </SheetHeader>
         
         {editedListing && (
-          <div className="space-y-6 mt-6">
-            <div className="aspect-video rounded-lg overflow-hidden bg-accent">
+          <div className="space-y-4 md:space-y-6 mt-4 md:mt-6 pb-safe">
+            <div className={`${isMobile ? 'h-40' : 'aspect-video'} rounded-lg overflow-hidden bg-accent`}>
               <img
                 src={editedListing.image_url}
                 alt={editedListing.title}
@@ -73,7 +75,7 @@ export const EditPanel = ({
               />
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <div>
                 <label htmlFor="title" className="text-sm font-medium text-foreground">
                   Title
@@ -85,6 +87,7 @@ export const EditPanel = ({
                     ...editedListing,
                     title: e.target.value
                   })}
+                  className="mt-1.5"
                 />
               </div>
 
@@ -99,7 +102,7 @@ export const EditPanel = ({
                     ...editedListing,
                     description: e.target.value
                   })}
-                  className="h-32"
+                  className="mt-1.5 h-24 md:h-32"
                 />
               </div>
 
@@ -115,11 +118,12 @@ export const EditPanel = ({
                     ...editedListing,
                     price: Number(e.target.value)
                   })}
+                  className="mt-1.5"
                 />
               </div>
 
               <Button 
-                className="w-full" 
+                className="w-full mt-6" 
                 onClick={handleSave}
               >
                 <Save className="w-4 h-4 mr-2" />

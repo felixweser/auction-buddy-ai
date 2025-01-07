@@ -6,12 +6,14 @@ import { EditPanel } from "@/components/MyItems/EditPanel";
 import { ListingItem } from "@/components/MyItems/ListingItem";
 import { useToast } from "@/hooks/use-toast";
 import { Listing } from "@/types/listing";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MyItems = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [editedListing, setEditedListing] = useState<Listing | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const fetchMyListings = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -71,18 +73,18 @@ const MyItems = () => {
         <AppSidebar />
         <div className="flex-1 bg-background">
           <header className="border-b">
-            <div className="container mx-auto flex items-center justify-between px-4 py-6">
+            <div className="container mx-auto flex items-center justify-between px-4 py-4 md:py-6">
               <div>
-                <h1 className="text-3xl font-bold text-primary">My Items</h1>
-                <p className="text-muted-foreground mt-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-primary">My Items</h1>
+                <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
                   Manage your listed items
                 </p>
               </div>
             </div>
           </header>
 
-          <main className="container mx-auto px-4 py-8">
-            <div className="space-y-4">
+          <main className="container mx-auto px-4 py-4 md:py-8">
+            <div className="space-y-3 md:space-y-4">
               {listings.map((listing) => (
                 <ListingItem
                   key={listing.id}
@@ -92,8 +94,8 @@ const MyItems = () => {
               ))}
 
               {listings.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
+                <div className="text-center py-8 md:py-12">
+                  <p className="text-muted-foreground text-sm md:text-base">
                     You haven't listed any items yet. Create your first listing!
                   </p>
                 </div>
@@ -107,6 +109,7 @@ const MyItems = () => {
             setEditedListing={setEditedListing}
             onClose={handleCloseEdit}
             onUpdate={handleListingUpdate}
+            isMobile={isMobile}
           />
         </div>
       </div>
