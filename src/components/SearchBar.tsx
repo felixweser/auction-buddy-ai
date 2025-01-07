@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Mic, Plus } from "lucide-react";
 import { PriceFilter } from "./PriceFilter";
 import { DistanceFilter } from "./DistanceFilter";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface SearchBarProps {
   searchQuery: string;
@@ -23,18 +24,20 @@ export const SearchBar = ({
   const [isPriceFilterOpen, setIsPriceFilterOpen] = React.useState(false);
   const [isDistanceFilterOpen, setIsDistanceFilterOpen] = React.useState(false);
   const [distanceRange, setDistanceRange] = React.useState([0, 25]);
+  const { state } = useSidebar();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className={`mx-auto space-y-8 transition-all duration-300 ease-in-out
+      ${state === "expanded" ? "max-w-3xl" : "max-w-5xl"}`}>
       <div className="relative">
-        <div className="bg-card rounded-xl p-6 shadow-lg border border-border">
+        <div className="bg-card rounded-xl p-8 shadow-lg border border-border">
           <div className="relative">
             <Input
               placeholder="What are you looking for? (e.g., 'a used MacBook in good condition')"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSearch()}
-              className="bg-transparent border-none text-foreground text-xl placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 pl-0"
+              className="bg-transparent border-none text-foreground text-2xl placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 pl-0"
             />
             <Button
               variant="ghost"
@@ -46,7 +49,7 @@ export const SearchBar = ({
             </Button>
           </div>
           
-          <div className="flex items-center gap-4 mt-4 text-muted-foreground">
+          <div className="flex items-center gap-4 mt-6 text-muted-foreground">
             <Button 
               variant="ghost" 
               className="flex items-center gap-2 hover:text-foreground"
