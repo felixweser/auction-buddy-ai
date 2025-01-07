@@ -91,18 +91,23 @@ const Messages = () => {
 
     // Set up real-time subscription for new messages
     const channel = supabase
-      .channel('messages')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'messages' 
-      }, () => {
-        fetchMessages();
-      })
+      .channel('messages-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          fetchMessages(); // Refresh messages when any change occurs
+        }
+      )
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 
