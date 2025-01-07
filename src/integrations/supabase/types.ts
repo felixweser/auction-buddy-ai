@@ -18,6 +18,7 @@ export type Database = {
           image_url: string
           is_negotiable: boolean
           price: number
+          shipping_available: boolean
           title: string
         }
         Insert: {
@@ -28,6 +29,7 @@ export type Database = {
           image_url: string
           is_negotiable?: boolean
           price: number
+          shipping_available?: boolean
           title: string
         }
         Update: {
@@ -38,6 +40,7 @@ export type Database = {
           image_url?: string
           is_negotiable?: boolean
           price?: number
+          shipping_available?: boolean
           title?: string
         }
         Relationships: []
