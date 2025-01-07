@@ -27,7 +27,20 @@ const AuthPage = () => {
       case "Email not confirmed":
         return "Please verify your email address before signing in.";
       default:
-        return error.message;
+        // Handle the weak password error
+        if (error.message.includes("Password should be at least 6 characters")) {
+          return "Password must be at least 6 characters long.";
+        }
+        // Parse JSON error message if it's in the body
+        try {
+          const errorBody = JSON.parse(error.message);
+          if (errorBody.message) {
+            return errorBody.message;
+          }
+        } catch {
+          // If parsing fails, return the original message
+          return error.message;
+        }
     }
   };
 
@@ -51,6 +64,9 @@ const AuthPage = () => {
             appearance={{ theme: ThemeSupa }}
             theme="light"
             providers={[]}
+            onError={(error) => {
+              setErrorMessage(getErrorMessage(error));
+            }}
           />
         </div>
       </div>
