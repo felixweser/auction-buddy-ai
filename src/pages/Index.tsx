@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ProfileSetup } from "@/components/ProfileSetup";
 import { ListingCard } from "@/components/ListingCard";
 import { ChatDialog } from "@/components/ChatDialog";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Search } from "lucide-react";
 
 interface Listing {
   id: string;
@@ -22,100 +25,44 @@ const Index = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [distance, setDistance] = useState([50]); // Distance in miles
   const { toast } = useToast();
 
-  useEffect(() => {
-    const checkProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username")
-          .eq("id", user.id)
-          .single();
-        
-        setProfileComplete(!!profile?.username);
-      }
-    };
-
-    const fetchListings = async () => {
-      const { data, error } = await supabase
-        .from("listings")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch listings",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setListings(data || []);
-    };
-
-    checkProfile();
-    fetchListings();
-  }, [toast]);
-
-  const handleListingCreated = async (formData: any) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
       toast({
         title: "Error",
-        description: "You must be logged in to create a listing",
+        description: "Please enter a search query",
         variant: "destructive",
       });
       return;
     }
 
-    const { error } = await supabase.from("listings").insert({
-      title: formData.title,
-      description: formData.description,
-      price: formData.price,
-      image_url: formData.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-      is_negotiable: true,
-      created_by: user.id,
-    });
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to create listing",
+        description: "Failed to fetch listings",
         variant: "destructive",
       });
       return;
     }
 
-    // Refresh listings
-    const { data: newListings } = await supabase
-      .from("listings")
-      .select("*")
-      .order("created_at", { ascending: false });
-    
-    setListings(newListings || []);
-    
-    toast({
-      title: "Success",
-      description: "Listing created successfully",
-    });
+    setListings(data || []);
+    setHasSearched(true);
   };
 
   const handleChat = (listing: Listing) => {
     setSelectedListing(listing);
     setChatOpen(true);
   };
-
-  if (profileComplete === false) {
-    return <ProfileSetup />;
-  }
-
-  if (profileComplete === null) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <SidebarProvider>
@@ -127,38 +74,101 @@ const Index = () => {
               <div>
                 <h1 className="text-3xl font-bold text-primary">Marketplace</h1>
                 <p className="text-muted-foreground mt-2">
-                  Buy and sell items with chat-based price negotiation
+                  Find what you're looking for
                 </p>
               </div>
-              <SidebarTrigger />
             </div>
           </header>
 
           <main className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {listings.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  id={listing.id}
-                  title={listing.title}
-                  description={listing.description}
-                  price={listing.price}
-                  imageUrl={listing.image_url}
-                  isNegotiable={listing.is_negotiable}
-                  onChat={() => handleChat(listing)}
+            {/* Search Section */}
+            <div className="max-w-2xl mx-auto space-y-8">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="What are you looking for? (e.g., 'a used MacBook in good condition')"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="flex-1"
                 />
-              ))}
+                <Button onClick={handleSearch}>
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </Button>
+              </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 border rounded-lg bg-muted/50">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Price Range</h3>
+                  <Slider
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    max={1000}
+                    step={10}
+                    className="mt-2"
+                  />
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>${priceRange[0]}</span>
+                    <span>${priceRange[1]}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Distance</h3>
+                  <Slider
+                    value={distance}
+                    onValueChange={setDistance}
+                    max={100}
+                    step={5}
+                    className="mt-2"
+                  />
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>0 miles</span>
+                    <span>{distance[0]} miles</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            {listings.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  No listings yet. Create your first listing!
-                </p>
+
+            {/* Results Section */}
+            {hasSearched && (
+              <div className="mt-12">
+                <h2 className="text-2xl font-semibold mb-6">Search Results</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {listings.map((listing) => (
+                    <ListingCard
+                      key={listing.id}
+                      id={listing.id}
+                      title={listing.title}
+                      description={listing.description}
+                      price={listing.price}
+                      imageUrl={listing.image_url}
+                      isNegotiable={listing.is_negotiable}
+                      onChat={() => handleChat(listing)}
+                    />
+                  ))}
+                </div>
+                {listings.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No items found matching your search criteria.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </main>
 
-          <CreateListingDialog onListingCreated={handleListingCreated} />
+          <CreateListingDialog onListingCreated={() => {
+            toast({
+              title: "Success",
+              description: "Listing created successfully",
+            });
+            if (hasSearched) {
+              handleSearch();
+            }
+          }} />
           
           {selectedListing && (
             <ChatDialog
