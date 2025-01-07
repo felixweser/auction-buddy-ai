@@ -1,5 +1,4 @@
 import { Listing } from "@/types/listing";
-import { DollarSign } from "lucide-react";
 
 interface ListingItemProps {
   listing: Listing;
@@ -27,9 +26,8 @@ export const ListingItem = ({ listing, onClick }: ListingItemProps) => {
           {listing.description}
         </p>
       </div>
-      <div className="flex items-center text-primary">
-        <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
-        <span className="font-semibold text-sm md:text-base">{listing.price}</span>
+      <div className="text-primary">
+        <span className="font-semibold text-sm md:text-base">${listing.price}</span>
       </div>
     </div>
   );
