@@ -5,6 +5,7 @@ import { supabase } from "./integrations/supabase/client";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import ProductPage from "./pages/ProductPage";
+import MyItems from "./pages/MyItems";
 import "./App.css";
 
 function App() {
@@ -47,6 +48,10 @@ function App() {
         <Route
           path="/product/:id"
           element={session ? <ProductPage /> : <Navigate to="/auth" />}
+        />
+        <Route
+          path="/my-items"
+          element={session ? <MyItems /> : <Navigate to="/auth" />}
         />
       </Routes>
     </Router>
