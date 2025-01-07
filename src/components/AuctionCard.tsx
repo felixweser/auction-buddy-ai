@@ -1,8 +1,10 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, DollarSign } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AuctionCardProps {
+  id: number;
   title: string;
   description: string;
   currentBid: number;
@@ -13,6 +15,7 @@ interface AuctionCardProps {
 }
 
 export const AuctionCard = ({
+  id,
   title,
   description,
   currentBid,
@@ -21,8 +24,13 @@ export const AuctionCard = ({
   onBid,
   onChat,
 }: AuctionCardProps) => {
+  const navigate = useNavigate();
+
   return (
-    <Card className="auction-card overflow-hidden">
+    <Card 
+      className="auction-card overflow-hidden cursor-pointer"
+      onClick={() => navigate(`/product/${id}`)}
+    >
       <div className="aspect-square overflow-hidden">
         <img
           src={imageUrl}
@@ -45,10 +53,23 @@ export const AuctionCard = ({
         </div>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button onClick={onBid} className="flex-1 bid-button">
+        <Button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onBid();
+          }} 
+          className="flex-1 bid-button"
+        >
           Place Bid
         </Button>
-        <Button onClick={onChat} variant="outline" className="flex-1">
+        <Button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onChat();
+          }} 
+          variant="outline" 
+          className="flex-1"
+        >
           Ask Question
         </Button>
       </CardFooter>

@@ -50,6 +50,7 @@ const Index = () => {
           {listings.map((listing) => (
             <AuctionCard
               key={listing.id}
+              id={listing.id}
               title={listing.title}
               description={listing.description}
               currentBid={listing.currentBid}
