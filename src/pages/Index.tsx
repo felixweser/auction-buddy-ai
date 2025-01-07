@@ -81,10 +81,15 @@ const Index = () => {
               />
 
               {hasSearched && (
-                <SearchResults 
-                  listings={listings}
-                  onChat={handleChat}
-                />
+                <div className="mt-12">
+                  <h2 className="text-2xl font-semibold mb-4">
+                    Search results for "{searchQuery}"
+                  </h2>
+                  <SearchResults 
+                    listings={listings}
+                    onChat={handleChat}
+                  />
+                </div>
               )}
             </div>
           </main>
