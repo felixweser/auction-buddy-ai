@@ -4,6 +4,7 @@ import SearchResultsPage from "./pages/SearchResults";
 import CreateListing from "./pages/CreateListing";
 import ProductPage from "./pages/ProductPage";
 import MyItems from "./pages/MyItems";
+import Messages from "./pages/Messages";
 import Auth from "./pages/Auth";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/my-items" element={<MyItems />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/auth" element={<Auth />} />
       </Routes>
     </Router>
