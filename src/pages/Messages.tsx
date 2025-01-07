@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { ChatList } from "@/components/Messages/ChatList";
+import { ChatMessages } from "@/components/Messages/ChatMessages";
+import { MessageInput } from "@/components/Messages/MessageInput";
 
 interface Message {
   id: string;
@@ -30,6 +30,7 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,6 +38,8 @@ const Messages = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+        
+        setCurrentUserId(user.id);
 
         const { data, error } = await supabase
           .from('messages')
@@ -51,34 +54,20 @@ const Messages = () => {
             )
           `)
           .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: true });
 
         if (error) throw error;
 
         // Group messages by listing
-        const groupedChats = data.reduce((acc: ChatGroup[], message: any) => {
+        const groupedChats = data.reduce((acc: ChatGroup[], message: Message) => {
           const existingGroup = acc.find(group => group.listing_id === message.listing_id);
           if (existingGroup) {
-            existingGroup.messages.push({
-              id: message.id,
-              content: message.content,
-              created_at: message.created_at,
-              sender_id: message.sender_id,
-              listing_id: message.listing_id,
-              listings: message.listings
-            });
+            existingGroup.messages.push(message);
           } else {
             acc.push({
               listing_id: message.listing_id,
               listing_title: message.listings.title,
-              messages: [{
-                id: message.id,
-                content: message.content,
-                created_at: message.created_at,
-                sender_id: message.sender_id,
-                listing_id: message.listing_id,
-                listings: message.listings
-              }]
+              messages: [message]
             });
           }
           return acc;
@@ -114,26 +103,23 @@ const Messages = () => {
   }, [toast]);
 
   const handleSendMessage = async () => {
-    if (!selectedChat || !newMessage.trim()) return;
+    if (!selectedChat || !newMessage.trim() || !currentUserId) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get the receiver_id from the most recent message in the chat
       const selectedChatGroup = chats.find(chat => chat.listing_id === selectedChat);
       if (!selectedChatGroup) return;
 
+      // Find the other user in the conversation (not the current user)
       const mostRecentMessage = selectedChatGroup.messages[0];
-      const receiver_id = mostRecentMessage.sender_id === user.id 
-        ? mostRecentMessage.sender_id 
-        : user.id;
+      const receiver_id = mostRecentMessage.sender_id === currentUserId
+        ? mostRecentMessage.receiver_id // If we sent the last message, use its receiver_id
+        : mostRecentMessage.sender_id;  // If we received the last message, use its sender_id
 
       const { error } = await supabase
         .from('messages')
         .insert({
           content: newMessage,
-          sender_id: user.id,
+          sender_id: currentUserId,
           receiver_id,
           listing_id: selectedChat
         });
@@ -181,77 +167,28 @@ const Messages = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-[300px,1fr] gap-6 h-[calc(100vh-200px)]">
-              {/* Chat List */}
-              <div className="border rounded-lg bg-card">
-                <ScrollArea className="h-full">
-                  <div className="p-4 space-y-2">
-                    {chats.map((chat) => (
-                      <Button
-                        key={chat.listing_id}
-                        variant={selectedChat === chat.listing_id ? "secondary" : "ghost"}
-                        className="w-full justify-start"
-                        onClick={() => setSelectedChat(chat.listing_id)}
-                      >
-                        <div className="truncate">
-                          <p className="font-medium">{chat.listing_title}</p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {chat.messages[0].content}
-                          </p>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              <ChatList
+                chats={chats}
+                selectedChat={selectedChat}
+                onSelectChat={setSelectedChat}
+              />
 
-              {/* Chat Messages */}
               <div className="border rounded-lg bg-card flex flex-col">
-                <ScrollArea className="flex-1 p-4">
-                  {selectedChat ? (
-                    <div className="space-y-4">
-                      {chats
-                        .find(chat => chat.listing_id === selectedChat)
-                        ?.messages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${message.sender_id === (supabase.auth.getUser() as any).data?.user?.id ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-[70%] rounded-lg p-3 ${
-                                message.sender_id === (supabase.auth.getUser() as any).data?.user?.id
-                                  ? 'bg-primary text-primary-foreground ml-auto'
-                                  : 'bg-muted'
-                              }`}
-                            >
-                              <p>{message.content}</p>
-                              <p className="text-xs opacity-70 mt-1">
-                                {new Date(message.created_at).toLocaleTimeString()}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-muted-foreground">
-                      Select a conversation to view messages
-                    </div>
-                  )}
-                </ScrollArea>
-
-                {/* Message Input */}
-                {selectedChat && (
-                  <div className="p-4 border-t">
-                    <div className="flex gap-2">
-                      <Input
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type your message..."
-                        onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                      />
-                      <Button size="icon" onClick={handleSendMessage}>
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </div>
+                {selectedChat ? (
+                  <>
+                    <ChatMessages
+                      messages={chats.find(chat => chat.listing_id === selectedChat)?.messages || []}
+                      currentUserId={currentUserId}
+                    />
+                    <MessageInput
+                      value={newMessage}
+                      onChange={setNewMessage}
+                      onSend={handleSendMessage}
+                    />
+                  </>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted-foreground">
+                    Select a conversation to view messages
                   </div>
                 )}
               </div>
