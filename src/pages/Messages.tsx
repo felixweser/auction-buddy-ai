@@ -34,75 +34,77 @@ const Messages = () => {
   const [currentUserId, setCurrentUserId] = useState<string>();
   const { toast } = useToast();
 
+  const fetchMessages = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      setCurrentUserId(user.id);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          id,
+          content,
+          created_at,
+          sender_id,
+          receiver_id,
+          listing_id,
+          listings (
+            title
+          )
+        `)
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Group messages by listing
+      const groupedChats = data.reduce((acc: ChatGroup[], message: Message) => {
+        const existingGroup = acc.find(group => group.listing_id === message.listing_id);
+        if (existingGroup) {
+          existingGroup.messages.push(message);
+        } else {
+          acc.push({
+            listing_id: message.listing_id,
+            listing_title: message.listings.title,
+            messages: [message]
+          });
+        }
+        return acc;
+      }, []);
+
+      setChats(groupedChats);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load messages",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        
-        setCurrentUserId(user.id);
-
-        const { data, error } = await supabase
-          .from('messages')
-          .select(`
-            id,
-            content,
-            created_at,
-            sender_id,
-            receiver_id,
-            listing_id,
-            listings (
-              title
-            )
-          `)
-          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-
-        // Group messages by listing
-        const groupedChats = data.reduce((acc: ChatGroup[], message: Message) => {
-          const existingGroup = acc.find(group => group.listing_id === message.listing_id);
-          if (existingGroup) {
-            existingGroup.messages.push(message);
-          } else {
-            acc.push({
-              listing_id: message.listing_id,
-              listing_title: message.listings.title,
-              messages: [message]
-            });
-          }
-          return acc;
-        }, []);
-
-        setChats(groupedChats);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMessages();
 
     // Set up real-time subscription for new messages
-    const subscription = supabase
+    const channel = supabase
       .channel('messages')
       .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 
         table: 'messages' 
-      }, fetchMessages)
+      }, () => {
+        fetchMessages();
+      })
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      channel.unsubscribe();
     };
-  }, [toast]);
+  }, []);
 
   const handleSendMessage = async () => {
     if (!selectedChat || !newMessage.trim() || !currentUserId) return;
