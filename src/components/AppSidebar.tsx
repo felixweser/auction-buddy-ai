@@ -1,4 +1,4 @@
-import { Search, User, Settings, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Search, User, Settings, LogOut, PanelLeftClose, PanelLeft, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -41,6 +41,11 @@ export function AppSidebar() {
       title: "My Items",
       icon: User,
       onClick: () => navigate("/my-items"),
+    },
+    {
+      title: "Messages",
+      icon: MessageSquare,
+      onClick: () => navigate("/messages"),
     },
     {
       title: "Settings",
