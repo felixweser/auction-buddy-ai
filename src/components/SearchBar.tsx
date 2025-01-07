@@ -28,7 +28,7 @@ export const SearchBar = ({
 
   return (
     <div className={`mx-auto space-y-8 transition-all duration-300 ease-in-out
-      ${state === "expanded" ? "max-w-3xl" : "max-w-5xl"}`}>
+      ${state === "expanded" ? "max-w-4xl" : "max-w-7xl"}`}>
       <div className="relative">
         <div className="bg-card rounded-xl p-8 shadow-lg border border-border">
           <div className="relative">
