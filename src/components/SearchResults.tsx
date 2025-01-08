@@ -26,7 +26,6 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -42,7 +41,7 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
         .from("listings")
         .select("*")
         .textSearch('title', query)
-        .neq('created_by', user.id) // Filter out the current user's listings
+        .neq('created_by', user.id)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -66,24 +65,25 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
   };
 
   return (
-    <div className="mt-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {listings.map((listing) => (
-          <ListingCard
-            key={listing.id}
-            id={listing.id}
-            title={listing.title}
-            description={listing.description}
-            price={listing.price}
-            imageUrl={listing.image_url}
-            isNegotiable={listing.is_negotiable}
-            onChat={() => handleChat(listing)}
-          />
-        ))}
-      </div>
-      {listings.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
+    <div>
+      {listings.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              id={listing.id}
+              title={listing.title}
+              description={listing.description}
+              price={listing.price}
+              imageUrl={listing.image_url}
+              isNegotiable={listing.is_negotiable}
+              onChat={() => handleChat(listing)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground text-lg">
             No items found matching your search criteria.
           </p>
         </div>

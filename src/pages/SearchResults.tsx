@@ -9,21 +9,23 @@ const SearchResults = () => {
   const query = searchParams.get("q") || "";
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <Button
-        variant="outline"
-        className="flex items-center gap-2 mb-6 hover:bg-secondary transition-colors"
-        onClick={() => navigate("/")}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Home
-      </Button>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8">
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 mb-8 hover:bg-secondary transition-colors"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Button>
 
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">
-          Search results for "{query}"
-        </h1>
-        <SearchResultsComponent query={query} />
+        <div>
+          <h1 className="text-2xl font-semibold mb-6">
+            Search results for "{query}"
+          </h1>
+          <SearchResultsComponent query={query} />
+        </div>
       </div>
     </div>
   );
