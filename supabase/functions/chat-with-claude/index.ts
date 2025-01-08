@@ -15,14 +15,17 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is not set');
+    }
 
+    const { message } = await req.json();
     console.log('Received message:', message);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY!,
+        'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
         'content-type': 'application/json',
       },
@@ -53,6 +56,10 @@ serve(async (req) => {
     const data = await response.json();
     console.log('Claude response:', data);
 
+    if (!data.content || !data.content[0]) {
+      throw new Error('Invalid response format from Claude API');
+    }
+
     return new Response(
       JSON.stringify({
         response: data.content[0].text
@@ -64,7 +71,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in chat-with-claude function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ 
+        error: error.message || 'An unexpected error occurred'
+      }), 
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

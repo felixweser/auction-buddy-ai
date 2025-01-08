@@ -45,6 +45,7 @@ const CreateListing = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    setInput("");
     setIsProcessing(true);
 
     try {
@@ -52,7 +53,14 @@ const CreateListing = () => {
         body: { message: input }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (!data?.response) {
+        throw new Error('Invalid response from AI');
+      }
 
       handleAIResponse(data.response);
     } catch (error) {
@@ -63,7 +71,6 @@ const CreateListing = () => {
         variant: "destructive",
       });
     } finally {
-      setInput("");
       setIsProcessing(false);
     }
   };
