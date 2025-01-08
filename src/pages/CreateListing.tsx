@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ChatWindow } from "@/components/listing/ChatWindow";
 import { ListingData, publishListing } from "@/utils/listingUtils";
 
@@ -18,7 +18,6 @@ export default function CreateListing() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [answers, setAnswers] = useState<string[]>([]);
   const [generatedListing, setGeneratedListing] = useState<ListingData | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,9 +50,9 @@ export default function CreateListing() {
       const messageForAI = newAnswers.length === 4 
         ? `Create a listing based on these details:
            Item: ${newAnswers[0]}
-           Minimum price: ${newAnswers[1]}
-           Ideal price: ${newAnswers[2]}
-           Additional details: ${newAnswers[3]}`
+           Price range: ${newAnswers[1]} (extract a single numeric value from this)
+           Additional details: ${newAnswers[2]}
+           Description: ${newAnswers[3]}`
         : input;
 
       const { data, error } = await supabase.functions.invoke('chat-with-claude', {
@@ -68,6 +67,11 @@ export default function CreateListing() {
       if (newAnswers.length === 4) {
         try {
           const listing = JSON.parse(data.response);
+          // Ensure price is a valid number
+          listing.price = parseFloat(listing.price);
+          if (isNaN(listing.price)) {
+            throw new Error('Invalid price generated');
+          }
           setGeneratedListing(listing);
           handleAIResponse(
             `Great! I've created a listing based on your input. Here's what I came up with:\n\n` +
@@ -86,11 +90,7 @@ export default function CreateListing() {
       }
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to get AI response. Please try again.");
     } finally {
       setIsProcessing(false);
     }

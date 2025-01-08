@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export interface ListingData {
   title: string;
@@ -14,11 +14,13 @@ export const publishListing = async (generatedListing: ListingData) => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      toast({
-        title: "Authentication Error",
-        description: "You must be logged in to create a listing",
-        variant: "destructive",
-      });
+      toast.error("You must be logged in to create a listing");
+      return false;
+    }
+
+    // Ensure price is a valid number
+    if (isNaN(generatedListing.price) || generatedListing.price <= 0) {
+      toast.error("Invalid price value");
       return false;
     }
 
@@ -37,19 +39,11 @@ export const publishListing = async (generatedListing: ListingData) => {
 
     if (error) throw error;
 
-    toast({
-      title: "Success",
-      description: "Your listing has been created!",
-    });
-
+    toast.success("Your listing has been created!");
     return true;
   } catch (error) {
     console.error('Error:', error);
-    toast({
-      title: "Error",
-      description: "Failed to create listing. Please try again.",
-      variant: "destructive",
-    });
+    toast.error("Failed to create listing. Please try again.");
     return false;
   }
 };
