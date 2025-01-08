@@ -106,11 +106,11 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
       </div>
 
       <ChatDialog 
-        open={isChatOpen} 
-        onOpenChange={setIsChatOpen}
         productTitle={listing.title}
         listingId={listing.id}
         sellerId={listing.created_by}
+        price={listing.price}
+        isNegotiable={listing.is_negotiable}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

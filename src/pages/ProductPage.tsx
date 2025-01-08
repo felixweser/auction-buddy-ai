@@ -2,9 +2,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useState, useEffect } from "react";
-import { ArrowLeft, MessageCircle, DollarSign, Calendar } from "lucide-react";
+import { ArrowLeft, DollarSign, Calendar, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface Listing {
   id: string;
@@ -15,6 +17,7 @@ interface Listing {
   is_negotiable: boolean;
   created_by: string;
   created_at: string;
+  shipping_available: boolean;
 }
 
 const ProductPage = () => {
@@ -78,53 +81,70 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container max-w-7xl mx-auto px-4 py-8">
         <Button
-          variant="outline"
-          className="flex items-center gap-2 mb-6 hover:bg-secondary transition-colors"
+          variant="ghost"
+          className="mb-8 hover:bg-secondary/80 -ml-4"
           onClick={() => navigate("/")}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Listings
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Image */}
-          <div className="lg:col-span-2">
-            <div className="rounded-lg overflow-hidden border bg-card">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Image Section */}
+            <div className="aspect-[4/3] w-full rounded-lg overflow-hidden bg-secondary/20">
               <img
                 src={listing.image_url}
                 alt={listing.title}
-                className="w-full h-auto object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
+
+            {/* Description Section */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">About this item</h2>
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {listing.description}
+              </p>
+            </Card>
           </div>
 
-          {/* Right Column - Details and Chat */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-card rounded-lg p-6 border">
-              <div className="space-y-4">
-                <h1 className="text-3xl font-bold text-foreground">{listing.title}</h1>
-                
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          {/* Right Column - Details and Actions */}
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="p-6">
+              <h1 className="text-2xl font-bold mb-2">{listing.title}</h1>
+              
+              <div className="flex items-baseline gap-2 mb-4">
+                <DollarSign className="h-6 w-6 text-primary" />
+                <span className="text-3xl font-bold">{listing.price.toLocaleString()}</span>
+                {listing.is_negotiable && (
+                  <span className="text-sm text-muted-foreground">(Negotiable)</span>
+                )}
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>Listed on {formattedDate}</span>
                 </div>
-
-                <div className="flex items-center gap-3 text-2xl font-semibold">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                  <span>{listing.price.toLocaleString()}</span>
-                  {listing.is_negotiable && (
-                    <span className="text-sm text-muted-foreground font-normal">(Price negotiable)</span>
-                  )}
+                
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Truck className="h-4 w-4" />
+                  <span>
+                    {listing.shipping_available 
+                      ? "Shipping available" 
+                      : "Local pickup only"}
+                  </span>
                 </div>
+              </div>
 
-                <div className="prose prose-sm max-w-none">
-                  <h3 className="text-lg font-semibold">Description</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
-                </div>
-
-                {!isOwner && (
+              {!isOwner && (
+                <div className="mt-6">
                   <ChatDialog
                     productTitle={listing.title}
                     listingId={listing.id}
@@ -132,9 +152,9 @@ const ProductPage = () => {
                     price={listing.price}
                     isNegotiable={listing.is_negotiable}
                   />
-                )}
-              </div>
-            </div>
+                </div>
+              )}
+            </Card>
           </div>
         </div>
       </div>
