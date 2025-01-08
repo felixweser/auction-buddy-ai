@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChatWindow } from "@/components/listing/ChatWindow";
 
 interface Message {
   content: string;
@@ -26,8 +25,7 @@ const CreateListing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Initialize chat when component mounts
-  useState(() => {
+  useEffect(() => {
     handleAIResponse("Hi! What would you like to sell today?");
   }, []);
 
@@ -41,7 +39,6 @@ const CreateListing = () => {
   const handleUserInput = async () => {
     if (!input.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       content: input,
       sender: "user",
@@ -144,7 +141,6 @@ const CreateListing = () => {
       </Button>
 
       <div className="relative min-h-[600px]">
-        {/* Centered radial gradient background */}
         <div 
           className="absolute inset-0 pointer-events-none flex items-center justify-center"
           aria-hidden="true"
@@ -159,53 +155,13 @@ const CreateListing = () => {
           />
         </div>
 
-        <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 relative">
-          <ScrollArea className="h-[400px] pr-4 mb-4">
-            <div className="space-y-4">
-              {messages.map((message, i) => (
-                <div
-                  key={i}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                      message.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    {message.content}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your answer..."
-              onKeyPress={(e) => e.key === "Enter" && handleUserInput()}
-              className="flex-1"
-            />
-            <Button 
-              onClick={handleUserInput}
-              disabled={isProcessing || !input.trim()}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Send"
-              )}
-            </Button>
-          </div>
-        </div>
+        <ChatWindow
+          messages={messages}
+          input={input}
+          isProcessing={isProcessing}
+          onInputChange={setInput}
+          onSend={handleUserInput}
+        />
       </div>
     </div>
   );
