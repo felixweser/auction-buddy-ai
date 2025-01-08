@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Robot, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { ChatWindow } from "@/components/listing/ChatWindow";
 import { ListingData, publishListing } from "@/utils/listingUtils";
+import { TitleStep } from "@/components/listing/TitleStep";
+import { DescriptionStep } from "@/components/listing/DescriptionStep";
+import { PriceStep } from "@/components/listing/PriceStep";
+import { ImageStep } from "@/components/listing/ImageStep";
 
 interface Message {
   content: string;
@@ -13,6 +16,18 @@ interface Message {
 }
 
 export default function CreateListing() {
+  const [mode, setMode] = useState<"manual" | "ai" | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    imageUrl: "",
+    isNegotiable: false,
+    shippingAvailable: false
+  });
+
+  // AI Chat state
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -21,8 +36,10 @@ export default function CreateListing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    handleAIResponse("Hi! Let's create your listing. What are you selling?");
-  }, []);
+    if (mode === "ai") {
+      handleAIResponse("Hi! Let's create your listing. What are you selling?");
+    }
+  }, [mode]);
 
   const handleAIResponse = async (message: string) => {
     setMessages(prev => [...prev, {
@@ -118,6 +135,96 @@ export default function CreateListing() {
       handleUserInput();
     }
   };
+
+  const handleManualNext = async () => {
+    if (currentStep === 3) {
+      const listing: ListingData = {
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        imageUrl: formData.imageUrl,
+        isNegotiable: formData.isNegotiable,
+        shippingAvailable: formData.shippingAvailable
+      };
+
+      const success = await publishListing(listing);
+      if (success) {
+        navigate('/my-items');
+      }
+      return;
+    }
+    setCurrentStep(prev => prev + 1);
+  };
+
+  const handleManualBack = () => {
+    setCurrentStep(prev => prev - 1);
+  };
+
+  if (!mode) {
+    return (
+      <div className="container max-w-2xl mx-auto px-4 py-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
+
+        <div className="space-y-8">
+          <h1 className="text-3xl font-bold text-center">Create a New Listing</h1>
+          <p className="text-center text-muted-foreground">
+            Choose how you'd like to create your listing
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-32 flex flex-col gap-2"
+              onClick={() => setMode("manual")}
+            >
+              <PenLine className="h-8 w-8" />
+              <span>Create Manually</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-32 flex flex-col gap-2"
+              onClick={() => setMode("ai")}
+            >
+              <Robot className="h-8 w-8" />
+              <span>AI-Assisted Creation</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "manual") {
+    const steps = [
+      <TitleStep key="title" onNext={handleManualNext} formData={formData} setFormData={setFormData} />,
+      <DescriptionStep key="description" onNext={handleManualNext} onBack={handleManualBack} formData={formData} setFormData={setFormData} />,
+      <PriceStep key="price" onNext={handleManualNext} onBack={handleManualBack} formData={formData} setFormData={setFormData} />,
+      <ImageStep key="image" onNext={handleManualNext} onBack={handleManualBack} formData={formData} setFormData={setFormData} />
+    ];
+
+    return (
+      <div className="container max-w-2xl mx-auto px-4 py-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
+
+        {steps[currentStep]}
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-2xl mx-auto px-4 py-8">
