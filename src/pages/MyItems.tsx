@@ -68,6 +68,10 @@ const MyItems = () => {
     fetchMyListings(); // Refresh the list to ensure we have the latest data
   };
 
+  const handleListingDelete = (deletedId: string) => {
+    setListings(listings.filter(listing => listing.id !== deletedId));
+  };
+
   const handleListingCreated = () => {
     fetchMyListings(); // Refresh the listings after creating a new one
   };
@@ -95,6 +99,7 @@ const MyItems = () => {
                   key={listing.id}
                   listing={listing}
                   onClick={() => handleListingClick(listing)}
+                  onDelete={handleListingDelete}
                 />
               ))}
 
