@@ -48,17 +48,12 @@ const CreateListing = () => {
     setIsProcessing(true);
 
     try {
-      const response = await fetch('/functions/chat-with-claude', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input }),
+      const { data, error } = await supabase.functions.invoke('chat-with-claude', {
+        body: { message: input }
       });
 
-      if (!response.ok) throw new Error('Failed to get AI response');
+      if (error) throw error;
 
-      const data = await response.json();
       handleAIResponse(data.response);
     } catch (error) {
       console.error('Error:', error);
