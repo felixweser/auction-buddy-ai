@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mic, Plus } from "lucide-react";
+import { Mic, Plus, DollarSign, MapPin } from "lucide-react";
 import { PriceFilter } from "./PriceFilter";
 import { DistanceFilter } from "./DistanceFilter";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -56,6 +56,7 @@ export const SearchBar = ({
               className="rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
               onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
             >
+              <DollarSign className="h-4 w-4 mr-1" />
               <span>Price</span>
             </Button>
             <Button 
@@ -72,6 +73,7 @@ export const SearchBar = ({
               className="rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
               onClick={() => setIsDistanceFilterOpen(!isDistanceFilterOpen)}
             >
+              <MapPin className="h-4 w-4 mr-1" />
               <span>Distance</span>
             </Button>
           </div>
