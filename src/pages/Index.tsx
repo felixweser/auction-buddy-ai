@@ -31,8 +31,14 @@ const Index = () => {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex-1 bg-background">
-          <main className="container mx-auto px-4 flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-2xl">
+          <main className="container mx-auto px-4 flex items-center justify-center min-h-screen relative">
+            {/* Radial gradient background */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#E5DEFF]/20 via-[#D3E4FD]/20 to-[#F2FCE2]/20 blur-3xl opacity-50" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background" />
+            </div>
+            
+            <div className="w-full max-w-2xl relative z-10">
               <h1 className="text-4xl font-bold mb-2 text-center">Großanzeigen</h1>
               <p className="text-xl text-muted-foreground mb-8 text-center">Finden was man sucht!</p>
               <SearchBar
