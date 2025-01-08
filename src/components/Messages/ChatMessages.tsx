@@ -64,9 +64,10 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
   return (
     <ScrollArea 
       ref={scrollRef}
-      className="flex-1 p-4 h-[calc(100vh-300px)]"
+      className="flex-1 p-4"
+      style={{ height: 'calc(100vh - 220px)' }}
     >
-      <div className="space-y-2 pb-4">
+      <div className="space-y-2">
         {messages.map((message, index) => {
           const isCurrentUser = message.sender_id === currentUserId;
           const showUsername = index === 0 || 
