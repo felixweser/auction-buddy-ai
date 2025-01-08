@@ -3,30 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ChatWindow } from "@/components/listing/ChatWindow";
 
 interface Message {
   content: string;
   sender: "ai" | "user";
-  type?: "title" | "description" | "price";
+}
+
+interface ListingData {
+  title: string;
+  description: string;
+  price: number;
+  isNegotiable: boolean;
+  imageUrl?: string;
 }
 
 const CreateListing = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    idealPrice: "",
-    minPrice: "",
-  });
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [generatedListing, setGeneratedListing] = useState<ListingData | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    handleAIResponse("Hi! What would you like to sell today?");
+    handleAIResponse("Hi! Let's create your listing. What are you selling?");
   }, []);
 
   const handleAIResponse = async (message: string) => {
@@ -45,24 +48,50 @@ const CreateListing = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    const newAnswers = [...answers, input];
+    setAnswers(newAnswers);
     setInput("");
     setIsProcessing(true);
 
     try {
+      // If we have 4 answers, generate the listing
+      const context = newAnswers.length === 4 ? 'generate_listing' : 'question';
+      const messageForAI = newAnswers.length === 4 
+        ? `Create a listing based on these details:
+           Item: ${newAnswers[0]}
+           Minimum price: ${newAnswers[1]}
+           Ideal price: ${newAnswers[2]}
+           Additional details: ${newAnswers[3]}`
+        : input;
+
       const { data, error } = await supabase.functions.invoke('chat-with-claude', {
-        body: { message: input }
+        body: { 
+          message: messageForAI,
+          context
+        }
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      if (!data?.response) {
-        throw new Error('Invalid response from AI');
+      if (newAnswers.length === 4) {
+        try {
+          const listing = JSON.parse(data.response);
+          setGeneratedListing(listing);
+          handleAIResponse(
+            `Great! I've created a listing based on your input. Here's what I came up with:\n\n` +
+            `Title: ${listing.title}\n` +
+            `Description: ${listing.description}\n` +
+            `Price: €${listing.price}\n\n` +
+            `Would you like to publish this listing? Type 'yes' to publish or 'no' to start over.`
+          );
+        } catch (e) {
+          console.error('Error parsing listing:', e);
+          handleAIResponse("I had trouble creating your listing. Let's start over. What are you selling?");
+          setAnswers([]);
+        }
+      } else {
+        handleAIResponse(data.response);
       }
-
-      handleAIResponse(data.response);
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -75,15 +104,8 @@ const CreateListing = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !formData.idealPrice || !formData.minPrice) {
-      toast({
-        title: "Missing information",
-        description: "Please complete all the required information",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handlePublishListing = async () => {
+    if (!generatedListing) return;
 
     setIsProcessing(true);
 
@@ -103,12 +125,12 @@ const CreateListing = () => {
         .from('listings')
         .insert([
           {
-            title: formData.title,
-            description: formData.description,
-            price: Number(formData.idealPrice),
-            image_url: 'https://via.placeholder.com/400',
+            title: generatedListing.title,
+            description: generatedListing.description,
+            price: generatedListing.price,
+            image_url: generatedListing.imageUrl || 'https://via.placeholder.com/400',
             created_by: user.id,
-            is_negotiable: Number(formData.minPrice) < Number(formData.idealPrice)
+            is_negotiable: generatedListing.isNegotiable
           }
         ]);
 
@@ -129,6 +151,18 @@ const CreateListing = () => {
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleFinalResponse = async (response: string) => {
+    if (response.toLowerCase() === 'yes') {
+      await handlePublishListing();
+    } else if (response.toLowerCase() === 'no') {
+      setAnswers([]);
+      setGeneratedListing(null);
+      handleAIResponse("Let's start over. What are you selling?");
+    } else {
+      handleAIResponse("Please type 'yes' to publish or 'no' to start over.");
     }
   };
 
@@ -162,7 +196,7 @@ const CreateListing = () => {
           input={input}
           isProcessing={isProcessing}
           onInputChange={setInput}
-          onSend={handleUserInput}
+          onSend={generatedListing ? handleFinalResponse : handleUserInput}
         />
       </div>
     </div>
