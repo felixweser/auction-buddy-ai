@@ -11,19 +11,13 @@ export const publishListing = async (listing: ListingData) => {
       return false;
     }
 
-    // Ensure price is a valid number
-    if (isNaN(listing.price) || listing.price <= 0) {
-      toast.error("Invalid price value");
-      return false;
-    }
-
     const { error } = await supabase
       .from('listings')
       .insert([
         {
           title: listing.title,
           description: listing.description,
-          price: listing.price,
+          price: listing.desiredPrice,
           image_url: listing.imageUrl || 'https://via.placeholder.com/400',
           created_by: user.id,
           is_negotiable: listing.isNegotiable,
