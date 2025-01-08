@@ -43,7 +43,7 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
   };
 
   const handleViewDetails = () => {
-    navigate(`/listing/${listing.id}`);
+    navigate(`/product/${listing.id}`);
   };
 
   return (
