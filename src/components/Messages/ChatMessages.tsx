@@ -53,13 +53,26 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollRef.current) {
-      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    const scrollToBottom = () => {
+      if (scrollRef.current) {
+        const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (viewport) {
+          // Use requestAnimationFrame to ensure the scroll happens after render
+          requestAnimationFrame(() => {
+            viewport.scrollTop = viewport.scrollHeight;
+          });
+        }
       }
-    }
-  }, [messages]);
+    };
+
+    // Initial scroll
+    scrollToBottom();
+
+    // Set up a small delay to handle any potential layout shifts
+    const timeoutId = setTimeout(scrollToBottom, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [messages]); // Re-run when messages change
 
   return (
     <ScrollArea 
