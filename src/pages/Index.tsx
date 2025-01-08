@@ -37,7 +37,7 @@ const Index = () => {
               <div 
                 className="w-[800px] h-[600px] rounded-full"
                 style={{
-                  background: 'radial-gradient(circle at center, rgba(211, 228, 253, 0.8) 0%, rgba(14, 165, 233, 0.5) 50%, transparent 70%)',
+                  background: 'radial-gradient(circle at center, rgba(211, 228, 253, 0.5) 0%, rgba(14, 165, 233, 0.25) 50%, transparent 70%)',
                   filter: 'blur(100px)',
                   transform: 'translate(-50%, -50%)',
                   position: 'absolute',
