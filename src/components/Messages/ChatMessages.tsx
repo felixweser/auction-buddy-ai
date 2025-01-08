@@ -25,7 +25,7 @@ interface UserProfile {
 
 export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Fetch user profiles
   useEffect(() => {
@@ -53,56 +53,55 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    if (viewportRef.current) {
-      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+    if (scrollRef.current) {
+      const scrollElement = scrollRef.current;
+      scrollElement.scrollTop = scrollElement.scrollHeight;
     }
   }, [messages]);
 
   return (
     <ScrollArea 
       className="h-full"
-      viewportRef={viewportRef}
+      ref={scrollRef}
     >
-      <div className="flex flex-col justify-end min-h-full p-4">
-        <div className="space-y-2">
-          {messages.map((message, index) => {
-            const isCurrentUser = message.sender_id === currentUserId;
-            const showUsername = index === 0 || 
-              messages[index - 1]?.sender_id !== message.sender_id;
+      <div className="flex flex-col space-y-2 p-4">
+        {messages.map((message, index) => {
+          const isCurrentUser = message.sender_id === currentUserId;
+          const showUsername = index === 0 || 
+            messages[index - 1]?.sender_id !== message.sender_id;
 
-            return (
+          return (
+            <div
+              key={message.id}
+              className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+            >
               <div
-                key={message.id}
-                className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                className={`
+                  max-w-[70%] rounded-2xl px-4 py-2
+                  ${isCurrentUser 
+                    ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' 
+                    : 'bg-muted rounded-bl-none'
+                  }
+                `}
               >
-                <div
-                  className={`
-                    max-w-[70%] rounded-2xl px-4 py-2
-                    ${isCurrentUser 
-                      ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' 
-                      : 'bg-muted rounded-bl-none'
-                    }
-                  `}
-                >
-                  {showUsername && (
-                    <p className="text-xs font-medium mb-1">
-                      {isCurrentUser 
-                        ? 'You'
-                        : userProfiles[message.sender_id]?.username || 'Unknown User'}
-                    </p>
-                  )}
-                  <p className="break-words">{message.content}</p>
-                  <p className="text-xs opacity-70 mt-1 text-right">
-                    {new Date(message.created_at).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                {showUsername && (
+                  <p className="text-xs font-medium mb-1">
+                    {isCurrentUser 
+                      ? 'You'
+                      : userProfiles[message.sender_id]?.username || 'Unknown User'}
                   </p>
-                </div>
+                )}
+                <p className="break-words">{message.content}</p>
+                <p className="text-xs opacity-70 mt-1 text-right">
+                  {new Date(message.created_at).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </ScrollArea>
   );
