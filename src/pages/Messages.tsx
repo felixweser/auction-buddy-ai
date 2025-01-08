@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { MessageCircle } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ChatList } from "@/components/Messages/ChatList";
 import { ChatMessages } from "@/components/Messages/ChatMessages";
 import { MessageInput } from "@/components/Messages/MessageInput";
+import { EmptyState } from "@/components/Messages/EmptyState";
+import { ChatHeader } from "@/components/Messages/ChatHeader";
 
 interface Message {
   id: string;
@@ -185,56 +186,58 @@ const Messages = () => {
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex items-center justify-center flex-1">
-            <p className="text-muted-foreground">Loading messages...</p>
+            <p className="text-muted-foreground animate-pulse">Loading messages...</p>
           </div>
         </div>
       </SidebarProvider>
     );
   }
 
+  const selectedChatGroup = chats.find(chat => chat.listing_id === selectedChat);
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex-1 p-6">
-          <h1 className="text-3xl font-bold mb-6">Messages</h1>
-          
-          {chats.length === 0 ? (
-            <div className="text-center py-12">
-              <MessageCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No messages yet</p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-[300px,1fr] gap-6 h-[calc(100vh-200px)]">
-              <ChatList
-                chats={chats}
-                selectedChat={selectedChat}
-                onSelectChat={setSelectedChat}
-              />
-
-              <div className="border rounded-lg bg-card flex flex-col overflow-hidden">
-                {selectedChat ? (
-                  <>
-                    <div className="flex-1 overflow-hidden">
-                      <ChatMessages
-                        messages={chats.find(chat => chat.listing_id === selectedChat)?.messages || []}
-                        currentUserId={currentUserId}
-                      />
-                    </div>
-                    <MessageInput
-                      value={newMessage}
-                      onChange={setNewMessage}
-                      onSend={handleSendMessage}
-                    />
-                  </>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-muted-foreground">
-                    Select a conversation to view messages
-                  </div>
-                )}
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6">Messages</h1>
+            
+            {chats.length === 0 ? (
+              <div className="border rounded-lg bg-card h-[calc(100vh-200px)]">
+                <EmptyState />
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="grid md:grid-cols-[350px,1fr] gap-6 h-[calc(100vh-200px)]">
+                <ChatList
+                  chats={chats}
+                  selectedChat={selectedChat}
+                  onSelectChat={setSelectedChat}
+                />
+
+                <div className="border rounded-lg bg-card flex flex-col">
+                  {selectedChat ? (
+                    <>
+                      <ChatHeader title={selectedChatGroup?.listing_title || ""} />
+                      <div className="flex-1 overflow-hidden">
+                        <ChatMessages
+                          messages={selectedChatGroup?.messages || []}
+                          currentUserId={currentUserId}
+                        />
+                      </div>
+                      <MessageInput
+                        value={newMessage}
+                        onChange={setNewMessage}
+                        onSend={handleSendMessage}
+                      />
+                    </>
+                  ) : (
+                    <EmptyState />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </SidebarProvider>
