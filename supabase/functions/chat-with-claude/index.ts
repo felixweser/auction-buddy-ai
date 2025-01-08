@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
 
@@ -17,22 +18,27 @@ serve(async (req) => {
       throw new Error('ANTHROPIC_API_KEY is not set')
     }
 
-    const { message, context } = await req.json()
+    const { message, context, answers } = await req.json()
     console.log('Received message:', message)
     console.log('Context:', context)
+    console.log('Previous answers:', answers)
 
     const systemPrompt = `You are a helpful assistant guiding users through creating marketplace listings. 
-    ${context === 'generate_listing' ? `Based on the user's answers, create a structured listing with:
-    - A clear, SEO-friendly title
-    - A well-written, detailed description that highlights key features
-    - Suggested price range based on minimum and ideal prices provided
-    Format the response as JSON with fields: title, description, price, isNegotiable` : 
-    `Ask one question at a time about their item in this order:
-    1. What are you selling? (Get a basic description)
-    2. What's the minimum price you'd accept?
-    3. What's your ideal selling price?
-    4. Any specific details about condition or features?
-    Keep responses friendly and concise.`}`
+    ${context === 'generate_listing' ? 
+      `Based on the user's answers, create a structured listing with:
+      - A clear, SEO-friendly title
+      - A well-written, detailed description that highlights key features, condition, and specifications
+      - A suggested price based on the minimum (${answers[2]}) and ideal prices (${answers[3]}) provided
+      - Include shipping availability status
+      Format the response as JSON with fields: title, description, price, isNegotiable, shippingAvailable` 
+      : 
+      `Ask one question at a time about their item in this order:
+      1. "What item would you like to sell today?"
+      2. "What's the minimum price you'd accept for this item?"
+      3. "What's your ideal 'sell it right now' price?"
+      4. "Tell me about the condition, features, and any notable details about the item."
+      5. "Is shipping available for this item? (Yes/No)"
+      Keep responses friendly and concise.`}`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

@@ -1,15 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ListingData } from "@/types/listing";
 
-export interface ListingData {
-  title: string;
-  description: string;
-  price: number;
-  isNegotiable: boolean;
-  imageUrl?: string;
-}
-
-export const publishListing = async (generatedListing: ListingData) => {
+export const publishListing = async (listing: ListingData) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -19,7 +12,7 @@ export const publishListing = async (generatedListing: ListingData) => {
     }
 
     // Ensure price is a valid number
-    if (isNaN(generatedListing.price) || generatedListing.price <= 0) {
+    if (isNaN(listing.price) || listing.price <= 0) {
       toast.error("Invalid price value");
       return false;
     }
@@ -28,12 +21,13 @@ export const publishListing = async (generatedListing: ListingData) => {
       .from('listings')
       .insert([
         {
-          title: generatedListing.title,
-          description: generatedListing.description,
-          price: generatedListing.price,
-          image_url: generatedListing.imageUrl || 'https://via.placeholder.com/400',
+          title: listing.title,
+          description: listing.description,
+          price: listing.price,
+          image_url: listing.imageUrl || 'https://via.placeholder.com/400',
           created_by: user.id,
-          is_negotiable: generatedListing.isNegotiable
+          is_negotiable: listing.isNegotiable,
+          shipping_available: listing.shippingAvailable
         }
       ]);
 
