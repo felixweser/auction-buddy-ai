@@ -5,21 +5,14 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ChatWindow } from "@/components/listing/ChatWindow";
+import { ListingData, publishListing } from "@/utils/listingUtils";
 
 interface Message {
   content: string;
   sender: "ai" | "user";
 }
 
-interface ListingData {
-  title: string;
-  description: string;
-  price: number;
-  isNegotiable: boolean;
-  imageUrl?: string;
-}
-
-const CreateListing = () => {
+export default function CreateListing() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -54,7 +47,6 @@ const CreateListing = () => {
     setIsProcessing(true);
 
     try {
-      // If we have 4 answers, generate the listing
       const context = newAnswers.length === 4 ? 'generate_listing' : 'question';
       const messageForAI = newAnswers.length === 4 
         ? `Create a listing based on these details:
@@ -104,65 +96,26 @@ const CreateListing = () => {
     }
   };
 
-  const handlePublishListing = async () => {
-    if (!generatedListing) return;
-
-    setIsProcessing(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication Error",
-          description: "You must be logged in to create a listing",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { error } = await supabase
-        .from('listings')
-        .insert([
-          {
-            title: generatedListing.title,
-            description: generatedListing.description,
-            price: generatedListing.price,
-            image_url: generatedListing.imageUrl || 'https://via.placeholder.com/400',
-            created_by: user.id,
-            is_negotiable: generatedListing.isNegotiable
-          }
-        ]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Your listing has been created!",
-      });
-
-      navigate('/my-items');
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create listing. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const handleFinalResponse = async (response: string) => {
-    if (response.toLowerCase() === 'yes') {
-      await handlePublishListing();
+    if (response.toLowerCase() === 'yes' && generatedListing) {
+      const success = await publishListing(generatedListing);
+      if (success) {
+        navigate('/my-items');
+      }
     } else if (response.toLowerCase() === 'no') {
       setAnswers([]);
       setGeneratedListing(null);
       handleAIResponse("Let's start over. What are you selling?");
     } else {
       handleAIResponse("Please type 'yes' to publish or 'no' to start over.");
+    }
+  };
+
+  const onSend = () => {
+    if (generatedListing) {
+      handleFinalResponse(input);
+    } else {
+      handleUserInput();
     }
   };
 
@@ -196,11 +149,9 @@ const CreateListing = () => {
           input={input}
           isProcessing={isProcessing}
           onInputChange={setInput}
-          onSend={generatedListing ? handleFinalResponse : handleUserInput}
+          onSend={onSend}
         />
       </div>
     </div>
   );
-};
-
-export default CreateListing;
+}
