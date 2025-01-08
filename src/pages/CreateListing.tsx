@@ -146,18 +146,18 @@ const CreateListing = () => {
         <ArrowLeft className="mr-2 h-4 w-4" /> Back
       </Button>
 
-      <div className="relative">
-        {/* Radial gradient background */}
-        <div className="absolute pointer-events-none">
+      <div className="relative min-h-[600px]">
+        {/* Centered radial gradient background */}
+        <div 
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          aria-hidden="true"
+        >
           <div 
             className="w-[800px] h-[600px] rounded-full"
             style={{
               background: 'radial-gradient(circle at center, rgba(211, 228, 253, 0.6) 0%, rgba(14, 165, 233, 0.3) 50%, transparent 70%)',
               filter: 'blur(100px)',
-              transform: 'translate(-50%, -50%)',
               position: 'absolute',
-              left: '50%',
-              top: '50%',
             }}
           />
         </div>
