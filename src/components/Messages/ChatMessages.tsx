@@ -24,19 +24,10 @@ interface UserProfile {
 }
 
 export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
 
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
-    }
-  }, [messages]);
-
+  // Fetch user profiles
   useEffect(() => {
     const fetchUserProfiles = async () => {
       const userIds = [...new Set(messages.map(message => message.sender_id))];
@@ -60,36 +51,59 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
     }
   }, [messages]);
 
+  // Auto scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollRef.current) {
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [messages]);
+
   return (
     <ScrollArea 
-      className="flex-1 p-4 h-[calc(100vh-300px)]" 
-      ref={scrollAreaRef}
+      ref={scrollRef}
+      className="flex-1 p-4 h-[calc(100vh-300px)]"
     >
-      <div className="space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
-          >
+      <div className="space-y-2 pb-4">
+        {messages.map((message, index) => {
+          const isCurrentUser = message.sender_id === currentUserId;
+          const showUsername = index === 0 || 
+            messages[index - 1]?.sender_id !== message.sender_id;
+
+          return (
             <div
-              className={`max-w-[70%] rounded-lg p-3 ${
-                message.sender_id === currentUserId
-                  ? 'bg-primary text-primary-foreground ml-auto'
-                  : 'bg-muted'
-              }`}
+              key={message.id}
+              className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
             >
-              <p className="text-xs font-medium mb-1">
-                {message.sender_id === currentUserId 
-                  ? 'You'
-                  : userProfiles[message.sender_id]?.username || 'Unknown User'}
-              </p>
-              <p>{message.content}</p>
-              <p className="text-xs opacity-70 mt-1">
-                {new Date(message.created_at).toLocaleTimeString()}
-              </p>
+              <div
+                className={`
+                  max-w-[70%] rounded-2xl px-4 py-2
+                  ${isCurrentUser 
+                    ? 'bg-primary text-primary-foreground ml-auto rounded-br-none' 
+                    : 'bg-muted rounded-bl-none'
+                  }
+                `}
+              >
+                {showUsername && (
+                  <p className="text-xs font-medium mb-1">
+                    {isCurrentUser 
+                      ? 'You'
+                      : userProfiles[message.sender_id]?.username || 'Unknown User'}
+                  </p>
+                )}
+                <p className="break-words">{message.content}</p>
+                <p className="text-xs opacity-70 mt-1 text-right">
+                  {new Date(message.created_at).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </ScrollArea>
   );
