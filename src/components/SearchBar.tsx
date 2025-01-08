@@ -30,9 +30,10 @@ export const SearchBar = ({
     <div className={`mx-auto space-y-4 transition-all duration-300 ease-in-out
       ${state === "expanded" ? "max-w-4xl" : "max-w-7xl"}`}>
       <div className="relative">
-        <div className="bg-background/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50 
-          relative z-10 ring-1 ring-primary/20 shadow-[0_0_30px_-5px_rgba(var(--primary),0.2)]
-          hover:shadow-[0_0_30px_-5px_rgba(var(--primary),0.3)] transition-shadow duration-300">
+        <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50 
+          before:absolute before:inset-0 before:-z-10 before:rounded-2xl before:bg-primary/10 
+          before:blur-2xl after:absolute after:inset-0 after:-z-10 after:rounded-2xl 
+          after:bg-primary/5 after:blur-xl relative z-10">
           <div className="relative">
             <Input
               placeholder="What are you looking for? (e.g., 'a used MacBook in good condition')"
