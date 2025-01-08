@@ -4,13 +4,20 @@ import { DollarSign, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ListingCardProps {
-  id: string;  // Changed from number to string to match UUID from Supabase
+  id: string;
   title: string;
   description: string;
   price: number;
   imageUrl: string;
   isNegotiable: boolean;
-  onChat: () => void;
+  sellerId: string;
+  onChat: (props: { 
+    listingId: string;
+    sellerId: string;
+    productTitle: string;
+    price: number;
+    isNegotiable: boolean;
+  }) => void;
 }
 
 export const ListingCard = ({
@@ -20,6 +27,7 @@ export const ListingCard = ({
   price,
   imageUrl,
   isNegotiable,
+  sellerId,
   onChat,
 }: ListingCardProps) => {
   const navigate = useNavigate();
@@ -45,7 +53,7 @@ export const ListingCard = ({
           <DollarSign className="w-4 h-4" />
           <span className="font-bold">${price}</span>
           {isNegotiable && (
-            <span className="text-sm text-muted-foreground">(VB)</span>
+            <span className="text-sm text-muted-foreground">(Negotiable)</span>
           )}
         </div>
       </CardContent>
@@ -53,7 +61,13 @@ export const ListingCard = ({
         <Button 
           onClick={(e) => {
             e.stopPropagation();
-            onChat();
+            onChat({ 
+              listingId: id, 
+              sellerId, 
+              productTitle: title,
+              price,
+              isNegotiable
+            });
           }} 
           className="w-full"
           variant="outline"

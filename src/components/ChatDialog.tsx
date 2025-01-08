@@ -1,14 +1,14 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
-import { Send } from "lucide-react";
+import { Send, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,20 +18,15 @@ interface Message {
 }
 
 interface ChatDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   productTitle: string;
   listingId: string;
   sellerId: string;
+  price: number;
+  isNegotiable: boolean;
 }
 
-export const ChatDialog = ({ open, onOpenChange, productTitle, listingId, sellerId }: ChatDialogProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      content: `Hello! I'm interested in ${productTitle}. Is it still available?`,
-      sender: "ai",
-    },
-  ]);
+export const ChatDialog = ({ productTitle, listingId, sellerId, price, isNegotiable }: ChatDialogProps) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -46,18 +41,19 @@ export const ChatDialog = ({ open, onOpenChange, productTitle, listingId, seller
     getCurrentUser();
   }, []);
 
-  const handleSend = async () => {
-    if (!input.trim() || !currentUserId) return;
+  const handleSend = async (content: string) => {
+    if (!content.trim() || !currentUserId) return;
 
     // Add message to local state
-    setMessages((prev) => [...prev, { content: input, sender: "user" }]);
+    setMessages((prev) => [...prev, { content, sender: "user" }]);
+    setInput("");
 
     try {
       // Save message to Supabase
       const { error } = await supabase
         .from('messages')
         .insert({
-          content: input,
+          content,
           sender_id: currentUserId,
           receiver_id: sellerId,
           listing_id: listingId
@@ -77,18 +73,29 @@ export const ChatDialog = ({ open, onOpenChange, productTitle, listingId, seller
       });
       console.error("Error sending message:", error);
     }
-
-    setInput("");
   };
 
+  const suggestions = [
+    `Hi! Is ${productTitle} still available?`,
+    "Could you provide more details about the condition?",
+    "When would this be available for pickup/delivery?",
+    ...(isNegotiable ? [
+      `Would you consider ${(price * 0.9).toFixed(2)}?`,
+      `Is the price of $${price} negotiable?`
+    ] : [])
+  ];
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Chat about {productTitle}</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col h-[400px]">
-          <ScrollArea className="flex-1 pr-4">
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageCircle className="h-5 w-5" />
+          Chat about {productTitle}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col h-[500px]">
+          <ScrollArea className="flex-1 pr-4 mb-4">
             <div className="space-y-4">
               {messages.map((message, i) => (
                 <div
@@ -110,19 +117,35 @@ export const ChatDialog = ({ open, onOpenChange, productTitle, listingId, seller
               ))}
             </div>
           </ScrollArea>
-          <div className="flex gap-2 mt-4">
+
+          {messages.length === 0 && (
+            <div className="grid grid-cols-1 gap-2 mb-4">
+              {suggestions.map((suggestion, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="text-left h-auto whitespace-normal"
+                  onClick={() => handleSend(suggestion)}
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
+              onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
             />
-            <Button size="icon" onClick={handleSend}>
+            <Button size="icon" onClick={() => handleSend(input)}>
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 };
