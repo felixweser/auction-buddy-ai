@@ -158,27 +158,23 @@ const Messages = () => {
     console.log("Initial fetch of messages");
     fetchMessages();
 
-    // Set up real-time subscription for new messages
     const channel = supabase
       .channel('messages-channel')
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'messages'
         },
         (payload) => {
           console.log('Real-time update received:', payload);
-          fetchMessages(); // Refresh messages when any change occurs
+          fetchMessages();
         }
       )
       .subscribe();
 
-    console.log("Subscribed to real-time updates");
-
     return () => {
-      console.log("Cleaning up subscription");
       supabase.removeChannel(channel);
     };
   }, []);
@@ -216,13 +212,15 @@ const Messages = () => {
                 onSelectChat={setSelectedChat}
               />
 
-              <div className="border rounded-lg bg-card flex flex-col">
+              <div className="border rounded-lg bg-card flex flex-col overflow-hidden">
                 {selectedChat ? (
                   <>
-                    <ChatMessages
-                      messages={chats.find(chat => chat.listing_id === selectedChat)?.messages || []}
-                      currentUserId={currentUserId}
-                    />
+                    <div className="flex-1 overflow-hidden">
+                      <ChatMessages
+                        messages={chats.find(chat => chat.listing_id === selectedChat)?.messages || []}
+                        currentUserId={currentUserId}
+                      />
+                    </div>
                     <MessageInput
                       value={newMessage}
                       onChange={setNewMessage}

@@ -24,8 +24,8 @@ interface UserProfile {
 }
 
 export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   // Fetch user profiles
   useEffect(() => {
@@ -51,18 +51,19 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
     }
   }, [messages]);
 
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (viewportRef.current) {
+      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <ScrollArea 
-      ref={scrollRef}
-      className="flex-1 p-4"
-      style={{ 
-        height: 'calc(100vh - 220px)',
-      }}
+      className="h-full"
+      viewportRef={viewportRef}
     >
-      <div 
-        className="flex flex-col-reverse" // This ensures newest messages are at the bottom
-        style={{ minHeight: '100%' }}
-      >
+      <div className="flex flex-col justify-end min-h-full p-4">
         <div className="space-y-2">
           {messages.map((message, index) => {
             const isCurrentUser = message.sender_id === currentUserId;
