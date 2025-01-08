@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Robot, PenLine } from "lucide-react";
+import { ArrowLeft, Bot, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { ChatWindow } from "@/components/listing/ChatWindow";
 import { ListingData, publishListing } from "@/utils/listingUtils";
@@ -9,6 +9,7 @@ import { TitleStep } from "@/components/listing/TitleStep";
 import { DescriptionStep } from "@/components/listing/DescriptionStep";
 import { PriceStep } from "@/components/listing/PriceStep";
 import { ImageStep } from "@/components/listing/ImageStep";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   content: string;
@@ -194,7 +195,7 @@ export default function CreateListing() {
               className="h-32 flex flex-col gap-2"
               onClick={() => setMode("ai")}
             >
-              <Robot className="h-8 w-8" />
+              <Bot className="h-8 w-8" />
               <span>AI-Assisted Creation</span>
             </Button>
           </div>

@@ -7,6 +7,18 @@ export interface ListingData {
   shippingAvailable: boolean;
 }
 
+export interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image_url: string;
+  is_negotiable: boolean;
+  shipping_available: boolean;
+  created_by: string;
+  created_at: string;
+}
+
 export interface StepProps {
   onNext: () => void;
   onBack?: () => void;
