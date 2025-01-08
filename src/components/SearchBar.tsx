@@ -31,9 +31,9 @@ export const SearchBar = ({
       ${state === "expanded" ? "max-w-4xl" : "max-w-7xl"}`}>
       <div className="relative">
         <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50 
-          before:absolute before:inset-0 before:-z-10 before:rounded-2xl before:bg-primary/5 
+          before:absolute before:inset-0 before:-z-10 before:rounded-2xl before:bg-primary/10 
           before:blur-2xl after:absolute after:inset-0 after:-z-10 after:rounded-2xl 
-          after:bg-background/10 after:blur-xl relative z-10">
+          after:bg-primary/5 after:blur-xl relative z-10">
           <div className="relative">
             <Input
               placeholder="What are you looking for? (e.g., 'a used MacBook in good condition')"
