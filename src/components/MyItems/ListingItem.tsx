@@ -1,8 +1,7 @@
 import { Listing } from "@/types/listing";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +23,6 @@ interface ListingItemProps {
 
 export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleDelete = async () => {
     const { error } = await supabase
@@ -42,15 +40,11 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
     setIsDeleteDialogOpen(false);
   };
 
-  const handleViewDetails = () => {
-    navigate(`/product/${listing.id}`);
-  };
-
   return (
     <div className="group relative flex flex-col md:flex-row gap-4 p-4 rounded-lg border bg-card hover:shadow-md transition-all">
       <div 
         className="w-full md:w-32 h-32 md:h-32 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer"
-        onClick={handleViewDetails}
+        onClick={onClick}
       >
         <img
           src={listing.image_url}
@@ -62,7 +56,7 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
       <div className="flex-1 min-w-0 space-y-2">
         <div 
           className="cursor-pointer"
-          onClick={handleViewDetails}
+          onClick={onClick}
         >
           <h3 className="font-semibold text-base md:text-lg text-foreground">
             {listing.title}
