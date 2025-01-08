@@ -23,9 +23,17 @@ interface ChatDialogProps {
   sellerId: string;
   price: number;
   isNegotiable: boolean;
+  description: string;
 }
 
-export const ChatDialog = ({ productTitle, listingId, sellerId, price, isNegotiable }: ChatDialogProps) => {
+export const ChatDialog = ({ 
+  productTitle, 
+  listingId, 
+  sellerId, 
+  price, 
+  isNegotiable,
+  description 
+}: ChatDialogProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -40,6 +48,13 @@ export const ChatDialog = ({ productTitle, listingId, sellerId, price, isNegotia
     };
     getCurrentUser();
   }, []);
+
+  // Stream the description as the first message
+  useEffect(() => {
+    if (description && messages.length === 0) {
+      setMessages([{ content: description, sender: "ai" }]);
+    }
+  }, [description]);
 
   const handleSend = async (content: string) => {
     if (!content.trim() || !currentUserId) return;
@@ -86,64 +101,62 @@ export const ChatDialog = ({ productTitle, listingId, sellerId, price, isNegotia
   ];
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-[calc(100vh-12rem)] flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
           Chat about {productTitle}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col h-[400px]">
-          <ScrollArea className="flex-1 pr-4 mb-4">
-            <div className="space-y-4">
-              {messages.map((message, i) => (
+      <CardContent className="flex-1 flex flex-col">
+        <ScrollArea className="flex-1 pr-4 mb-4">
+          <div className="space-y-4">
+            {messages.map((message, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  message.sender === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
-                  key={i}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
+                  className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                    message.sender === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
                   }`}
                 >
-                  <div
-                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                      message.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
-                  >
-                    {message.content}
-                  </div>
+                  {message.content}
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-
-          {messages.length === 0 && (
-            <div className="grid grid-cols-1 gap-2 mb-4">
-              {suggestions.map((suggestion, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="text-left h-auto whitespace-normal"
-                  onClick={() => handleSend(suggestion)}
-                >
-                  {suggestion}
-                </Button>
-              ))}
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
-            />
-            <Button size="icon" onClick={() => handleSend(input)}>
-              <Send className="h-4 w-4" />
-            </Button>
+              </div>
+            ))}
           </div>
+        </ScrollArea>
+
+        {messages.length === 1 && (
+          <div className="grid grid-cols-1 gap-2 mb-4">
+            {suggestions.map((suggestion, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="text-left h-auto whitespace-normal"
+                onClick={() => handleSend(suggestion)}
+              >
+                {suggestion}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex gap-2 mt-auto">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
+          />
+          <Button size="icon" onClick={() => handleSend(input)}>
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>

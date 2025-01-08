@@ -4,7 +4,7 @@ import { ChatDialog } from "@/components/ChatDialog";
 import { useState, useEffect } from "react";
 import { ArrowLeft, DollarSign, Calendar, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -91,10 +91,9 @@ const ProductPage = () => {
           Back to Listings
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Image Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Image and Details */}
+          <div className="space-y-6">
             <div className="aspect-[4/3] w-full rounded-lg overflow-hidden bg-secondary/20">
               <img
                 src={listing.image_url}
@@ -103,19 +102,8 @@ const ProductPage = () => {
               />
             </div>
 
-            {/* Description Section */}
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">About this item</h2>
-              <p className="text-muted-foreground whitespace-pre-wrap">
-                {listing.description}
-              </p>
-            </Card>
-          </div>
-
-          {/* Right Column - Details and Actions */}
-          <div className="lg:col-span-4 space-y-6">
-            <Card className="p-6">
-              <h1 className="text-2xl font-bold mb-2">{listing.title}</h1>
+              <h1 className="text-2xl font-bold mb-4">{listing.title}</h1>
               
               <div className="flex items-baseline gap-2 mb-4">
                 <DollarSign className="h-6 w-6 text-primary" />
@@ -142,19 +130,21 @@ const ProductPage = () => {
                   </span>
                 </div>
               </div>
-
-              {!isOwner && (
-                <div className="mt-6">
-                  <ChatDialog
-                    productTitle={listing.title}
-                    listingId={listing.id}
-                    sellerId={listing.created_by}
-                    price={listing.price}
-                    isNegotiable={listing.is_negotiable}
-                  />
-                </div>
-              )}
             </Card>
+          </div>
+
+          {/* Right Column - Chat */}
+          <div>
+            {!isOwner && (
+              <ChatDialog
+                productTitle={listing.title}
+                listingId={listing.id}
+                sellerId={listing.created_by}
+                price={listing.price}
+                isNegotiable={listing.is_negotiable}
+                description={listing.description}
+              />
+            )}
           </div>
         </div>
       </div>
