@@ -1,7 +1,6 @@
 import { Listing } from "@/types/listing";
 import { Edit, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ChatDialog } from "@/components/ChatDialog";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -23,7 +22,6 @@ interface ListingItemProps {
 }
 
 export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -86,15 +84,6 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsChatOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span className="hidden md:inline">Messages</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
               onClick={() => setIsDeleteDialogOpen(true)}
               className="flex items-center gap-2 text-destructive hover:text-destructive"
             >
@@ -104,14 +93,6 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
           </div>
         </div>
       </div>
-
-      <ChatDialog 
-        productTitle={listing.title}
-        listingId={listing.id}
-        sellerId={listing.created_by}
-        price={listing.price}
-        isNegotiable={listing.is_negotiable}
-      />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
