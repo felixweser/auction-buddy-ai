@@ -39,21 +39,30 @@ export function SearchResults({ query }: SearchResultsProps) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("listings")
-        .select("*")
-        .textSearch('title', query)
-        .neq('created_by', user.id)
-        .order("created_at", { ascending: false });
+      try {
+        // Format the query for text search by replacing spaces with &
+        const formattedQuery = query.split(' ').join(' & ');
+        
+        const { data, error } = await supabase
+          .from("listings")
+          .select("*")
+          .textSearch('title', formattedQuery)
+          .neq('created_by', user.id)
+          .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching search results:", error);
-        toast.error("Failed to fetch search results");
-        return;
+        if (error) {
+          console.error("Error fetching search results:", error);
+          toast.error("Failed to fetch search results");
+          return;
+        }
+
+        setListings(data || []);
+      } catch (error) {
+        console.error("Error in search:", error);
+        toast.error("An error occurred while searching");
+      } finally {
+        setIsLoading(false);
       }
-
-      setListings(data || []);
-      setIsLoading(false);
     };
 
     fetchResults();
