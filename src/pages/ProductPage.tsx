@@ -20,7 +20,6 @@ interface Listing {
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [chatOpen, setChatOpen] = useState(false);
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
@@ -29,7 +28,6 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        // Get the listing data
         const { data: listingData, error: listingError } = await supabase
           .from("listings")
           .select("*")
@@ -38,7 +36,6 @@ const ProductPage = () => {
 
         if (listingError) throw listingError;
 
-        // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         
         setListing(listingData);
@@ -91,62 +88,56 @@ const ProductPage = () => {
           Back to Listings
         </Button>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Image Section */}
-          <div className="space-y-4">
-            <div className="aspect-square rounded-lg overflow-hidden border bg-secondary">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Column - Image */}
+          <div className="lg:col-span-2">
+            <div className="rounded-lg overflow-hidden border bg-card">
               <img
                 src={listing.image_url}
                 alt={listing.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                className="w-full h-auto object-cover"
               />
             </div>
           </div>
 
-          {/* Details Section */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">{listing.title}</h1>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Listed on {formattedDate}</span>
+          {/* Right Column - Details and Chat */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-card rounded-lg p-6 border">
+              <div className="space-y-4">
+                <h1 className="text-3xl font-bold text-foreground">{listing.title}</h1>
+                
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <Calendar className="h-4 w-4" />
+                  <span>Listed on {formattedDate}</span>
+                </div>
+
+                <div className="flex items-center gap-3 text-2xl font-semibold">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                  <span>{listing.price.toLocaleString()}</span>
+                  {listing.is_negotiable && (
+                    <span className="text-sm text-muted-foreground font-normal">(Price negotiable)</span>
+                  )}
+                </div>
+
+                <div className="prose prose-sm max-w-none">
+                  <h3 className="text-lg font-semibold">Description</h3>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
+                </div>
+
+                {!isOwner && (
+                  <ChatDialog
+                    productTitle={listing.title}
+                    listingId={listing.id}
+                    sellerId={listing.created_by}
+                    price={listing.price}
+                    isNegotiable={listing.is_negotiable}
+                  />
+                )}
               </div>
             </div>
-
-            <div className="flex items-center gap-3 text-2xl font-semibold">
-              <DollarSign className="h-6 w-6 text-primary" />
-              <span>{listing.price.toLocaleString()}</span>
-              {listing.is_negotiable && (
-                <span className="text-sm text-muted-foreground font-normal">(Price negotiable)</span>
-              )}
-            </div>
-
-            <div className="prose prose-sm max-w-none">
-              <h3 className="text-lg font-semibold mb-2">Description</h3>
-              <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
-            </div>
-
-            {!isOwner && (
-              <Button
-                className="w-full mt-6"
-                size="lg"
-                onClick={() => setChatOpen(true)}
-              >
-                <MessageCircle className="mr-2 h-5 w-5" />
-                {listing.is_negotiable ? "Negotiate Price" : "Contact Seller"}
-              </Button>
-            )}
           </div>
         </div>
       </div>
-
-      <ChatDialog
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        productTitle={listing.title}
-        listingId={listing.id}
-        sellerId={listing.created_by}
-      />
     </div>
   );
 };

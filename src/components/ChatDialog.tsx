@@ -86,7 +86,7 @@ export const ChatDialog = ({ productTitle, listingId, sellerId, price, isNegotia
   ];
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
@@ -94,7 +94,7 @@ export const ChatDialog = ({ productTitle, listingId, sellerId, price, isNegotia
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col h-[500px]">
+        <div className="flex flex-col h-[400px]">
           <ScrollArea className="flex-1 pr-4 mb-4">
             <div className="space-y-4">
               {messages.map((message, i) => (
