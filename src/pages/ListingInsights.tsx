@@ -40,12 +40,13 @@ const ListingInsights = () => {
   const { data: interestedUsers } = useQuery({
     queryKey: ["interested-users", id],
     queryFn: async () => {
+      // Updated query to properly join messages with profiles
       const { data: messages, error } = await supabase
         .from("messages")
         .select(`
           sender_id,
           content,
-          profiles!messages_sender_id_fkey (
+          profiles (
             username
           )
         `)
