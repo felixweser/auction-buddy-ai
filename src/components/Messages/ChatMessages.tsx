@@ -57,28 +57,32 @@ export function ChatMessages({ messages, currentUserId }: ChatMessagesProps) {
       if (scrollRef.current) {
         const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
         if (viewport) {
-          // Use requestAnimationFrame to ensure the scroll happens after render
-          requestAnimationFrame(() => {
-            viewport.scrollTop = viewport.scrollHeight;
-          });
+          viewport.scrollTop = viewport.scrollHeight;
         }
       }
     };
 
-    // Initial scroll
-    scrollToBottom();
+    // Initial scroll with a delay to ensure content is rendered
+    const initialScrollTimeout = setTimeout(scrollToBottom, 50);
+    
+    // Additional scroll after a longer delay to handle any dynamic content
+    const secondaryScrollTimeout = setTimeout(scrollToBottom, 150);
 
-    // Set up a small delay to handle any potential layout shifts
-    const timeoutId = setTimeout(scrollToBottom, 100);
-
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(initialScrollTimeout);
+      clearTimeout(secondaryScrollTimeout);
+    };
   }, [messages]); // Re-run when messages change
 
   return (
     <ScrollArea 
       ref={scrollRef}
       className="flex-1 p-4"
-      style={{ height: 'calc(100vh - 220px)' }}
+      style={{ 
+        height: 'calc(100vh - 220px)',
+        display: 'flex',
+        flexDirection: 'column-reverse' // This ensures newest messages are visible first
+      }}
     >
       <div className="space-y-2">
         {messages.map((message, index) => {
