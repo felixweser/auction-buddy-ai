@@ -1,39 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { ListingCard } from "@/components/ListingCard";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ListingCard } from "./ListingCard";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { ChatDialog } from "@/components/ChatDialog";
-
-interface Listing {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  image_url: string;
-  is_negotiable: boolean;
-  created_by: string;
-}
+import { Listing } from "@/types/listing";
+import { toast } from "sonner";
 
 interface SearchResultsProps {
   query: string;
 }
 
-export const SearchResults = ({ query }: SearchResultsProps) => {
+export function SearchResults({ query }: SearchResultsProps) {
   const [listings, setListings] = useState<Listing[]>([]);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleChat = async (listing: Listing) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error("Please sign in to start a conversation");
+      return;
+    }
+
+    if (listing.created_by === user.id) {
+      toast.error("You cannot start a conversation with yourself");
+      return;
+    }
+
+    navigate(`/messages?listing=${listing.id}`);
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to search listings",
-          variant: "destructive",
-        });
+        setIsLoading(false);
         return;
       }
 
@@ -45,29 +47,30 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
         .order("created_at", { ascending: false });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch listings",
-          variant: "destructive",
-        });
+        console.error("Error fetching search results:", error);
+        toast.error("Failed to fetch search results");
         return;
       }
 
       setListings(data || []);
+      setIsLoading(false);
     };
 
     fetchResults();
-  }, [query, toast]);
+  }, [query]);
 
-  const handleChat = (listing: Listing) => {
-    setSelectedListing(listing);
-    setChatOpen(true);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-muted-foreground">Loading results...</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="space-y-8">
       {listings.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {listings.map((listing) => (
             <ListingCard
               key={listing.id}
@@ -82,22 +85,15 @@ export const SearchResults = ({ query }: SearchResultsProps) => {
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground text-lg">
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <p className="text-xl text-muted-foreground text-center">
             No items found matching your search criteria.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2 text-center">
+            Try adjusting your search terms or browse our other listings.
           </p>
         </div>
       )}
-
-      {selectedListing && (
-        <ChatDialog
-          open={chatOpen}
-          onOpenChange={setChatOpen}
-          productTitle={selectedListing.title}
-          listingId={selectedListing.id}
-          sellerId={selectedListing.created_by}
-        />
-      )}
     </div>
   );
-};
+}
