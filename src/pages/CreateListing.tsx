@@ -1,46 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TitleStep } from "@/components/listing/TitleStep";
-import { DescriptionStep } from "@/components/listing/DescriptionStep";
-import { PriceStep } from "@/components/listing/PriceStep";
-import { ImageStep } from "@/components/listing/ImageStep";
-import { ListingFormData } from "@/types/listing";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Loader2, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const CreateListing = () => {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<ListingFormData>({
-    title: "",
-    description: "",
-    price: "",
-    imageUrl: "",
-    isNegotiable: false,
-    shippingAvailable: false,
-  });
+  const [description, setDescription] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !formData.price) {
+    if (!description.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
+        title: "Description needed",
+        description: "Please describe your item first",
         variant: "destructive",
       });
       return;
     }
 
-    if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
-      toast({
-        title: "Invalid Price",
-        description: "Please enter a valid price greater than 0",
-        variant: "destructive",
-      });
-      return;
-    }
+    setIsProcessing(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -54,35 +36,25 @@ const CreateListing = () => {
         return;
       }
 
-      const { data, error } = await supabase
+      // For now, we'll create a basic listing
+      // This will be enhanced with AI processing later
+      const { error } = await supabase
         .from('listings')
         .insert([
           {
-            title: formData.title,
-            description: formData.description,
-            price: Number(formData.price),
-            image_url: formData.imageUrl || 'https://via.placeholder.com/400',
-            is_negotiable: formData.isNegotiable,
-            shipping_available: formData.shippingAvailable,
+            title: description.split('\n')[0] || 'New Item',
+            description: description,
+            price: 0, // This will be extracted by AI later
+            image_url: 'https://via.placeholder.com/400',
             created_by: user.id,
           }
-        ])
-        .select()
-        .single();
+        ]);
 
-      if (error) {
-        console.error('Error creating listing:', error);
-        toast({
-          title: "Error",
-          description: "Failed to create listing. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Listing created successfully!",
+        description: "Your listing has been created!",
       });
 
       navigate('/my-items');
@@ -90,51 +62,11 @@ const CreateListing = () => {
       console.error('Error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Failed to create listing. Please try again.",
         variant: "destructive",
       });
-    }
-  };
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <TitleStep
-            onNext={() => setStep(2)}
-            formData={formData}
-            setFormData={setFormData}
-          />
-        );
-      case 2:
-        return (
-          <DescriptionStep
-            onNext={() => setStep(3)}
-            onBack={() => setStep(1)}
-            formData={formData}
-            setFormData={setFormData}
-          />
-        );
-      case 3:
-        return (
-          <PriceStep
-            onNext={() => setStep(4)}
-            onBack={() => setStep(2)}
-            formData={formData}
-            setFormData={setFormData}
-          />
-        );
-      case 4:
-        return (
-          <ImageStep
-            onNext={handleSubmit}
-            onBack={() => setStep(3)}
-            formData={formData}
-            setFormData={setFormData}
-          />
-        );
-      default:
-        return null;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -147,22 +79,40 @@ const CreateListing = () => {
       >
         <ArrowLeft className="mr-2 h-4 w-4" /> Back
       </Button>
-      <div className="bg-card rounded-lg shadow-lg p-6">
-        <div className="mb-6">
-          <div className="flex justify-between mb-4">
-            <h1 className="text-3xl font-bold">Create New Listing</h1>
-            <div className="text-sm text-muted-foreground">
-              Step {step} of 4
-            </div>
-          </div>
-          <div className="w-full bg-secondary rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(step / 4) * 100}%` }}
-            />
-          </div>
+
+      <div className="bg-card rounded-lg shadow-lg p-6 space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Tell me about your item</h1>
+          <p className="text-muted-foreground">
+            Describe your item naturally, as if you're telling a friend about it.
+            Include details about its condition, features, and your desired price.
+          </p>
         </div>
-        {renderStep()}
+
+        <div className="relative">
+          <Textarea
+            placeholder="Example: I'm selling my iPhone 13 Pro that I bought last year. It's in great condition with no scratches. Comes with original charger and box. Looking to get around €800 for it."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="min-h-[200px] text-lg leading-relaxed resize-none"
+          />
+          <MessageSquare className="absolute right-3 bottom-3 h-5 w-5 text-muted-foreground opacity-50" />
+        </div>
+
+        <Button 
+          className="w-full h-12 text-lg"
+          onClick={handleSubmit}
+          disabled={isProcessing || !description.trim()}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            "Create Listing"
+          )}
+        </Button>
       </div>
     </div>
   );
