@@ -40,13 +40,12 @@ const ListingInsights = () => {
   const { data: interestedUsers } = useQuery({
     queryKey: ["interested-users", id],
     queryFn: async () => {
-      // Updated query to properly join messages with profiles
-      const { data: messages, error } = await supabase
+      const { data, error } = await supabase
         .from("messages")
         .select(`
           sender_id,
           content,
-          profiles (
+          profiles!messages_sender_id_profiles_fkey (
             username
           )
         `)
@@ -55,7 +54,7 @@ const ListingInsights = () => {
       if (error) throw error;
 
       // Process messages to extract offers and count messages per user
-      const userStats = messages.reduce((acc: { [key: string]: InterestedUser }, message) => {
+      const userStats = data.reduce((acc: { [key: string]: InterestedUser }, message) => {
         const senderId = message.sender_id;
         const username = message.profiles?.username;
         
