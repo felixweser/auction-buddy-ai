@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { TitleStep } from "@/components/listing/TitleStep";
 import { DescriptionStep } from "@/components/listing/DescriptionStep";
 import { PriceStep } from "@/components/listing/PriceStep";
+import { ImageStep } from "@/components/listing/ImageStep";
 import { publishListing } from "@/utils/listingUtils";
 import type { ListingData } from "@/types/listing";
 
@@ -23,7 +24,7 @@ export default function CreateListing() {
   const navigate = useNavigate();
 
   const handleManualNext = async () => {
-    if (currentStep === 2) {
+    if (currentStep === 3) {
       const listing: ListingData = {
         title: formData.title,
         description: formData.description,
@@ -63,6 +64,13 @@ export default function CreateListing() {
     />,
     <PriceStep 
       key="price" 
+      onNext={handleManualNext} 
+      onBack={handleManualBack} 
+      formData={formData} 
+      setFormData={setFormData} 
+    />,
+    <ImageStep 
+      key="image" 
       onNext={handleManualNext} 
       onBack={handleManualBack} 
       formData={formData} 

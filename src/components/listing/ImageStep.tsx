@@ -111,7 +111,7 @@ export const ImageStep = ({ onNext, onBack, formData, setFormData }: StepProps) 
         <Button 
           className="flex-1" 
           onClick={onNext}
-          disabled={isUploading}
+          disabled={isUploading || !formData.imageUrl}
         >
           {isUploading ? "Uploading..." : "Create Listing"} <Image className="ml-2 h-4 w-4" />
         </Button>
