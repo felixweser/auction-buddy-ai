@@ -84,6 +84,7 @@ export const SearchResults = () => {
           sellerId={selectedListing.created_by}
           price={selectedListing.price}
           isNegotiable={selectedListing.is_negotiable}
+          description={selectedListing.description}
         />
       )}
     </div>
