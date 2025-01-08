@@ -16,8 +16,8 @@ const Index = () => {
   const handleSearch = () => {
     if (!searchQuery.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a search query",
+        title: "Fehler",
+        description: "Bitte geben Sie einen Suchbegriff ein",
         variant: "destructive",
       });
       return;
@@ -64,7 +64,7 @@ const Index = () => {
             className="fixed bottom-6 right-6"
             onClick={() => navigate('/create-listing')}
           >
-            <Plus className="mr-2 h-4 w-4" /> Create Listing
+            <Plus className="mr-2 h-4 w-4" /> Anzeige erstellen
           </Button>
         </div>
       </div>

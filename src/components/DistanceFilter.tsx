@@ -9,7 +9,7 @@ interface DistanceFilterProps {
 export const DistanceFilter = ({ value, onChange }: DistanceFilterProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="font-medium text-foreground">Distance Range</h3>
+      <h3 className="font-medium text-foreground">Entfernungsbereich</h3>
       <Slider
         value={value}
         onValueChange={onChange}

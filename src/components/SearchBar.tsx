@@ -33,7 +33,7 @@ export const SearchBar = ({
         <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
           <div className="relative">
             <Input
-              placeholder="What are you looking for? (e.g., 'a used MacBook in good condition')"
+              placeholder="Wonach suchst du? (z.B. 'ein gebrauchtes MacBook in gutem Zustand')"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSearch()}
@@ -57,7 +57,7 @@ export const SearchBar = ({
               onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
             >
               <DollarSign className="h-4 w-4 mr-1" />
-              <span>Price</span>
+              <span>Preis</span>
             </Button>
             <Button 
               variant="ghost" 
@@ -65,7 +65,7 @@ export const SearchBar = ({
               className="rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
             >
               <Plus className="h-4 w-4 mr-1" />
-              <span>Attach</span>
+              <span>Anhängen</span>
             </Button>
             <Button 
               variant="ghost" 
@@ -74,7 +74,7 @@ export const SearchBar = ({
               onClick={() => setIsDistanceFilterOpen(!isDistanceFilterOpen)}
             >
               <MapPin className="h-4 w-4 mr-1" />
-              <span>Distance</span>
+              <span>Entfernung</span>
             </Button>
           </div>
 
