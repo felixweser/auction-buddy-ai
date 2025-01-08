@@ -6,6 +6,7 @@ import ProductPage from "./pages/ProductPage";
 import MyItems from "./pages/MyItems";
 import Messages from "./pages/Messages";
 import Auth from "./pages/Auth";
+import ListingInsights from "./pages/ListingInsights";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/my-items" element={<MyItems />} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/listing/:id/insights" element={<ListingInsights />} />
       </Routes>
     </Router>
   );

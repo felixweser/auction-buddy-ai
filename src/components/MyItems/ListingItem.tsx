@@ -1,7 +1,8 @@
 import { Listing } from "@/types/listing";
-import { Edit, MessageSquare, Trash2 } from "lucide-react";
+import { Edit, MessageSquare, Trash2, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ interface ListingItemProps {
 
 export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     const { error } = await supabase
@@ -72,6 +74,15 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
           </span>
           
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/listing/${listing.id}/insights`)}
+              className="flex items-center gap-2"
+            >
+              <ChartBar className="h-4 w-4" />
+              <span className="hidden md:inline">View Insights</span>
+            </Button>
             <Button
               variant="outline"
               size="sm"
