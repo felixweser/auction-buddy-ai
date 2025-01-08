@@ -14,13 +14,7 @@ interface Message {
 }
 
 const CreateListing = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      content: "What would you like to sell today?",
-      sender: "ai",
-      type: "title"
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({
@@ -31,6 +25,56 @@ const CreateListing = () => {
   });
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Initialize chat when component mounts
+  useState(() => {
+    handleAIResponse("Hi! What would you like to sell today?");
+  }, []);
+
+  const handleAIResponse = async (message: string) => {
+    setMessages(prev => [...prev, {
+      content: message,
+      sender: "ai"
+    }]);
+  };
+
+  const handleUserInput = async () => {
+    if (!input.trim()) return;
+
+    // Add user message
+    const userMessage: Message = {
+      content: input,
+      sender: "user",
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/functions/chat-with-claude', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get AI response');
+
+      const data = await response.json();
+      handleAIResponse(data.response);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setInput("");
+      setIsProcessing(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.description || !formData.idealPrice || !formData.minPrice) {
@@ -87,53 +131,6 @@ const CreateListing = () => {
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const handleUserInput = () => {
-    if (!input.trim()) return;
-
-    // Add user message
-    const userMessage: Message = {
-      content: input,
-      sender: "user",
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-
-    // Process user input based on current stage
-    const currentStage = messages[messages.length - 1];
-    
-    if (currentStage.type === "title") {
-      setFormData(prev => ({ ...prev, title: input }));
-      // Add follow-up questions based on title
-      const followUpQuestions: Message[] = [
-        {
-          content: `Tell me more about your ${input}. What condition is it in?`,
-          sender: "ai",
-          type: "description"
-        }
-      ];
-      setMessages(prev => [...prev, ...followUpQuestions]);
-    } else if (currentStage.type === "description") {
-      setFormData(prev => ({ ...prev, description: input }));
-      // Ask about pricing
-      const priceQuestion: Message = {
-        content: "What's your ideal selling price?",
-        sender: "ai",
-        type: "price"
-      };
-      setMessages(prev => [...prev, priceQuestion]);
-    } else if (currentStage.type === "price") {
-      setFormData(prev => ({ ...prev, idealPrice: input }));
-      const minPriceQuestion: Message = {
-        content: "What's the minimum price you'd accept?",
-        sender: "ai",
-        type: "price"
-      };
-      setMessages(prev => [...prev, minPriceQuestion]);
-    }
-
-    setInput("");
   };
 
   return (
