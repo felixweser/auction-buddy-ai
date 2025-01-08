@@ -34,7 +34,7 @@ const Index = () => {
           <main className="container mx-auto px-4 flex items-center justify-center min-h-screen relative">
             {/* Radial gradient background */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#D3E4FD]/30 via-[#0EA5E9]/20 to-[#D3E4FD]/30 blur-3xl opacity-50" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#D3E4FD]/80 via-[#0EA5E9]/50 to-[#D3E4FD]/80 blur-[100px] opacity-70" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background" />
             </div>
             
