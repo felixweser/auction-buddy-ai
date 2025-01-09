@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,6 +24,8 @@ const Messages = () => {
         });
         return;
       }
+
+      setCurrentUserId(user.id);
 
       const { data, error } = await supabase
         .from("messages")
@@ -80,7 +83,7 @@ const Messages = () => {
         {selectedChat ? (
           <ChatMessages
             messages={selectedChat.messages}
-            currentUserId={supabase.auth.getUser()?.data?.user?.id}
+            currentUserId={currentUserId}
           />
         ) : (
           <EmptyState />

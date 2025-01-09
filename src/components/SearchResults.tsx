@@ -30,12 +30,9 @@ export const SearchResults = () => {
         return;
       }
 
-      const transformedData = data.map(property => ({
-        ...property,
-        property_details: property.property_details?.[0] || null
-      }));
+      if (!data) return;
 
-      setProperties(transformedData);
+      setProperties(data as Property[]);
     };
 
     fetchProperties();
