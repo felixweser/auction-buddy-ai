@@ -56,4 +56,5 @@ export interface PropertyFormData {
   coolingSystem: string;
   electricalSystem: string;
   lastSystemServiceDate: string;
+  shippingAvailable: boolean;
 }

@@ -19,6 +19,7 @@ export default function CreateListing() {
     price: "",
     imageUrl: "",
     isNegotiable: false,
+    shippingAvailable: false,
     addressLine1: "",
     addressLine2: "",
     city: "",
