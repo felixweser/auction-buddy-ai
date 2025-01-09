@@ -1,6 +1,6 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface ListingCardProps {
@@ -11,7 +11,7 @@ interface ListingCardProps {
   imageUrl: string;
   isNegotiable: boolean;
   sellerId: string;
-  onChat: (props: { 
+  onChat: (params: {
     listingId: string;
     sellerId: string;
     productTitle: string;
@@ -33,47 +33,44 @@ export const ListingCard = ({
   const navigate = useNavigate();
 
   return (
-    <Card 
-      className="overflow-hidden cursor-pointer"
-      onClick={() => navigate(`/property/${id}`)}
-    >
-      <div className="aspect-square overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-        />
-      </div>
-      <CardHeader>
-        <h3 className="font-semibold text-lg">{title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2 text-primary">
-          <DollarSign className="w-4 h-4" />
-          <span className="font-bold">${price}</span>
-          {isNegotiable && (
-            <span className="text-sm text-muted-foreground">(Negotiable)</span>
-          )}
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div 
+        className="cursor-pointer"
+        onClick={() => navigate(`/property/${id}`)}
+      >
+        <div className="aspect-video relative overflow-hidden bg-accent">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
         </div>
-      </CardContent>
-      <CardFooter>
-        <Button 
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-lg mb-1 line-clamp-1">{title}</h3>
+          <p className="text-xl font-bold text-primary mb-2">
+            €{price.toLocaleString()}
+            {isNegotiable && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                (Negotiable)
+              </span>
+            )}
+          </p>
+          <p className="text-muted-foreground text-sm line-clamp-2">
+            {description}
+          </p>
+        </CardContent>
+      </div>
+      <CardFooter className="p-4 pt-0">
+        <Button
+          variant="secondary"
+          className="w-full"
           onClick={(e) => {
             e.stopPropagation();
-            onChat({ 
-              listingId: id, 
-              sellerId, 
-              productTitle: title,
-              price,
-              isNegotiable
-            });
-          }} 
-          className="w-full"
-          variant="outline"
+            onChat({ listingId: id, sellerId, productTitle: title, price, isNegotiable });
+          }}
         >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          {isNegotiable ? "Negotiate Price" : "Contact Seller"}
+          <MessageCircle className="h-4 w-4 mr-2" />
+          Contact Seller
         </Button>
       </CardFooter>
     </Card>
