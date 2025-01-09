@@ -17,7 +17,7 @@ export interface Property {
 
 export interface PropertyDetails {
   id: string;
-  property_id: string;
+  property_id: string | null;
   year_built: number;
   square_footage: number;
   bedrooms: number;
@@ -26,4 +26,5 @@ export interface PropertyDetails {
   cooling_system?: string | null;
   electrical_system?: string | null;
   last_system_service_date?: string | null;
+  created_at: string;
 }

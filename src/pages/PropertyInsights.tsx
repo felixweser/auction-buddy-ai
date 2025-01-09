@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ChartBar, DollarSign, Users } from "lucide-react";
+import { Property } from "@/types/property";
 
 interface InterestedUser {
   id: string;
@@ -23,7 +24,7 @@ interface InterestedUser {
 const PropertyInsights = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { data: property } = useQuery({
+  const { data: property } = useQuery<Property>({
     queryKey: ["property", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,7 +41,7 @@ const PropertyInsights = () => {
     },
   });
 
-  const { data: interestedUsers } = useQuery({
+  const { data: interestedUsers } = useQuery<InterestedUser[]>({
     queryKey: ["interested-users", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -56,7 +57,6 @@ const PropertyInsights = () => {
 
       if (error) throw error;
 
-      // Process messages to extract offers and count messages per user
       const userStats = data.reduce((acc: { [key: string]: InterestedUser }, message) => {
         const senderId = message.sender_id;
         const username = message.profiles?.username;
@@ -70,7 +70,6 @@ const PropertyInsights = () => {
           };
         }
 
-        // Check if message contains an offer (assuming offers are in format "$X" or "X dollars")
         const offerMatch = message.content.match(/\$?(\d+)(?:\s*dollars?)?/i);
         if (offerMatch) {
           const amount = parseInt(offerMatch[1]);
