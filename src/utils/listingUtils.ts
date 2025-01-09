@@ -23,7 +23,7 @@ export const publishListing = async (listing: ListingData) => {
           created_by: user.id,
           is_negotiable: listing.isNegotiable,
           address_line1: listing.addressLine1,
-          address_line2: listing.addressLine2,
+          address_line2: listing.addressLine2 || null,
           city: listing.city,
           state: listing.state,
           zip_code: listing.zipCode,
@@ -32,26 +32,32 @@ export const publishListing = async (listing: ListingData) => {
       .select()
       .single();
 
-    if (propertyError) throw propertyError;
+    if (propertyError) {
+      console.error('Property Error:', propertyError);
+      throw propertyError;
+    }
 
     // Then, create the property details
+    const propertyDetails = {
+      property_id: propertyData.id,
+      year_built: parseInt(listing.yearBuilt),
+      square_footage: parseFloat(listing.squareFootage),
+      bedrooms: parseInt(listing.bedrooms),
+      bathrooms: parseFloat(listing.bathrooms),
+      heating_system: listing.heatingSystem || null,
+      cooling_system: listing.coolingSystem || null,
+      electrical_system: listing.electricalSystem || null,
+      last_system_service_date: listing.lastSystemServiceDate || null
+    };
+
     const { error: detailsError } = await supabase
       .from('property_details')
-      .insert([
-        {
-          property_id: propertyData.id,
-          year_built: listing.yearBuilt,
-          square_footage: listing.squareFootage,
-          bedrooms: listing.bedrooms,
-          bathrooms: listing.bathrooms,
-          heating_system: listing.heatingSystem,
-          cooling_system: listing.coolingSystem,
-          electrical_system: listing.electricalSystem,
-          last_system_service_date: listing.lastSystemServiceDate,
-        }
-      ]);
+      .insert([propertyDetails]);
 
-    if (detailsError) throw detailsError;
+    if (detailsError) {
+      console.error('Details Error:', detailsError);
+      throw detailsError;
+    }
 
     toast.success("Your property listing has been created!");
     return true;
