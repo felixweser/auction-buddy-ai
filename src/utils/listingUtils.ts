@@ -11,27 +11,53 @@ export const publishListing = async (listing: ListingData) => {
       return false;
     }
 
-    const { error } = await supabase
-      .from('listings')
+    // First, create the property
+    const { data: propertyData, error: propertyError } = await supabase
+      .from('properties')
       .insert([
         {
           title: listing.title,
           description: listing.description,
-          price: listing.desiredPrice,
-          image_url: listing.imageUrl || 'https://via.placeholder.com/400',
+          price: listing.price,
+          image_url: listing.imageUrl,
           created_by: user.id,
           is_negotiable: listing.isNegotiable,
-          shipping_available: listing.shippingAvailable
+          address_line1: listing.addressLine1,
+          address_line2: listing.addressLine2,
+          city: listing.city,
+          state: listing.state,
+          zip_code: listing.zipCode,
+        }
+      ])
+      .select()
+      .single();
+
+    if (propertyError) throw propertyError;
+
+    // Then, create the property details
+    const { error: detailsError } = await supabase
+      .from('property_details')
+      .insert([
+        {
+          property_id: propertyData.id,
+          year_built: listing.yearBuilt,
+          square_footage: listing.squareFootage,
+          bedrooms: listing.bedrooms,
+          bathrooms: listing.bathrooms,
+          heating_system: listing.heatingSystem,
+          cooling_system: listing.coolingSystem,
+          electrical_system: listing.electricalSystem,
+          last_system_service_date: listing.lastSystemServiceDate,
         }
       ]);
 
-    if (error) throw error;
+    if (detailsError) throw detailsError;
 
-    toast.success("Your listing has been created!");
+    toast.success("Your property listing has been created!");
     return true;
   } catch (error) {
     console.error('Error:', error);
-    toast.error("Failed to create listing. Please try again.");
+    toast.error("Failed to create property listing. Please try again.");
     return false;
   }
 };

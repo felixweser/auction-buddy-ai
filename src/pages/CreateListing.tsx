@@ -5,34 +5,58 @@ import { ArrowLeft } from "lucide-react";
 import { TitleStep } from "@/components/listing/TitleStep";
 import { DescriptionStep } from "@/components/listing/DescriptionStep";
 import { PriceStep } from "@/components/listing/PriceStep";
+import { AddressStep } from "@/components/listing/AddressStep";
+import { PropertyDetailsStep } from "@/components/listing/PropertyDetailsStep";
 import { ImageStep } from "@/components/listing/ImageStep";
 import { publishListing } from "@/utils/listingUtils";
-import type { ListingData } from "@/types/listing";
+import type { PropertyFormData } from "@/types/listing";
 
 export default function CreateListing() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PropertyFormData>({
     title: "",
     description: "",
-    minPrice: "",
-    desiredPrice: "",
+    price: "",
     imageUrl: "",
     isNegotiable: false,
-    shippingAvailable: false
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    yearBuilt: "",
+    squareFootage: "",
+    bedrooms: "",
+    bathrooms: "",
+    heatingSystem: "",
+    coolingSystem: "",
+    electricalSystem: "",
+    lastSystemServiceDate: "",
   });
 
   const navigate = useNavigate();
 
   const handleManualNext = async () => {
-    if (currentStep === 3) {
-      const listing: ListingData = {
+    if (currentStep === 5) {
+      const listing = {
         title: formData.title,
         description: formData.description,
-        minPrice: parseFloat(formData.minPrice),
-        desiredPrice: parseFloat(formData.desiredPrice),
+        price: parseFloat(formData.price),
         imageUrl: formData.imageUrl,
         isNegotiable: formData.isNegotiable,
-        shippingAvailable: formData.shippingAvailable
+        addressLine1: formData.addressLine1,
+        addressLine2: formData.addressLine2,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        yearBuilt: parseInt(formData.yearBuilt),
+        squareFootage: parseFloat(formData.squareFootage),
+        bedrooms: parseInt(formData.bedrooms),
+        bathrooms: parseFloat(formData.bathrooms),
+        heatingSystem: formData.heatingSystem,
+        coolingSystem: formData.coolingSystem,
+        electricalSystem: formData.electricalSystem,
+        lastSystemServiceDate: formData.lastSystemServiceDate,
       };
 
       const success = await publishListing(listing);
@@ -64,6 +88,20 @@ export default function CreateListing() {
     />,
     <PriceStep 
       key="price" 
+      onNext={handleManualNext} 
+      onBack={handleManualBack} 
+      formData={formData} 
+      setFormData={setFormData} 
+    />,
+    <AddressStep 
+      key="address" 
+      onNext={handleManualNext} 
+      onBack={handleManualBack} 
+      formData={formData} 
+      setFormData={setFormData} 
+    />,
+    <PropertyDetailsStep 
+      key="details" 
       onNext={handleManualNext} 
       onBack={handleManualBack} 
       formData={formData} 

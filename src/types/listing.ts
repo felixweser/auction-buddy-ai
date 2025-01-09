@@ -1,11 +1,22 @@
 export interface ListingData {
   title: string;
   description: string;
-  minPrice: number;
-  desiredPrice: number;
+  price: number;
   imageUrl: string;
   isNegotiable: boolean;
-  shippingAvailable: boolean;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  yearBuilt: number;
+  squareFootage: number;
+  bedrooms: number;
+  bathrooms: number;
+  heatingSystem?: string;
+  coolingSystem?: string;
+  electricalSystem?: string;
+  lastSystemServiceDate?: string;
 }
 
 export interface Listing {
@@ -17,28 +28,32 @@ export interface Listing {
   is_negotiable: boolean;
   created_by: string;
   created_at: string;
-  shipping_available: boolean;
 }
 
 export interface StepProps {
   onNext: () => void;
   onBack?: () => void;
-  formData: {
-    title: string;
-    description: string;
-    minPrice: string;
-    desiredPrice: string;
-    imageUrl: string;
-    isNegotiable: boolean;
-    shippingAvailable: boolean;
-  };
-  setFormData: React.Dispatch<React.SetStateAction<{
-    title: string;
-    description: string;
-    minPrice: string;
-    desiredPrice: string;
-    imageUrl: string;
-    isNegotiable: boolean;
-    shippingAvailable: boolean;
-  }>>;
+  formData: PropertyFormData;
+  setFormData: React.Dispatch<React.SetStateAction<PropertyFormData>>;
+}
+
+export interface PropertyFormData {
+  title: string;
+  description: string;
+  price: string;
+  imageUrl: string;
+  isNegotiable: boolean;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  yearBuilt: string;
+  squareFootage: string;
+  bedrooms: string;
+  bathrooms: string;
+  heatingSystem: string;
+  coolingSystem: string;
+  electricalSystem: string;
+  lastSystemServiceDate: string;
 }
