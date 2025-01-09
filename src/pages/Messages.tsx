@@ -3,12 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatList } from "@/components/Messages/ChatList";
 import { ChatMessages } from "@/components/Messages/ChatMessages";
 import { EmptyState } from "@/components/Messages/EmptyState";
-import { Message, ChatGroup } from "@/types/property";
+import { Message } from "@/types/property";
 import { useToast } from "@/hooks/use-toast";
 
 const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const Messages = () => {
         .from("messages")
         .select(`
           *,
-          property:listing_id (
+          properties!inner (
             *,
             property_details (*)
           )
@@ -51,43 +51,37 @@ const Messages = () => {
     fetchMessages();
   }, [toast]);
 
-  const groupMessages = (messages: Message[]): ChatGroup[] => {
-    return messages.reduce((acc: ChatGroup[], message: Message) => {
-      const property = message.property;
-      if (!property) return acc;
+  const groupedChats = messages.reduce((acc: any[], message: Message) => {
+    const existingChat = acc.find(chat => chat.listing_id === message.listing_id);
+    if (existingChat) {
+      existingChat.messages.push(message);
+      return acc;
+    }
 
-      const existingGroup = acc.find(g => g.property.id === property.id);
-      if (existingGroup) {
-        existingGroup.messages.push(message);
-        return acc;
-      }
+    return [...acc, {
+      listing_id: message.listing_id,
+      listing_title: message.property?.title || "Unknown Property",
+      messages: [message]
+    }];
+  }, []);
 
-      const otherUserId = message.sender_id;
-      const newGroup: ChatGroup = {
-        property,
-        messages: [message],
-        otherUser: {
-          id: otherUserId,
-          username: null // We'll fetch this separately
-        }
-      };
-      
-      return [...acc, newGroup];
-    }, []);
-  };
+  const selectedChat = groupedChats.find(chat => chat.listing_id === selectedChatId);
 
   return (
     <div className="flex h-screen">
       <div className="w-1/3 border-r">
         <ChatList
-          groups={groupMessages(messages)}
-          selectedGroup={selectedGroup}
-          onSelectGroup={setSelectedGroup}
+          chats={groupedChats}
+          selectedChat={selectedChatId}
+          onSelectChat={setSelectedChatId}
         />
       </div>
       <div className="flex-1">
-        {selectedGroup ? (
-          <ChatMessages group={selectedGroup} />
+        {selectedChat ? (
+          <ChatMessages
+            messages={selectedChat.messages}
+            currentUserId={supabase.auth.getUser()?.data?.user?.id}
+          />
         ) : (
           <EmptyState />
         )}

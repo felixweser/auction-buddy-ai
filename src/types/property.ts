@@ -41,10 +41,20 @@ export interface Message {
 }
 
 export interface ChatGroup {
-  property: Property;
-  messages: Message[];
-  otherUser: {
-    id: string;
-    username: string | null;
-  };
+  chats: {
+    listing_id: string;
+    listing_title: string;
+    messages: {
+      id: string;
+      content: string;
+      created_at: string;
+      sender_id: string;
+      listing_id: string;
+      listings: {
+        title: string;
+      };
+    }[];
+  }[];
+  selectedChat: string | null;
+  onSelectChat: (chatId: string) => void;
 }
