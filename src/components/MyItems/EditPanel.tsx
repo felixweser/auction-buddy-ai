@@ -3,16 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Listing } from "@/types/listing";
+import { Property } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { Save } from "lucide-react";
 
 interface EditPanelProps {
-  listing: Listing | null;
-  editedListing: Listing | null;
-  setEditedListing: (listing: Listing | null) => void;
+  listing: Property | null;
+  editedListing: Property | null;
+  setEditedListing: (listing: Property | null) => void;
   onClose: () => void;
-  onUpdate: (listing: Listing) => void;
+  onUpdate: (listing: Property) => void;
   isMobile: boolean;
 }
 
@@ -30,7 +30,7 @@ export const EditPanel = ({
     if (!editedListing) return;
 
     const { data, error } = await supabase
-      .from("listings")
+      .from("properties")
       .update({
         title: editedListing.title,
         description: editedListing.description,
@@ -44,7 +44,7 @@ export const EditPanel = ({
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to update listing. Please try again.",
+        description: "Failed to update property. Please try again.",
         variant: "destructive",
       });
       return;
@@ -52,17 +52,17 @@ export const EditPanel = ({
 
     toast({
       title: "Success",
-      description: "Your listing has been updated successfully!",
+      description: "Your property has been updated successfully!",
     });
     
-    onUpdate(data as Listing);
+    onUpdate(data as Property);
   };
 
   return (
     <Sheet open={!!listing} onOpenChange={() => onClose()}>
       <SheetContent className="w-full sm:max-w-xl" side={isMobile ? "bottom" : "right"}>
         <SheetHeader>
-          <SheetTitle>Edit Listing</SheetTitle>
+          <SheetTitle>Edit Property</SheetTitle>
         </SheetHeader>
         
         {editedListing && (

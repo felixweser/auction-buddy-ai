@@ -34,8 +34,8 @@ export const ListingCard = ({
 
   return (
     <Card 
-      className="listing-card overflow-hidden cursor-pointer"
-      onClick={() => navigate(`/product/${id}`)}
+      className="overflow-hidden cursor-pointer"
+      onClick={() => navigate(`/property/${id}`)}
     >
       <div className="aspect-square overflow-hidden">
         <img
