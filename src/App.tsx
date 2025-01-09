@@ -5,8 +5,6 @@ import Messages from "./pages/Messages";
 import MyItems from "./pages/MyItems";
 import CreateListing from "./pages/CreateListing";
 import SearchResults from "./pages/SearchResults";
-import ProductPage from "./pages/ProductPage";
-import PropertyInsights from "./pages/PropertyInsights";
 
 function App() {
   return (
@@ -18,8 +16,6 @@ function App() {
         <Route path="/my-items" element={<MyItems />} />
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/search" element={<SearchResults />} />
-        <Route path="/product/:id" element={<ProductPage />} />
-        <Route path="/property/:id/insights" element={<PropertyInsights />} />
       </Routes>
     </BrowserRouter>
   );
