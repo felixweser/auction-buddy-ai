@@ -1,14 +1,12 @@
 import { Property } from "@/types/property";
 import { Card } from "@/components/ui/card";
 import { MapPin, Home, Layout } from "lucide-react";
-import Image from "@/components/ui/image";
 
 interface PropertyStoryProps {
   property: Property;
 }
 
 export const PropertyStory = ({ property }: PropertyStoryProps) => {
-  // These would be AI-generated in the future
   const sections = [
     {
       title: "Location Story",

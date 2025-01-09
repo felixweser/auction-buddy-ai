@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { ChatDialog } from "@/components/ChatDialog";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyHero } from "@/components/property/PropertyHero";
 import { PropertyStats } from "@/components/property/PropertyStats";
@@ -15,7 +14,6 @@ import { PropertyStory } from "@/components/property/PropertyStory";
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: property, isLoading, error } = useQuery({
@@ -113,29 +111,20 @@ const PropertyDetails = () => {
           <p className="text-lg text-muted-foreground leading-relaxed">
             {property.description}
           </p>
-          <Button 
-            className="mt-8"
-            onClick={() => setIsChatOpen(true)}
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Contact Agent
-          </Button>
         </div>
 
         <PropertyStory property={property} />
         <PropertyLocation property={property} />
       </div>
 
-      {isChatOpen && property && (
-        <ChatDialog
-          listingId={property.id}
-          sellerId={property.created_by}
-          productTitle={property.title}
-          price={property.price}
-          isNegotiable={property.is_negotiable}
-          description={property.description}
-        />
-      )}
+      <ChatDialog
+        listingId={property.id}
+        sellerId={property.created_by}
+        productTitle={property.title}
+        price={property.price}
+        isNegotiable={property.is_negotiable}
+        description={property.description}
+      />
     </div>
   );
 };

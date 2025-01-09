@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
-import { Send, MessageCircle } from "lucide-react";
+import { Send, MessageCircle, Minimize2, Maximize2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -37,6 +37,7 @@ export const ChatDialog = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isMinimized, setIsMinimized] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,7 +50,6 @@ export const ChatDialog = ({
     getCurrentUser();
   }, []);
 
-  // Stream the description as the first message
   useEffect(() => {
     if (description && messages.length === 0) {
       setMessages([{ content: description, sender: "ai" }]);
@@ -59,12 +59,10 @@ export const ChatDialog = ({
   const handleSend = async (content: string) => {
     if (!content.trim() || !currentUserId) return;
 
-    // Add message to local state
     setMessages((prev) => [...prev, { content, sender: "user" }]);
     setInput("");
 
     try {
-      // Save message to Supabase
       const { error } = await supabase
         .from('messages')
         .insert({
@@ -101,64 +99,77 @@ export const ChatDialog = ({
   ];
 
   return (
-    <Card className="w-full h-[calc(100vh-12rem)] flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5" />
-          Chat about {productTitle}
+    <Card className={`fixed bottom-0 right-4 transition-all duration-300 ease-in-out shadow-lg ${
+      isMinimized ? 'w-64 h-12' : 'w-96 h-[600px]'
+    }`}>
+      <CardHeader className={`p-3 cursor-pointer ${isMinimized ? 'border-none' : 'border-b'}`} onClick={() => setIsMinimized(!isMinimized)}>
+        <CardTitle className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-4 w-4" />
+            Chat about {productTitle}
+          </div>
+          {isMinimized ? (
+            <Maximize2 className="h-4 w-4" />
+          ) : (
+            <Minimize2 className="h-4 w-4" />
+          )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        <ScrollArea className="flex-1 pr-4 mb-4">
-          <div className="space-y-4">
-            {messages.map((message, i) => (
-              <div
-                key={i}
-                className={`flex ${
-                  message.sender === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+      
+      {!isMinimized && (
+        <CardContent className="p-4 flex flex-col h-[calc(100%-60px)]">
+          <ScrollArea className="flex-1 pr-4 mb-4">
+            <div className="space-y-4">
+              {messages.map((message, i) => (
                 <div
-                  className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                    message.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                  key={i}
+                  className={`flex ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.content}
+                  <div
+                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                      message.sender === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
+              ))}
+            </div>
+          </ScrollArea>
 
-        {messages.length === 1 && (
-          <div className="grid grid-cols-1 gap-2 mb-4">
-            {suggestions.map((suggestion, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="text-left h-auto whitespace-normal"
-                onClick={() => handleSend(suggestion)}
-              >
-                {suggestion}
-              </Button>
-            ))}
-          </div>
-        )}
+          {messages.length === 1 && (
+            <div className="grid grid-cols-1 gap-2 mb-4">
+              {suggestions.map((suggestion, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="text-left h-auto whitespace-normal text-sm"
+                  onClick={() => handleSend(suggestion)}
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          )}
 
-        <div className="flex gap-2 mt-auto">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
-          />
-          <Button size="icon" onClick={() => handleSend(input)}>
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
+          <div className="flex gap-2 mt-auto">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+              onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
+              className="text-sm"
+            />
+            <Button size="icon" onClick={() => handleSend(input)}>
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 };
