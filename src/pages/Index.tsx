@@ -61,7 +61,7 @@ const Index = () => {
           </main>
 
           <Button 
-            className="fixed bottom-6 right-6 bg-primary text-primary-foreground hover:bg-primary/90"
+            className="fixed bottom-6 right-6"
             onClick={() => navigate('/create-listing')}
           >
             <Plus className="mr-2 h-4 w-4" /> Anzeige erstellen
