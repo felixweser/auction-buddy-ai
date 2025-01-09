@@ -48,7 +48,7 @@ const Index = () => {
             </div>
             
             <div className="w-full max-w-2xl relative z-10">
-              <h1 className="text-4xl font-bold mb-2 text-center">Großanzeigen</h1>
+              <h1 className="text-4xl font-bold mb-2 text-center">Agora</h1>
               <p className="text-xl text-muted-foreground mb-8 text-center">Finde was du suchst!</p>
               <SearchBar
                 searchQuery={searchQuery}
