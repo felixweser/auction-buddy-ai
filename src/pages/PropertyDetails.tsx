@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PropertyHero } from "@/components/property/PropertyHero";
 import { PropertyStats } from "@/components/property/PropertyStats";
 import { PropertyLocation } from "@/components/property/PropertyLocation";
+import { PropertyStory } from "@/components/property/PropertyStory";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -107,8 +108,8 @@ const PropertyDetails = () => {
         />
       )}
 
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="py-12">
+      <div className="max-w-7xl mx-auto">
+        <div className="py-12 px-4">
           <p className="text-lg text-muted-foreground leading-relaxed">
             {property.description}
           </p>
@@ -121,6 +122,7 @@ const PropertyDetails = () => {
           </Button>
         </div>
 
+        <PropertyStory property={property} />
         <PropertyLocation property={property} />
       </div>
 
