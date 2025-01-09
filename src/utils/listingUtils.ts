@@ -38,21 +38,19 @@ export const publishListing = async (listing: ListingData) => {
     }
 
     // Then, create the property details
-    const propertyDetails = {
-      property_id: propertyData.id,
-      year_built: parseInt(listing.yearBuilt),
-      square_footage: parseFloat(listing.squareFootage),
-      bedrooms: parseInt(listing.bedrooms),
-      bathrooms: parseFloat(listing.bathrooms),
-      heating_system: listing.heatingSystem || null,
-      cooling_system: listing.coolingSystem || null,
-      electrical_system: listing.electricalSystem || null,
-      last_system_service_date: listing.lastSystemServiceDate || null
-    };
-
     const { error: detailsError } = await supabase
       .from('property_details')
-      .insert([propertyDetails]);
+      .insert([{
+        property_id: propertyData.id,
+        year_built: listing.yearBuilt,
+        square_footage: listing.squareFootage,
+        bedrooms: listing.bedrooms,
+        bathrooms: listing.bathrooms,
+        heating_system: listing.heatingSystem || null,
+        cooling_system: listing.coolingSystem || null,
+        electrical_system: listing.electricalSystem || null,
+        last_system_service_date: listing.lastSystemServiceDate || null
+      }]);
 
     if (detailsError) {
       console.error('Details Error:', detailsError);

@@ -1,4 +1,4 @@
-import { Listing } from "@/types/listing";
+import { Property } from "@/types/property";
 import { Edit, MessageSquare, Trash2, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface ListingItemProps {
-  listing: Listing;
+  listing: Property;
   onClick: () => void;
   onDelete: (id: string) => void;
 }
@@ -28,16 +28,16 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
 
   const handleDelete = async () => {
     const { error } = await supabase
-      .from("listings")
+      .from("properties")
       .delete()
       .eq("id", listing.id);
 
     if (error) {
-      toast.error("Failed to delete listing");
+      toast.error("Failed to delete property");
       return;
     }
 
-    toast.success("Listing deleted successfully");
+    toast.success("Property deleted successfully");
     onDelete(listing.id);
     setIsDeleteDialogOpen(false);
   };
@@ -77,7 +77,7 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/listing/${listing.id}/insights`)}
+              onClick={() => navigate(`/property/${listing.id}/insights`)}
               className="flex items-center gap-2"
             >
               <ChartBar className="h-4 w-4" />
@@ -90,7 +90,7 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
               className="flex items-center gap-2"
             >
               <Edit className="h-4 w-4" />
-              <span className="hidden md:inline">Edit Listing</span>
+              <span className="hidden md:inline">Edit Property</span>
             </Button>
             <Button
               variant="outline"
@@ -110,7 +110,7 @@ export const ListingItem = ({ listing, onClick, onDelete }: ListingItemProps) =>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your listing.
+              This action cannot be undone. This will permanently delete your property listing.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
