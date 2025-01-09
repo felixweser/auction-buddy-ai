@@ -7,13 +7,13 @@ export interface Property {
   is_negotiable: boolean;
   created_by: string;
   created_at: string;
-  last_updated: string;
   address_line1: string;
   address_line2?: string | null;
   city: string;
   state: string;
   zip_code: string;
-  property_details?: PropertyDetails | null;
+  last_updated: string;
+  property_details: PropertyDetails | null;
 }
 
 export interface PropertyDetails {
