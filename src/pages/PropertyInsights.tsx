@@ -88,6 +88,9 @@ const PropertyInsights = () => {
 
   if (!property) return null;
 
+  // Get the first property details record if it exists
+  const propertyDetails = property.property_details?.[0];
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -140,25 +143,25 @@ const PropertyInsights = () => {
               </div>
             </div>
 
-            {property.property_details && (
+            {propertyDetails && (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">Property Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="p-4 rounded-lg border bg-card">
                     <h3 className="text-sm font-medium text-muted-foreground">Year Built</h3>
-                    <p className="text-lg font-semibold">{property.property_details.year_built}</p>
+                    <p className="text-lg font-semibold">{propertyDetails.year_built}</p>
                   </div>
                   <div className="p-4 rounded-lg border bg-card">
                     <h3 className="text-sm font-medium text-muted-foreground">Square Footage</h3>
-                    <p className="text-lg font-semibold">{property.property_details.square_footage} sq ft</p>
+                    <p className="text-lg font-semibold">{propertyDetails.square_footage} sq ft</p>
                   </div>
                   <div className="p-4 rounded-lg border bg-card">
                     <h3 className="text-sm font-medium text-muted-foreground">Bedrooms</h3>
-                    <p className="text-lg font-semibold">{property.property_details.bedrooms}</p>
+                    <p className="text-lg font-semibold">{propertyDetails.bedrooms}</p>
                   </div>
                   <div className="p-4 rounded-lg border bg-card">
                     <h3 className="text-sm font-medium text-muted-foreground">Bathrooms</h3>
-                    <p className="text-lg font-semibold">{property.property_details.bathrooms}</p>
+                    <p className="text-lg font-semibold">{propertyDetails.bathrooms}</p>
                   </div>
                 </div>
               </div>
