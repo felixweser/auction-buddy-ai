@@ -13,7 +13,7 @@ export interface Property {
   state: string;
   zip_code: string;
   last_updated: string;
-  property_details: PropertyDetails | null;
+  property_details?: PropertyDetails[] | null;
 }
 
 export interface PropertyDetails {
@@ -41,20 +41,16 @@ export interface Message {
 }
 
 export interface ChatGroup {
-  chats: {
+  listing_id: string;
+  listing_title: string;
+  messages: {
+    id: string;
+    content: string;
+    created_at: string;
+    sender_id: string;
     listing_id: string;
-    listing_title: string;
-    messages: {
-      id: string;
-      content: string;
-      created_at: string;
-      sender_id: string;
-      listing_id: string;
-      listings: {
-        title: string;
-      };
-    }[];
+    properties: {
+      title: string;
+    };
   }[];
-  selectedChat: string | null;
-  onSelectChat: (chatId: string) => void;
 }
