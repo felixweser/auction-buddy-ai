@@ -23,11 +23,11 @@ interface InterestedUser {
 const ListingInsights = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { data: listing } = useQuery({
-    queryKey: ["listing", id],
+  const { data: property } = useQuery({
+    queryKey: ["property", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("listings")
+        .from("properties")
         .select("*")
         .eq("id", id)
         .single();
@@ -84,7 +84,7 @@ const ListingInsights = () => {
     },
   });
 
-  if (!listing) return null;
+  if (!property) return null;
 
   return (
     <SidebarProvider>
@@ -94,10 +94,10 @@ const ListingInsights = () => {
           <header className="border-b">
             <div className="container mx-auto px-4 py-6">
               <h1 className="text-2xl md:text-3xl font-bold text-primary">
-                Listing Insights
+                Property Insights
               </h1>
               <p className="text-sm md:text-base text-muted-foreground mt-2">
-                {listing.title}
+                {property.title}
               </p>
             </div>
           </header>
