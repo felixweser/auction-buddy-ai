@@ -6,9 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { PropertyHeader } from "@/components/property/PropertyHeader";
-import { PropertyDetailsSection } from "@/components/property/PropertyDetails";
+import { useToast } from "@/hooks/use-toast";
+import { PropertyHero } from "@/components/property/PropertyHero";
+import { PropertyStats } from "@/components/property/PropertyStats";
 import { PropertyLocation } from "@/components/property/PropertyLocation";
 
 const PropertyDetails = () => {
@@ -45,20 +45,6 @@ const PropertyDetails = () => {
     },
     retry: 1,
   });
-
-  const handleScheduleTour = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Virtual tour scheduling will be available soon!",
-    });
-  };
-
-  const handleWatchVideo = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Video tours will be available soon!",
-    });
-  };
 
   if (error) {
     return (
@@ -108,33 +94,34 @@ const PropertyDetails = () => {
         Back
       </Button>
 
-      <PropertyHeader
-        property={property}
-        onScheduleTour={handleScheduleTour}
-        onWatchVideo={handleWatchVideo}
+      <PropertyHero
+        imageUrl={property.image_url}
+        title={property.title}
+        price={property.price}
       />
 
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="py-12">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {property.description}
-            </p>
-            <Button 
-              className="mt-8"
-              onClick={() => setIsChatOpen(true)}
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Contact Seller
-            </Button>
-          </div>
+      {property.property_details?.[0] && (
+        <PropertyStats
+          price={property.price}
+          details={property.property_details[0]}
+        />
+      )}
 
-          {property.property_details?.[0] && (
-            <PropertyDetailsSection details={property.property_details[0]} />
-          )}
-
-          <PropertyLocation property={property} />
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="py-12">
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            {property.description}
+          </p>
+          <Button 
+            className="mt-8"
+            onClick={() => setIsChatOpen(true)}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Contact Agent
+          </Button>
         </div>
+
+        <PropertyLocation property={property} />
       </div>
 
       {isChatOpen && property && (
