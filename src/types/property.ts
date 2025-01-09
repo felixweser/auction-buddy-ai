@@ -7,6 +7,7 @@ export interface Property {
   is_negotiable: boolean;
   created_by: string;
   created_at: string;
+  last_updated: string;
   address_line1: string;
   address_line2?: string | null;
   city: string;

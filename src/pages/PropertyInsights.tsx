@@ -37,7 +37,7 @@ const PropertyInsights = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Property;
     },
   });
 

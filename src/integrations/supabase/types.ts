@@ -9,42 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      listings: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string
-          id: string
-          image_url: string
-          is_negotiable: boolean
-          price: number
-          shipping_available: boolean
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description: string
-          id?: string
-          image_url: string
-          is_negotiable?: boolean
-          price: number
-          shipping_available?: boolean
-          title: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string
-          id?: string
-          image_url?: string
-          is_negotiable?: boolean
-          price?: number
-          shipping_available?: boolean
-          title?: string
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
           content: string
@@ -71,13 +35,6 @@ export type Database = {
           sender_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "messages_listing_id_fkey"
-            columns: ["listing_id"]
-            isOneToOne: false
-            referencedRelation: "listings"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "messages_sender_id_profiles_fkey"
             columns: ["sender_id"]

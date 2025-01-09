@@ -43,7 +43,7 @@ const MyItems = () => {
       return;
     }
 
-    setProperties(data || []);
+    setProperties(data as Property[]);
   };
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const MyItems = () => {
       property.id === updatedProperty.id ? updatedProperty : property
     ));
     handleCloseEdit();
-    fetchMyProperties(); // Refresh the list to ensure we have the latest data
+    fetchMyProperties();
   };
 
   const handlePropertyDelete = (deletedId: string) => {
@@ -73,7 +73,7 @@ const MyItems = () => {
   };
 
   const handlePropertyCreated = () => {
-    fetchMyProperties(); // Refresh the properties after creating a new one
+    fetchMyProperties();
   };
 
   return (
@@ -116,9 +116,9 @@ const MyItems = () => {
           <EditPanel
             listing={selectedProperty}
             editedListing={editedProperty}
-            setEditedListing={setEditedProperty}
+            setEditedListing={setEditedProperty as any}
             onClose={handleCloseEdit}
-            onUpdate={handlePropertyUpdate}
+            onUpdate={handlePropertyUpdate as any}
             isMobile={isMobile}
           />
 
