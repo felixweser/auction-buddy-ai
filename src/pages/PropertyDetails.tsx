@@ -7,28 +7,65 @@ import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const { toast } = useToast();
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading, error } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("properties")
-        .select(`
-          *,
-          property_details (*)
-        `)
-        .eq("id", id)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select(`
+            *,
+            property_details (*)
+          `)
+          .eq("id", id)
+          .maybeSingle();
 
-      if (error) throw error;
-      return data as Property;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
+
+        if (!data) {
+          throw new Error("Property not found");
+        }
+
+        return data as Property;
+      } catch (err) {
+        console.error("Failed to fetch property:", err);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load property details. Please try again later.",
+        });
+        throw err;
+      }
     },
+    retry: 1,
   });
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold mb-4">Error loading property</h1>
+            <p className="text-muted-foreground mb-4">
+              There was an error loading the property details.
+            </p>
+            <Button onClick={() => navigate("/search")}>Back to Search</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
