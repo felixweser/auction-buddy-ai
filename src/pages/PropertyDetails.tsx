@@ -1,5 +1,4 @@
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +7,9 @@ import { Property } from "@/types/property";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { PropertyHeader } from "@/components/property/PropertyHeader";
+import { PropertyDetailsSection } from "@/components/property/PropertyDetails";
+import { PropertyLocation } from "@/components/property/PropertyLocation";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -28,15 +30,8 @@ const PropertyDetails = () => {
           .eq("id", id)
           .maybeSingle();
 
-        if (error) {
-          console.error("Supabase error:", error);
-          throw error;
-        }
-
-        if (!data) {
-          throw new Error("Property not found");
-        }
-
+        if (error) throw error;
+        if (!data) throw new Error("Property not found");
         return data as Property;
       } catch (err) {
         console.error("Failed to fetch property:", err);
@@ -50,6 +45,20 @@ const PropertyDetails = () => {
     },
     retry: 1,
   });
+
+  const handleScheduleTour = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Virtual tour scheduling will be available soon!",
+    });
+  };
+
+  const handleWatchVideo = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Video tours will be available soon!",
+    });
+  };
 
   if (error) {
     return (
@@ -88,45 +97,31 @@ const PropertyDetails = () => {
     );
   }
 
-  const propertyDetails = property.property_details?.[0];
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <Button
-          variant="outline"
-          className="mb-6"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+      <Button
+        variant="outline"
+        className="fixed top-6 left-6 z-10"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back
+      </Button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="aspect-video rounded-lg overflow-hidden bg-accent">
-              <img
-                src={property.image_url}
-                alt={property.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+      <PropertyHeader
+        property={property}
+        onScheduleTour={handleScheduleTour}
+        onWatchVideo={handleWatchVideo}
+      />
 
-            <div>
-              <h1 className="text-3xl font-semibold mb-2">{property.title}</h1>
-              <p className="text-2xl font-bold text-primary mb-4">
-                €{property.price.toLocaleString()}
-                {property.is_negotiable && (
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
-                    (Negotiable)
-                  </span>
-                )}
-              </p>
-              <p className="text-muted-foreground">{property.description}</p>
-            </div>
-
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="py-12">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {property.description}
+            </p>
             <Button 
-              className="w-full"
+              className="mt-8"
               onClick={() => setIsChatOpen(true)}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
@@ -134,72 +129,24 @@ const PropertyDetails = () => {
             </Button>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-card rounded-lg p-6 border">
-              <h2 className="text-xl font-semibold mb-4">Property Details</h2>
-              <div className="space-y-4">
-                {propertyDetails && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Year Built</p>
-                        <p className="font-medium">{propertyDetails.year_built}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Square Footage</p>
-                        <p className="font-medium">{propertyDetails.square_footage} sq ft</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Bedrooms</p>
-                        <p className="font-medium">{propertyDetails.bedrooms}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Bathrooms</p>
-                        <p className="font-medium">{propertyDetails.bathrooms}</p>
-                      </div>
-                    </div>
+          {property.property_details?.[0] && (
+            <PropertyDetailsSection details={property.property_details[0]} />
+          )}
 
-                    <div className="space-y-2">
-                      {propertyDetails.heating_system && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Heating System</p>
-                          <p className="font-medium">{propertyDetails.heating_system}</p>
-                        </div>
-                      )}
-                      {propertyDetails.cooling_system && (
-                        <div>
-                          <p className="text-sm text-muted-foreground">Cooling System</p>
-                          <p className="font-medium">{propertyDetails.cooling_system}</p>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-card rounded-lg p-6 border">
-              <h2 className="text-xl font-semibold mb-4">Location</h2>
-              <div className="space-y-2">
-                <p>{property.address_line1}</p>
-                {property.address_line2 && <p>{property.address_line2}</p>}
-                <p>{property.city}, {property.state} {property.zip_code}</p>
-              </div>
-            </div>
-          </div>
+          <PropertyLocation property={property} />
         </div>
-
-        {isChatOpen && property && (
-          <ChatDialog
-            listingId={property.id}
-            sellerId={property.created_by}
-            productTitle={property.title}
-            price={property.price}
-            isNegotiable={property.is_negotiable}
-            description={property.description}
-          />
-        )}
       </div>
+
+      {isChatOpen && property && (
+        <ChatDialog
+          listingId={property.id}
+          sellerId={property.created_by}
+          productTitle={property.title}
+          price={property.price}
+          isNegotiable={property.is_negotiable}
+          description={property.description}
+        />
+      )}
     </div>
   );
 };
