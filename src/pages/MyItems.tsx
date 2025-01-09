@@ -3,77 +3,77 @@ import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { EditPanel } from "@/components/MyItems/EditPanel";
-import { ListingItem } from "@/components/MyItems/ListingItem";
+import { PropertyItem } from "@/components/MyItems/PropertyItem";
 import { useToast } from "@/hooks/use-toast";
-import { Listing } from "@/types/listing";
+import { Property } from "@/types/property";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
 
 const MyItems = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [editedListing, setEditedListing] = useState<Listing | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [editedProperty, setEditedProperty] = useState<Property | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const fetchMyListings = async () => {
+  const fetchMyProperties = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to view your items",
+        description: "You must be logged in to view your properties",
         variant: "destructive",
       });
       return;
     }
 
     const { data, error } = await supabase
-      .from("listings")
-      .select("*")
+      .from("properties")
+      .select("*, property_details(*)")
       .eq("created_by", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch your listings",
+        description: "Failed to fetch your properties",
         variant: "destructive",
       });
       return;
     }
 
-    setListings(data || []);
+    setProperties(data || []);
   };
 
   useEffect(() => {
-    fetchMyListings();
+    fetchMyProperties();
   }, []);
 
-  const handleListingClick = (listing: Listing) => {
-    setSelectedListing(listing);
-    setEditedListing(listing);
+  const handlePropertyClick = (property: Property) => {
+    setSelectedProperty(property);
+    setEditedProperty(property);
   };
 
   const handleCloseEdit = () => {
-    setSelectedListing(null);
-    setEditedListing(null);
+    setSelectedProperty(null);
+    setEditedProperty(null);
   };
 
-  const handleListingUpdate = (updatedListing: Listing) => {
-    setListings(listings.map(listing => 
-      listing.id === updatedListing.id ? updatedListing : listing
+  const handlePropertyUpdate = (updatedProperty: Property) => {
+    setProperties(properties.map(property => 
+      property.id === updatedProperty.id ? updatedProperty : property
     ));
     handleCloseEdit();
-    fetchMyListings(); // Refresh the list to ensure we have the latest data
+    fetchMyProperties(); // Refresh the list to ensure we have the latest data
   };
 
-  const handleListingDelete = (deletedId: string) => {
-    setListings(listings.filter(listing => listing.id !== deletedId));
+  const handlePropertyDelete = (deletedId: string) => {
+    setProperties(properties.filter(property => property.id !== deletedId));
   };
 
-  const handleListingCreated = () => {
-    fetchMyListings(); // Refresh the listings after creating a new one
+  const handlePropertyCreated = () => {
+    fetchMyProperties(); // Refresh the properties after creating a new one
   };
 
   return (
@@ -84,9 +84,9 @@ const MyItems = () => {
           <header className="border-b">
             <div className="container mx-auto flex items-center justify-between px-4 py-4 md:py-6">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-primary">My Items</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-primary">My Properties</h1>
                 <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
-                  Manage your listed items
+                  Manage your listed properties
                 </p>
               </div>
             </div>
@@ -94,19 +94,19 @@ const MyItems = () => {
 
           <main className="container mx-auto px-4 py-4 md:py-8">
             <div className="space-y-3 md:space-y-4">
-              {listings.map((listing) => (
-                <ListingItem
-                  key={listing.id}
-                  listing={listing}
-                  onClick={() => handleListingClick(listing)}
-                  onDelete={handleListingDelete}
+              {properties.map((property) => (
+                <PropertyItem
+                  key={property.id}
+                  property={property}
+                  onClick={() => handlePropertyClick(property)}
+                  onDelete={handlePropertyDelete}
                 />
               ))}
 
-              {listings.length === 0 && (
+              {properties.length === 0 && (
                 <div className="text-center py-8 md:py-12">
                   <p className="text-muted-foreground text-sm md:text-base">
-                    You haven't listed any items yet. Create your first listing!
+                    You haven't listed any properties yet. Create your first property listing!
                   </p>
                 </div>
               )}
@@ -114,15 +114,15 @@ const MyItems = () => {
           </main>
 
           <EditPanel
-            listing={selectedListing}
-            editedListing={editedListing}
-            setEditedListing={setEditedListing}
+            listing={selectedProperty}
+            editedListing={editedProperty}
+            setEditedListing={setEditedProperty}
             onClose={handleCloseEdit}
-            onUpdate={handleListingUpdate}
+            onUpdate={handlePropertyUpdate}
             isMobile={isMobile}
           />
 
-          <CreateListingDialog onListingCreated={handleListingCreated} />
+          <CreateListingDialog onListingCreated={handlePropertyCreated} />
         </div>
       </div>
     </SidebarProvider>
