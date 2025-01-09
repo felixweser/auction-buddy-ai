@@ -23,9 +23,28 @@ export interface PropertyDetails {
   square_footage: number;
   bedrooms: number;
   bathrooms: number;
-  heating_system?: string | null;
-  cooling_system?: string | null;
-  electrical_system?: string | null;
-  last_system_service_date?: string | null;
+  heating_system: string | null;
+  cooling_system: string | null;
+  electrical_system: string | null;
+  last_system_service_date: string | null;
   created_at: string;
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  sender_id: string;
+  receiver_id: string;
+  listing_id: string;
+  created_at: string;
+  property?: Property;
+}
+
+export interface ChatGroup {
+  property: Property;
+  messages: Message[];
+  otherUser: {
+    id: string;
+    username: string | null;
+  };
 }

@@ -15,7 +15,10 @@ export const SearchResults = () => {
     const fetchProperties = async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("*")
+        .select(`
+          *,
+          property_details (*)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) {
