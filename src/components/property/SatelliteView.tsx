@@ -9,7 +9,7 @@ interface SatelliteViewProps {
 export const SatelliteView = ({ property }: SatelliteViewProps) => {
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-semibold mb-6">3D Satellite View</h2>
+      <h2 className="text-2xl font-semibold mb-6">Location</h2>
       
       {/* Location Information */}
       <div className="mb-6">
