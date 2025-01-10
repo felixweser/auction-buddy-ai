@@ -33,7 +33,7 @@ export const SearchBar = ({
         <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
           <div className="relative">
             <Input
-              placeholder="Wonach suchst du? (z.B. 'ein gebrauchtes MacBook in gutem Zustand')"
+              placeholder="What are you looking for? (e.g., 'a used MacBook in good condition')"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSearch()}
