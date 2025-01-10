@@ -21,7 +21,7 @@ export const CreateListingDialog = ({ onListingCreated }: CreateListingDialogPro
       className="fixed bottom-6 right-6 shadow-md"
       onClick={handleClick}
     >
-      <Plus className="h-4 w-4" /> Erstellen Sie eine Anzeige
+      <Plus className="h-4 w-4" /> Anzeige erstellen
     </Button>
   );
 };
