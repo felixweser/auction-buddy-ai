@@ -43,3 +43,8 @@
 .bid-button {
   @apply transition-colors duration-200;
 }
+
+/* Add styles for the chat input */
+input::placeholder {
+  @apply text-gray-500 font-normal;
+}

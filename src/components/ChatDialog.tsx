@@ -2,13 +2,12 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
-import { Send, MessageCircle, Minimize2, Maximize2, ArrowLeft } from "lucide-react";
+import { Send, Mic, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -44,7 +43,6 @@ export const ChatDialog = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isMinimized, setIsMinimized] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -98,89 +96,37 @@ export const ChatDialog = ({
     }
   };
 
-  const suggestions = [
-    `Hi! Is ${productTitle} still available?`,
-    "Could you provide more details about the condition?",
-    "When would this be available for pickup/delivery?",
-    ...(isNegotiable ? [
-      `Would you consider ${(price * 0.9).toFixed(2)}?`,
-      `Is the price of $${price} negotiable?`
-    ] : [])
-  ];
-
   return (
     <>
-      <Card className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 transition-all duration-300 ease-in-out shadow-lg ${
-        isMinimized ? 'w-64 h-12' : 'w-96 h-[600px]'
-      }`}>
-        <CardHeader className={`p-3 cursor-pointer ${isMinimized ? 'border-none' : 'border-b'}`} onClick={() => setIsMinimized(!isMinimized)}>
-          <CardTitle className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              Chat about {productTitle}
-            </div>
-            {isMinimized ? (
-              <Maximize2 className="h-4 w-4" />
-            ) : (
-              <Minimize2 className="h-4 w-4" />
-            )}
-          </CardTitle>
-        </CardHeader>
-        
-        {!isMinimized && (
-          <CardContent className="p-4 flex flex-col h-[calc(100%-60px)]">
-            <ScrollArea className="flex-1 pr-4 mb-4">
-              <div className="space-y-4">
-                {messages.map((message, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${
-                      message.sender === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                        message.sender === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
-                      {message.content}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-
-            {messages.length === 1 && (
-              <div className="grid grid-cols-1 gap-2 mb-4">
-                {suggestions.map((suggestion, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="text-left h-auto whitespace-normal text-sm"
-                    onClick={() => handleSend(suggestion)}
-                  >
-                    {suggestion}
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2 mt-auto">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
-                onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
-                className="text-sm"
-              />
-              <Button size="icon" onClick={() => handleSend(input)}>
-                <Send className="h-4 w-4" />
+      <Card className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[600px] max-w-[90vw] bg-gray-100/90 backdrop-blur-sm border-0 shadow-lg rounded-full">
+        <CardContent className="p-2">
+          <div className="flex items-center gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask a question..."
+              onKeyPress={(e) => e.key === "Enter" && handleSend(input)}
+              className="flex-1 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+            />
+            <div className="flex items-center gap-2 pr-2">
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="rounded-full hover:bg-gray-200/50"
+              >
+                <Mic className="h-5 w-5 text-teal-600" />
+              </Button>
+              <Button 
+                size="icon" 
+                variant="ghost"
+                className="rounded-full hover:bg-gray-200/50"
+                onClick={() => handleSend(input)}
+              >
+                <Send className="h-5 w-5 text-teal-600" />
               </Button>
             </div>
-          </CardContent>
-        )}
+          </div>
+        </CardContent>
       </Card>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -200,26 +146,28 @@ export const ChatDialog = ({
               Chat about {productTitle}
             </SheetTitle>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
-            {messages.map((message, i) => (
-              <div
-                key={i}
-                className={`flex ${
-                  message.sender === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+          <ScrollArea className="flex-1 h-[calc(100vh-8rem)] mt-6">
+            <div className="space-y-4 pr-4">
+              {messages.map((message, i) => (
                 <div
-                  className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                    message.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                  key={i}
+                  className={`flex ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.content}
+                  <div
+                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                      message.sender === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
           <div className="absolute bottom-4 left-4 right-4">
             <div className="flex gap-2">
               <Input
