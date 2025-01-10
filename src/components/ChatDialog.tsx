@@ -52,9 +52,14 @@ export const ChatDialog = ({
   const handleSend = async (content: string) => {
     if (!content.trim() || !currentUserId) return;
 
+    // Add message to local state first
     setMessages((prev) => [...prev, { content, sender: "user" }]);
-    setInput("");
+    
+    // Open the sheet before clearing input
     setIsSheetOpen(true);
+    
+    // Clear input after opening sheet
+    setInput("");
 
     try {
       const { error } = await supabase
@@ -89,10 +94,7 @@ export const ChatDialog = ({
           <ChatInput
             value={input}
             onChange={setInput}
-            onSend={() => {
-              handleSend(input);
-              setIsSheetOpen(true);
-            }}
+            onSend={() => handleSend(input)}
           />
         </div>
       </div>
