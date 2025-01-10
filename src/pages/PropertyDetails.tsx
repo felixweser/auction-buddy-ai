@@ -7,8 +7,12 @@ import { Property } from "@/types/property";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyHero } from "@/components/property/PropertyHero";
-import { PropertyStory } from "@/components/property/PropertyStory";
+import { FloorPlan } from "@/components/property/FloorPlan";
+import { KeyMetrics } from "@/components/property/KeyMetrics";
 import { PropertyLocation } from "@/components/property/PropertyLocation";
+import { SatelliteView } from "@/components/property/SatelliteView";
+import { LocationAnalysis } from "@/components/property/LocationAnalysis";
+import { PropertySpecs } from "@/components/property/PropertySpecs";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -99,15 +103,21 @@ const PropertyDetails = () => {
         details={property.property_details[0]}
       />
 
-      <div className="max-w-7xl mx-auto">
-        <div className="py-12 px-4">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="py-12">
           <p className="text-lg text-muted-foreground leading-relaxed">
             {property.description}
           </p>
         </div>
 
-        <PropertyStory property={property} />
-        <PropertyLocation property={property} />
+        <div className="space-y-12 pb-12">
+          <FloorPlan />
+          <KeyMetrics />
+          <PropertyLocation property={property} />
+          <SatelliteView />
+          <LocationAnalysis />
+          <PropertySpecs details={property.property_details[0]} />
+        </div>
       </div>
 
       <ChatDialog
