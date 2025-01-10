@@ -68,7 +68,6 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
                   alt={`${title} - Bild ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/90" />
               </div>
             </CarouselItem>
           ))}
