@@ -93,18 +93,20 @@ const PropertyDetails = () => {
         Back
       </Button>
 
+      {property.property_details?.[0] && (
+        <div className="sticky top-0 z-10">
+          <PropertyStats
+            price={property.price}
+            details={property.property_details[0]}
+          />
+        </div>
+      )}
+
       <PropertyHero
         imageUrl={property.image_url}
         title={property.title}
         price={property.price}
       />
-
-      {property.property_details?.[0] && (
-        <PropertyStats
-          price={property.price}
-          details={property.property_details[0]}
-        />
-      )}
 
       <div className="max-w-7xl mx-auto">
         <div className="py-12 px-4">
