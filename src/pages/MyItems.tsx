@@ -84,7 +84,7 @@ const MyItems = () => {
           <header className="border-b">
             <div className="container mx-auto flex items-center justify-between px-4 py-4 md:py-6">
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-primary">My Properties</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-black">My Properties</h1>
                 <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
                   Manage your listed properties
                 </p>
