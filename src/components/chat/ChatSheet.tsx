@@ -33,17 +33,16 @@ export const ChatSheet = ({
   onInputChange,
   onSend,
   productTitle,
-  onBack,
 }: ChatSheetProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader>
+      <SheetContent className="!px-0">
+        <SheetHeader className="px-6">
           <SheetTitle className="flex items-center gap-2">
             <Button 
               variant="agora" 
               size="icon"
-              onClick={onBack}
+              onClick={() => onOpenChange(false)}
               className="rounded-full"
             >
               <ArrowLeft className="h-4 w-4" />
