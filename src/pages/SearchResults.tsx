@@ -23,7 +23,7 @@ const SearchResults = () => {
 
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold mb-8 text-foreground">
-              Search results for "<span className="text-primary">{query}</span>"
+              Search results for "<span className="text-[#D3E4FD]">{query}</span>"
             </h1>
             <SearchResultsComponent />
           </div>
