@@ -41,19 +41,18 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
 
   return (
     <div className="relative h-[70vh] group">
-      <div className="absolute top-4 right-4 z-20 flex gap-3">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
         <Button 
-          size="sm"
-          className="bg-white/90 text-foreground hover:bg-white"
+          variant="agora"
+          className="h-9"
           onClick={handleScheduleViewing}
         >
           <Calendar className="mr-2 h-4 w-4" />
           Besichtigung planen
         </Button>
         <Button 
-          size="sm"
-          variant="outline" 
-          className="bg-background/50 text-foreground border-white/20 hover:bg-background/70"
+          variant="agora"
+          className="h-9"
           onClick={handleVirtualTour}
         >
           <Video className="mr-2 h-4 w-4" />
