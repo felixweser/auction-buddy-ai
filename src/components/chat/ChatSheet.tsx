@@ -41,10 +41,10 @@ export const ChatSheet = ({
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Button 
-              variant="ghost" 
+              variant="agora" 
               size="icon"
               onClick={onBack}
-              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+              className="rounded-full"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
