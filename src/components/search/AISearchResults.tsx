@@ -54,7 +54,7 @@ export const AISearchResults = ({ properties, searchQuery }: AISearchResultsProp
   return (
     <div className="space-y-6">
       {/* Streaming text section */}
-      <div className="bg-card rounded-lg p-6 font-mono text-sm whitespace-pre-wrap">
+      <div className="bg-card rounded-lg p-6 text-sm whitespace-pre-wrap">
         {streamingText}
         {!isComplete && (
           <span className="inline-flex ml-2">
