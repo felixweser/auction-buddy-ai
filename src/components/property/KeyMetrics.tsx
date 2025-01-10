@@ -1,26 +1,121 @@
 import { Card } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
-const data = [
-  { name: 'This Property', value: 100 },
-  { name: 'Neighborhood Avg', value: 85 },
-  { name: 'City Avg', value: 70 },
+const priceComparisonData = [
+  { name: 'This Property', value: 2500 },
+  { name: 'Neighborhood Avg', value: 2200 },
+];
+
+const historicalPriceData = [
+  { month: 'Jan', price: 450000 },
+  { month: 'Feb', price: 455000 },
+  { month: 'Mar', price: 460000 },
+  { month: 'Apr', price: 465000 },
+  { month: 'May', price: 470000 },
+  { month: 'Jun', price: 475000 },
+];
+
+const percentileData = [
+  { price: '400k', count: 10 },
+  { price: '450k', count: 25 },
+  { price: '500k', count: 40 },
+  { price: '550k', count: 25 },
+  { price: '600k', count: 10 },
+];
+
+const costProjectionData = [
+  { year: '2024', mortgage: 24000, utilities: 3600, taxes: 5000, maintenance: 2400 },
+  { year: '2025', mortgage: 24000, utilities: 3700, taxes: 5100, maintenance: 2500 },
+  { year: '2026', mortgage: 24000, utilities: 3800, taxes: 5200, maintenance: 2600 },
+];
+
+const charts = [
+  { id: 'price-per-sqm', label: 'Price per Square Meter' },
+  { id: 'historical-price', label: 'Historical Prices' },
+  { id: 'percentile', label: 'Price Position' },
+  { id: 'cost-projection', label: 'Cost Projection' },
 ];
 
 export const KeyMetrics = () => {
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-semibold mb-6">Key Metrics & Comparisons</h2>
-      <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#4f46e5" />
-          </BarChart>
-        </ResponsiveContainer>
+      <h2 className="text-2xl font-semibold mb-6 text-foreground">Key Metrics & Comparisons</h2>
+      <div className="flex gap-6">
+        <NavigationMenu orientation="vertical" className="min-w-[200px]">
+          <NavigationMenuList className="flex-col items-start space-y-2">
+            {charts.map((chart) => (
+              <NavigationMenuItem key={chart.id}>
+                <NavigationMenuLink
+                  href={`#${chart.id}`}
+                  className={cn(
+                    "block px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md w-full"
+                  )}
+                >
+                  {chart.label}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        <div className="flex-1 space-y-8">
+          <div id="price-per-sqm" className="h-[300px]">
+            <h3 className="text-lg font-medium mb-4 text-foreground">Price per Square Meter vs. Neighborhood</h3>
+            <ResponsiveContainer>
+              <BarChart data={priceComparisonData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#4f46e5" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div id="historical-price" className="h-[300px]">
+            <h3 className="text-lg font-medium mb-4 text-foreground">Historical Price Development</h3>
+            <ResponsiveContainer>
+              <LineChart data={historicalPriceData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="price" stroke="#4f46e5" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div id="percentile" className="h-[300px]">
+            <h3 className="text-lg font-medium mb-4 text-foreground">Price Position Distribution</h3>
+            <ResponsiveContainer>
+              <AreaChart data={percentileData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="price" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" fill="#4f46e5" stroke="#4f46e5" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div id="cost-projection" className="h-[300px]">
+            <h3 className="text-lg font-medium mb-4 text-foreground">Total Cost of Ownership Projection</h3>
+            <ResponsiveContainer>
+              <BarChart data={costProjectionData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="mortgage" stackId="a" fill="#4f46e5" />
+                <Bar dataKey="utilities" stackId="a" fill="#818cf8" />
+                <Bar dataKey="taxes" stackId="a" fill="#a5b4fc" />
+                <Bar dataKey="maintenance" stackId="a" fill="#c7d2fe" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
     </Card>
   );
