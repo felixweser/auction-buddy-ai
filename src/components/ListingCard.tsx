@@ -47,7 +47,7 @@ export const ListingCard = ({
         </div>
         <CardContent className="p-4">
           <h3 className="font-semibold text-lg mb-1 line-clamp-1">{title}</h3>
-          <p className="text-xl font-bold text-primary mb-2">
+          <p className="text-xl font-bold text-[#D3E4FD] mb-2">
             €{price.toLocaleString()}
             {isNegotiable && (
               <span className="text-sm font-normal text-muted-foreground ml-2">
