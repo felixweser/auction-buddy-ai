@@ -1,6 +1,5 @@
 import { PropertyDetails } from "@/types/property";
 import { 
-  Home,
   Ruler,
   BedDouble,
   Bath,
@@ -15,11 +14,6 @@ interface PropertyStatsProps {
 
 export const PropertyStats = ({ price, details }: PropertyStatsProps) => {
   const stats = [
-    {
-      label: "Price",
-      value: `€${price.toLocaleString()}`,
-      icon: Home,
-    },
     {
       label: "Square Feet",
       value: details.square_footage.toLocaleString(),
@@ -48,7 +42,7 @@ export const PropertyStats = ({ price, details }: PropertyStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-3 md:grid-cols-6 gap-6 bg-white/90 backdrop-blur-sm rounded-lg p-4">
+    <div className="grid grid-cols-3 md:grid-cols-5 gap-6 bg-white/90 backdrop-blur-sm rounded-lg p-4">
       {stats.map((stat, index) => (
         <div key={index} className="flex items-center gap-2">
           <stat.icon className="h-5 w-5 text-foreground" />

@@ -85,8 +85,8 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
       <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
         <div className="max-w-7xl mx-auto space-y-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">{title}</h1>
-            <p className="text-3xl font-bold text-white">
+            <h1 className="text-4xl font-bold text-foreground mb-2">{title}</h1>
+            <p className="text-3xl font-bold text-foreground">
               €{price.toLocaleString()}
             </p>
           </div>
