@@ -16,6 +16,7 @@ export const CreateListingDialog = ({ onListingCreated }: CreateListingDialogPro
 
   return (
     <Button 
+      variant="agora"
       className="fixed bottom-6 right-6"
       onClick={handleClick}
     >
