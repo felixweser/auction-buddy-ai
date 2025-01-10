@@ -62,15 +62,15 @@ export const ListingCard = ({
       </div>
       <CardFooter className="p-4 pt-0">
         <Button
-          variant="secondary"
+          variant="agora"
           className="w-full"
           onClick={(e) => {
             e.stopPropagation();
             onChat({ listingId: id, sellerId, productTitle: title, price, isNegotiable });
           }}
         >
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Contact Seller
+          <MessageCircle />
+          <span>Contact Seller</span>
         </Button>
       </CardFooter>
     </Card>
