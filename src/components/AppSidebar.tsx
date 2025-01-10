@@ -33,12 +33,12 @@ export function AppSidebar() {
 
   const items = [
     {
-      title: "Immobilien suchen",
+      title: "Suche",
       icon: Search,
       onClick: () => navigate("/"),
     },
     {
-      title: "Meine Immobilien",
+      title: "Meine Anzeigen",
       icon: User,
       onClick: () => navigate("/my-items"),
     },
