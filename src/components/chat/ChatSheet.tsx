@@ -22,7 +22,6 @@ interface ChatSheetProps {
   onInputChange: (value: string) => void;
   onSend: () => void;
   productTitle: string;
-  onBack: () => void;
 }
 
 export const ChatSheet = ({

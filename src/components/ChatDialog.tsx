@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatSheet } from "./chat/ChatSheet";
 
@@ -33,7 +32,6 @@ export const ChatDialog = ({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -91,7 +89,10 @@ export const ChatDialog = ({
           <ChatInput
             value={input}
             onChange={setInput}
-            onSend={() => handleSend(input)}
+            onSend={() => {
+              handleSend(input);
+              setIsSheetOpen(true);
+            }}
           />
         </CardContent>
       </Card>
@@ -104,10 +105,6 @@ export const ChatDialog = ({
         onInputChange={setInput}
         onSend={() => handleSend(input)}
         productTitle={productTitle}
-        onBack={() => {
-          setIsSheetOpen(false);
-          navigate(-1);
-        }}
       />
     </>
   );
