@@ -23,26 +23,24 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
   const { toast } = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Temporary images array - in production this would come from props
   const images = [imageUrl, imageUrl, imageUrl];
 
   const handleScheduleViewing = () => {
     toast({
-      title: "Coming Soon",
-      description: "Viewing scheduling will be available soon!",
+      title: "Demnächst verfügbar",
+      description: "Die Terminvereinbarung wird in Kürze verfügbar sein!",
     });
   };
 
   const handleVirtualTour = () => {
     toast({
-      title: "Coming Soon",
-      description: "Virtual tours will be available soon!",
+      title: "Demnächst verfügbar",
+      description: "Virtuelle Besichtigungen werden in Kürze verfügbar sein!",
     });
   };
 
   return (
     <div className="relative h-[70vh] group">
-      {/* Action Buttons */}
       <div className="absolute top-4 right-4 z-20 flex gap-3">
         <Button 
           size="sm"
@@ -50,7 +48,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           onClick={handleScheduleViewing}
         >
           <Calendar className="mr-2 h-4 w-4" />
-          Schedule Viewing
+          Besichtigung planen
         </Button>
         <Button 
           size="sm"
@@ -59,7 +57,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           onClick={handleVirtualTour}
         >
           <Video className="mr-2 h-4 w-4" />
-          Virtual Tour
+          Virtuelle Tour
         </Button>
       </div>
 
@@ -70,7 +68,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
               <div className="relative w-full h-full">
                 <img
                   src={img}
-                  alt={`${title} - Image ${index + 1}`}
+                  alt={`${title} - Bild ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/90" />

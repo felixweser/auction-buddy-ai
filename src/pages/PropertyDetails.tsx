@@ -32,14 +32,14 @@ const PropertyDetails = () => {
           .maybeSingle();
 
         if (error) throw error;
-        if (!data) throw new Error("Property not found");
+        if (!data) throw new Error("Immobilie nicht gefunden");
         return data as Property;
       } catch (err) {
-        console.error("Failed to fetch property:", err);
+        console.error("Fehler beim Laden der Immobilie:", err);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to load property details. Please try again later.",
+          title: "Fehler",
+          description: "Die Immobiliendetails konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
         });
         throw err;
       }
@@ -52,11 +52,11 @@ const PropertyDetails = () => {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold mb-4">Error loading property</h1>
+            <h1 className="text-2xl font-semibold mb-4">Fehler beim Laden der Immobilie</h1>
             <p className="text-muted-foreground mb-4">
-              There was an error loading the property details.
+              Beim Laden der Immobiliendetails ist ein Fehler aufgetreten.
             </p>
-            <Button onClick={() => navigate("/search")}>Back to Search</Button>
+            <Button onClick={() => navigate("/search")}>Zurück zur Suche</Button>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@ const PropertyDetails = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+        <div className="animate-pulse">Wird geladen...</div>
       </div>
     );
   }
@@ -76,8 +76,8 @@ const PropertyDetails = () => {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold mb-4">Property not found</h1>
-            <Button onClick={() => navigate("/search")}>Back to Search</Button>
+            <h1 className="text-2xl font-semibold mb-4">Immobilie nicht gefunden</h1>
+            <Button onClick={() => navigate("/search")}>Zurück zur Suche</Button>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@ const PropertyDetails = () => {
         onClick={() => navigate(-1)}
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back
+        Zurück
       </Button>
 
       <PropertyHero

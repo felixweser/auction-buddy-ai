@@ -15,27 +15,27 @@ interface PropertyStatsProps {
 export const PropertyStats = ({ price, details }: PropertyStatsProps) => {
   const stats = [
     {
-      label: "Square Feet",
+      label: "Quadratmeter",
       value: details.square_footage.toLocaleString(),
       icon: Ruler,
     },
     {
-      label: "Bedrooms",
+      label: "Schlafzimmer",
       value: details.bedrooms,
       icon: BedDouble,
     },
     {
-      label: "Bathrooms",
+      label: "Badezimmer",
       value: details.bathrooms,
       icon: Bath,
     },
     {
-      label: "Year Built",
+      label: "Baujahr",
       value: details.year_built,
       icon: Calendar,
     },
     {
-      label: "Energy Rating",
+      label: "Energieeffizienz",
       value: "A+",
       icon: Zap,
     },
