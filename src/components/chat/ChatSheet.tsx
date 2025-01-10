@@ -44,6 +44,7 @@ export const ChatSheet = ({
               variant="ghost" 
               size="icon"
               onClick={onBack}
+              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
