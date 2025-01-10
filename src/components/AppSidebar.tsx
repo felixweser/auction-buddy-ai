@@ -22,8 +22,8 @@ export function AppSidebar() {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to sign out",
+        title: "Fehler",
+        description: "Abmeldung fehlgeschlagen",
         variant: "destructive",
       });
       return;
@@ -33,27 +33,27 @@ export function AppSidebar() {
 
   const items = [
     {
-      title: "Search Products",
+      title: "Immobilien suchen",
       icon: Search,
       onClick: () => navigate("/"),
     },
     {
-      title: "My Items",
+      title: "Meine Immobilien",
       icon: User,
       onClick: () => navigate("/my-items"),
     },
     {
-      title: "Messages",
+      title: "Nachrichten",
       icon: MessageSquare,
       onClick: () => navigate("/messages"),
     },
     {
-      title: "Settings",
+      title: "Einstellungen",
       icon: Settings,
       onClick: () => navigate("/settings"),
     },
     {
-      title: "Logout",
+      title: "Abmelden",
       icon: LogOut,
       onClick: handleLogout,
     },
@@ -61,11 +61,10 @@ export function AppSidebar() {
 
   return (
     <>
-      {/* Mobile toggle button - fixed position */}
       <button
         onClick={toggleSidebar}
         className="fixed left-4 top-4 z-50 p-2 bg-background hover:bg-accent rounded-md transition-colors border shadow-sm md:hidden"
-        aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+        aria-label={state === "expanded" ? "Seitenleiste einklappen" : "Seitenleiste ausklappen"}
       >
         {state === "expanded" ? (
           <PanelLeftClose className="h-5 w-5" />
@@ -74,12 +73,11 @@ export function AppSidebar() {
         )}
       </button>
 
-      {/* Desktop toggle button - fixed position when sidebar is collapsed */}
       <button
         onClick={toggleSidebar}
         className={`fixed left-4 top-4 z-50 p-2 bg-background hover:bg-accent rounded-md transition-all duration-200 border shadow-sm hidden md:flex
           ${state === "expanded" ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-        aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+        aria-label={state === "expanded" ? "Seitenleiste einklappen" : "Seitenleiste ausklappen"}
       >
         <PanelLeft className="h-5 w-5" />
       </button>
@@ -88,12 +86,11 @@ export function AppSidebar() {
         <SidebarContent>
           <SidebarGroup>
             <div className="flex items-center justify-between p-4">
-              <h2 className="text-lg font-semibold">Menu</h2>
-              {/* In-sidebar toggle button - only visible when sidebar is expanded */}
+              <h2 className="text-lg font-semibold">Menü</h2>
               <button
                 onClick={toggleSidebar}
                 className="p-2 hover:bg-accent rounded-md transition-colors hidden md:block"
-                aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+                aria-label={state === "expanded" ? "Seitenleiste einklappen" : "Seitenleiste ausklappen"}
               >
                 <PanelLeftClose className="h-5 w-5" />
               </button>
