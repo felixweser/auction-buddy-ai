@@ -55,7 +55,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         <Button 
           size="sm"
           variant="outline" 
-          className="bg-background/50 text-white border-white/20 hover:bg-background/70"
+          className="bg-background/50 text-foreground border-white/20 hover:bg-background/70"
           onClick={handleVirtualTour}
         >
           <Video className="mr-2 h-4 w-4" />
