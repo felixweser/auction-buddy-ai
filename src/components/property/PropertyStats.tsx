@@ -48,24 +48,20 @@ export const PropertyStats = ({ price, details }: PropertyStatsProps) => {
   ];
 
   return (
-    <div className="w-full bg-white/90 py-4 px-4 z-20">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <stat.icon className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <div className="text-sm font-medium">
-                  {stat.value}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {stat.label}
-                </div>
-              </div>
+    <div className="grid grid-cols-3 md:grid-cols-6 gap-6 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+      {stats.map((stat, index) => (
+        <div key={index} className="flex items-center gap-2">
+          <stat.icon className="h-5 w-5 text-white" />
+          <div>
+            <div className="text-sm font-medium text-white">
+              {stat.value}
             </div>
-          ))}
+            <div className="text-xs text-white/80">
+              {stat.label}
+            </div>
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 };

@@ -9,14 +9,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PropertyDetails } from "@/types/property";
+import { PropertyStats } from "./PropertyStats";
 
 interface PropertyHeroProps {
   imageUrl: string;
   title: string;
   price: number;
+  details: PropertyDetails;
 }
 
-export const PropertyHero = ({ imageUrl, title, price }: PropertyHeroProps) => {
+export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroProps) => {
   const { toast } = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -80,11 +83,14 @@ export const PropertyHero = ({ imageUrl, title, price }: PropertyHeroProps) => {
       </Carousel>
 
       <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-2">{title}</h1>
-          <p className="text-3xl font-bold text-white">
-            €{price.toLocaleString()}
-          </p>
+        <div className="max-w-7xl mx-auto space-y-4">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">{title}</h1>
+            <p className="text-3xl font-bold text-white">
+              €{price.toLocaleString()}
+            </p>
+          </div>
+          <PropertyStats price={price} details={details} />
         </div>
       </div>
     </div>

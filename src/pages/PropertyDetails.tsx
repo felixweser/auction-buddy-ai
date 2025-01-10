@@ -7,9 +7,8 @@ import { Property } from "@/types/property";
 import { ChatDialog } from "@/components/ChatDialog";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyHero } from "@/components/property/PropertyHero";
-import { PropertyStats } from "@/components/property/PropertyStats";
-import { PropertyLocation } from "@/components/property/PropertyLocation";
 import { PropertyStory } from "@/components/property/PropertyStory";
+import { PropertyLocation } from "@/components/property/PropertyLocation";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -93,19 +92,11 @@ const PropertyDetails = () => {
         Back
       </Button>
 
-      {property.property_details?.[0] && (
-        <div className="sticky top-0 z-10">
-          <PropertyStats
-            price={property.price}
-            details={property.property_details[0]}
-          />
-        </div>
-      )}
-
       <PropertyHero
         imageUrl={property.image_url}
         title={property.title}
         price={property.price}
+        details={property.property_details[0]}
       />
 
       <div className="max-w-7xl mx-auto">
