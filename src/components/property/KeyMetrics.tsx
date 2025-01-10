@@ -42,6 +42,16 @@ const charts = [
 export const KeyMetrics = ({ property }: KeyMetricsProps) => {
   const [activeChart, setActiveChart] = useState(charts[0].id);
 
+  // Check if we have valid property data
+  if (!property || !property.property_details?.[0]) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-semibold mb-6 text-foreground">Key Metrics & Comparisons</h2>
+        <p className="text-muted-foreground">Property details are not available.</p>
+      </Card>
+    );
+  }
+
   // Calculate price per square meter
   const pricePerSqm = property.price / property.property_details[0].square_footage;
   const avgNeighborhoodPricePerSqm = pricePerSqm * 0.9; // Example: 90% of property's price for demonstration

@@ -112,7 +112,7 @@ const PropertyDetails = () => {
 
         <div className="space-y-12 pb-12">
           <FloorPlan />
-          <KeyMetrics />
+          <KeyMetrics property={property} />
           <PropertyLocation property={property} />
           <SatelliteView />
           <LocationAnalysis />
