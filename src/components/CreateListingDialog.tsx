@@ -17,10 +17,11 @@ export const CreateListingDialog = ({ onListingCreated }: CreateListingDialogPro
   return (
     <Button 
       variant="agora"
-      className="fixed bottom-6 right-6"
+      size="default"
+      className="fixed bottom-6 right-6 shadow-md"
       onClick={handleClick}
     >
-      <Plus className="mr-2 h-4 w-4" /> Erstellen Sie eine Anzeige
+      <Plus className="h-4 w-4" /> Erstellen Sie eine Anzeige
     </Button>
   );
 };
