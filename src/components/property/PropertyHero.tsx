@@ -39,6 +39,27 @@ export const PropertyHero = ({ imageUrl, title, price }: PropertyHeroProps) => {
 
   return (
     <div className="relative h-[70vh] group">
+      {/* Action Buttons */}
+      <div className="absolute top-4 right-4 z-20 flex gap-3">
+        <Button 
+          size="sm"
+          className="bg-white/90 text-foreground hover:bg-white"
+          onClick={handleScheduleViewing}
+        >
+          <Calendar className="mr-2 h-4 w-4" />
+          Schedule Viewing
+        </Button>
+        <Button 
+          size="sm"
+          variant="outline" 
+          className="bg-background/50 text-white border-white/20 hover:bg-background/70"
+          onClick={handleVirtualTour}
+        >
+          <Video className="mr-2 h-4 w-4" />
+          Virtual Tour
+        </Button>
+      </div>
+
       <Carousel className="w-full h-full">
         <CarouselContent>
           {images.map((img, index) => (
@@ -61,28 +82,9 @@ export const PropertyHero = ({ imageUrl, title, price }: PropertyHeroProps) => {
       <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-2">{title}</h1>
-          <p className="text-3xl font-bold text-white mb-6">
+          <p className="text-3xl font-bold text-white">
             €{price.toLocaleString()}
           </p>
-          <div className="flex gap-4">
-            <Button 
-              size="lg" 
-              className="bg-white/90 text-foreground hover:bg-white"
-              onClick={handleScheduleViewing}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              Schedule Viewing
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="bg-background/50 text-white border-white/20 hover:bg-background/70"
-              onClick={handleVirtualTour}
-            >
-              <Video className="mr-2 h-4 w-4" />
-              Virtual Tour
-            </Button>
-          </div>
         </div>
       </div>
     </div>
