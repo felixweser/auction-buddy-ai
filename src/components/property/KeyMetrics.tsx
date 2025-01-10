@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
@@ -39,29 +40,13 @@ const charts = [
 ];
 
 export const KeyMetrics = () => {
-  return (
-    <Card className="p-6">
-      <h2 className="text-2xl font-semibold mb-6 text-foreground">Key Metrics & Comparisons</h2>
-      <div className="flex gap-6">
-        <NavigationMenu orientation="vertical" className="min-w-[200px]">
-          <NavigationMenuList className="flex-col items-start space-y-2">
-            {charts.map((chart) => (
-              <NavigationMenuItem key={chart.id}>
-                <NavigationMenuLink
-                  href={`#${chart.id}`}
-                  className={cn(
-                    "block px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md w-full"
-                  )}
-                >
-                  {chart.label}
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+  const [activeChart, setActiveChart] = useState(charts[0].id);
 
-        <div className="flex-1 space-y-8">
-          <div id="price-per-sqm" className="h-[300px]">
+  const renderChart = () => {
+    switch (activeChart) {
+      case 'price-per-sqm':
+        return (
+          <div className="h-[300px]">
             <h3 className="text-lg font-medium mb-4 text-foreground">Price per Square Meter vs. Neighborhood</h3>
             <ResponsiveContainer>
               <BarChart data={priceComparisonData}>
@@ -73,8 +58,11 @@ export const KeyMetrics = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        );
 
-          <div id="historical-price" className="h-[300px]">
+      case 'historical-price':
+        return (
+          <div className="h-[300px]">
             <h3 className="text-lg font-medium mb-4 text-foreground">Historical Price Development</h3>
             <ResponsiveContainer>
               <LineChart data={historicalPriceData}>
@@ -86,8 +74,11 @@ export const KeyMetrics = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
+        );
 
-          <div id="percentile" className="h-[300px]">
+      case 'percentile':
+        return (
+          <div className="h-[300px]">
             <h3 className="text-lg font-medium mb-4 text-foreground">Price Position Distribution</h3>
             <ResponsiveContainer>
               <AreaChart data={percentileData}>
@@ -99,8 +90,11 @@ export const KeyMetrics = () => {
               </AreaChart>
             </ResponsiveContainer>
           </div>
+        );
 
-          <div id="cost-projection" className="h-[300px]">
+      case 'cost-projection':
+        return (
+          <div className="h-[300px]">
             <h3 className="text-lg font-medium mb-4 text-foreground">Total Cost of Ownership Projection</h3>
             <ResponsiveContainer>
               <BarChart data={costProjectionData}>
@@ -115,6 +109,41 @@ export const KeyMetrics = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-2xl font-semibold mb-6 text-foreground">Key Metrics & Comparisons</h2>
+      <div className="flex gap-6">
+        <NavigationMenu orientation="vertical" className="min-w-[200px]">
+          <NavigationMenuList className="flex-col items-start space-y-2">
+            {charts.map((chart) => (
+              <NavigationMenuItem key={chart.id}>
+                <NavigationMenuLink
+                  href={`#${chart.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveChart(chart.id);
+                  }}
+                  className={cn(
+                    "block px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md w-full",
+                    activeChart === chart.id && "bg-accent text-accent-foreground"
+                  )}
+                >
+                  {chart.label}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+
+        <div className="flex-1">
+          {renderChart()}
         </div>
       </div>
     </Card>
