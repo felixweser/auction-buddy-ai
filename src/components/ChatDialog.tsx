@@ -84,8 +84,8 @@ export const ChatDialog = ({
 
   return (
     <>
-      <Card className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[600px] max-w-[90vw] bg-gray-100/90 backdrop-blur-sm border-0 shadow-lg rounded-full">
-        <CardContent className="p-2">
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[600px] max-w-[90vw]">
+        <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
           <ChatInput
             value={input}
             onChange={setInput}
@@ -94,8 +94,8 @@ export const ChatDialog = ({
               setIsSheetOpen(true);
             }}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <ChatSheet
         isOpen={isSheetOpen}
