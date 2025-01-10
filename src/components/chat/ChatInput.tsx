@@ -24,7 +24,7 @@ export const ChatInput = ({ value, onChange, onSend }: ChatInputProps) => {
           variant="ghost" 
           className="rounded-full hover:bg-gray-200/50"
         >
-          <Mic className="h-5 w-5 text-teal-600" />
+          <Mic className="h-5 w-5 text-[#D3E4FD]" />
         </Button>
         <Button 
           size="icon"
@@ -32,7 +32,7 @@ export const ChatInput = ({ value, onChange, onSend }: ChatInputProps) => {
           className="rounded-full hover:bg-gray-200/50"
           onClick={onSend}
         >
-          <Send className="h-5 w-5 text-teal-600" />
+          <Send className="h-5 w-5 text-[#D3E4FD]" />
         </Button>
       </div>
     </div>
