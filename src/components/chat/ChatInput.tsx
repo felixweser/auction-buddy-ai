@@ -21,15 +21,15 @@ export const ChatInput = ({ value, onChange, onSend }: ChatInputProps) => {
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
         <Button 
           variant="agora" 
-          size="icon"
-          className="rounded-full"
+          size="sm"
+          className="rounded-lg"
         >
           <Mic className="h-5 w-5" />
         </Button>
         <Button 
           variant="agora"
-          size="icon"
-          className="rounded-full"
+          size="sm"
+          className="rounded-lg"
           onClick={onSend}
         >
           <Send className="h-5 w-5" />
