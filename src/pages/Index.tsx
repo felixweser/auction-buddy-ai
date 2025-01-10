@@ -61,7 +61,8 @@ const Index = () => {
           </main>
 
           <Button 
-            className="fixed bottom-6 right-6 bg-[#D3E4FD] hover:bg-[#D3E4FD]/80 text-black"
+            variant="agora"
+            className="fixed bottom-6 right-6"
             onClick={() => navigate('/create-listing')}
           >
             <Plus className="mr-2 h-4 w-4" /> Anzeige erstellen
