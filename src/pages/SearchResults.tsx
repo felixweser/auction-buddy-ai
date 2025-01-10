@@ -13,8 +13,8 @@ const SearchResults = () => {
       <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="max-w-7xl mx-auto">
           <Button
-            variant="outline"
-            className="flex items-center gap-2 mb-6 hover:bg-secondary transition-colors"
+            variant="agora"
+            className="flex items-center gap-2 mb-6"
             onClick={() => navigate("/")}
           >
             <ArrowLeft className="h-4 w-4" />
