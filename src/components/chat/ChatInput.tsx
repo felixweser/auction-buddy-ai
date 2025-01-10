@@ -21,18 +21,18 @@ export const ChatInput = ({ value, onChange, onSend }: ChatInputProps) => {
       <div className="flex items-center gap-2 pr-2">
         <Button 
           size="icon" 
-          variant="ghost" 
-          className="rounded-full hover:bg-gray-200/50"
+          variant="agora"
+          className="rounded-full"
         >
-          <Mic className="h-5 w-5 text-[#D3E4FD]" />
+          <Mic className="h-5 w-5" />
         </Button>
         <Button 
           size="icon"
-          variant="ghost"
-          className="rounded-full hover:bg-gray-200/50"
+          variant="agora"
+          className="rounded-full"
           onClick={onSend}
         >
-          <Send className="h-5 w-5 text-[#D3E4FD]" />
+          <Send className="h-5 w-5" />
         </Button>
       </div>
     </div>
