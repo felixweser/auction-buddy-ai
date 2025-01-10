@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { PropertyHero } from "@/components/property/PropertyHero";
 import { FloorPlan } from "@/components/property/FloorPlan";
 import { KeyMetrics } from "@/components/property/KeyMetrics";
-import { PropertyLocation } from "@/components/property/PropertyLocation";
 import { SatelliteView } from "@/components/property/SatelliteView";
 import { LocationAnalysis } from "@/components/property/LocationAnalysis";
 import { PropertySpecs } from "@/components/property/PropertySpecs";
@@ -113,8 +112,7 @@ const PropertyDetails = () => {
         <div className="space-y-12 pb-12">
           <FloorPlan />
           <KeyMetrics property={property} />
-          <PropertyLocation property={property} />
-          <SatelliteView />
+          <SatelliteView property={property} />
           <LocationAnalysis />
           <PropertySpecs details={property.property_details[0]} />
         </div>
