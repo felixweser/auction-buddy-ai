@@ -40,9 +40,9 @@ export const SearchBar = ({
               className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
             />
             <Button
-              variant="ghost"
+              variant="agora"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2"
               onClick={onSearch}
             >
               <Mic className="h-5 w-5" />
