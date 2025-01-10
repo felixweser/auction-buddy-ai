@@ -1,9 +1,8 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ChatInput } from "./chat/ChatInput";
-import { ChatSheet } from "./chat/ChatSheet";
+import { ChatMessages } from "./chat/ChatMessages";
 
 interface Message {
   content: string;
@@ -30,7 +29,6 @@ export const ChatDialog = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,10 +53,7 @@ export const ChatDialog = ({
     // Add message to local state first
     setMessages((prev) => [...prev, { content, sender: "user" }]);
     
-    // Open the sheet before clearing input
-    setIsSheetOpen(true);
-    
-    // Clear input after opening sheet
+    // Clear input
     setInput("");
 
     try {
@@ -88,26 +83,18 @@ export const ChatDialog = ({
   };
 
   return (
-    <>
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[600px] max-w-[90vw]">
-        <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
-          <ChatInput
-            value={input}
-            onChange={setInput}
-            onSend={() => handleSend(input)}
-          />
+    <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border/50">
+      <div className="max-w-3xl mx-auto p-4">
+        <div className="mb-4">
+          <h3 className="font-semibold text-lg mb-2">{productTitle}</h3>
+          <ChatMessages messages={messages} />
         </div>
+        <ChatInput
+          value={input}
+          onChange={setInput}
+          onSend={() => handleSend(input)}
+        />
       </div>
-
-      <ChatSheet
-        isOpen={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
-        messages={messages}
-        input={input}
-        onInputChange={setInput}
-        onSend={() => handleSend(input)}
-        productTitle={productTitle}
-      />
-    </>
+    </div>
   );
 };

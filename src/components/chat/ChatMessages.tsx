@@ -11,7 +11,7 @@ interface ChatMessagesProps {
 
 export const ChatMessages = ({ messages }: ChatMessagesProps) => {
   return (
-    <ScrollArea className="flex-1 h-[calc(100vh-8rem)] mt-6">
+    <ScrollArea className="h-[200px]">
       <div className="space-y-4 pr-4">
         {messages.map((message, i) => (
           <div
