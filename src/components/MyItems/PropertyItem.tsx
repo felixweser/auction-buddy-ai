@@ -83,7 +83,7 @@ export const PropertyItem = ({ property, onClick, onDelete }: PropertyItemProps)
               variant="outline"
               size="sm"
               onClick={() => navigate(`/property/${property.id}/insights`)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-[#D3E4FD] hover:text-black transition-colors"
             >
               <ChartBar className="h-4 w-4" />
               <span className="hidden md:inline">View Insights</span>
@@ -92,7 +92,7 @@ export const PropertyItem = ({ property, onClick, onDelete }: PropertyItemProps)
               variant="outline"
               size="sm"
               onClick={onClick}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-[#D3E4FD] hover:text-black transition-colors"
             >
               <Edit className="h-4 w-4" />
               <span className="hidden md:inline">Edit Property</span>
@@ -101,7 +101,7 @@ export const PropertyItem = ({ property, onClick, onDelete }: PropertyItemProps)
               variant="outline"
               size="sm"
               onClick={() => setIsDeleteDialogOpen(true)}
-              className="flex items-center gap-2 text-destructive hover:text-destructive"
+              className="flex items-center gap-2 text-destructive hover:bg-[#D3E4FD] hover:text-black transition-colors"
             >
               <Trash2 className="h-4 w-4" />
               <span className="hidden md:inline">Delete</span>
