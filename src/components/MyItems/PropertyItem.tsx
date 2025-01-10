@@ -74,7 +74,7 @@ export const PropertyItem = ({ property, onClick, onDelete }: PropertyItemProps)
         </div>
 
         <div className="flex items-center justify-between mt-4">
-          <span className="text-lg font-semibold text-primary">
+          <span className="text-lg font-semibold text-black">
             ${property.price.toLocaleString()}
           </span>
           
