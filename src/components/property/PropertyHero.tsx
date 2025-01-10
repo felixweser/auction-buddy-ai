@@ -46,14 +46,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           variant="agora"
           onClick={handleScheduleViewing}
         >
-          <Calendar className="h-4 w-4" />
+          <Calendar />
           <span>Besichtigung planen</span>
         </Button>
         <Button 
           variant="agora"
           onClick={handleVirtualTour}
         >
-          <Video className="h-4 w-4" />
+          <Video />
           <span>Virtuelle Tour</span>
         </Button>
       </div>
