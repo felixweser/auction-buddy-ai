@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { useToast } from "@/hooks/use-toast";
+import { ChatDialog } from "@/components/ChatDialog";
 
 const SearchResults = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const SearchResults = () => {
   const query = searchParams.get("q") || "";
   const [viewMode, setViewMode] = useState<"ai" | "grid">("ai");
   const [properties, setProperties] = useState<Property[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,6 +43,27 @@ const SearchResults = () => {
 
     fetchProperties();
   }, [toast]);
+
+  const handleChatOpen = ({
+    listingId,
+    sellerId,
+    productTitle,
+    price,
+    isNegotiable,
+    description,
+  }: {
+    listingId: string;
+    sellerId: string;
+    productTitle: string;
+    price: number;
+    isNegotiable: boolean;
+    description: string;
+  }) => {
+    const property = properties.find((p) => p.id === listingId);
+    if (property) {
+      setSelectedProperty(property);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -72,13 +95,28 @@ const SearchResults = () => {
             </h1>
             
             {viewMode === "ai" ? (
-              <AISearchResults properties={properties} searchQuery={query} />
+              <AISearchResults 
+                properties={properties} 
+                searchQuery={query} 
+                onPropertyClick={handleChatOpen}
+              />
             ) : (
               <SearchResultsGrid />
             )}
           </div>
         </div>
       </div>
+
+      {selectedProperty && (
+        <ChatDialog
+          productTitle={selectedProperty.title}
+          listingId={selectedProperty.id}
+          sellerId={selectedProperty.created_by}
+          price={selectedProperty.price}
+          isNegotiable={selectedProperty.is_negotiable}
+          description={selectedProperty.description}
+        />
+      )}
     </div>
   );
 };

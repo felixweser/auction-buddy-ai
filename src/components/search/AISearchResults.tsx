@@ -1,55 +1,67 @@
-import { useState, useEffect } from "react";
-import { Property } from "@/types/property";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Property } from '@/types/property';
+import { Card } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AISearchResultsProps {
   properties: Property[];
   searchQuery: string;
+  onPropertyClick: (property: {
+    listingId: string;
+    sellerId: string;
+    productTitle: string;
+    price: number;
+    isNegotiable: boolean;
+    description: string;
+  }) => void;
 }
 
-export const AISearchResults = ({ properties, searchQuery }: AISearchResultsProps) => {
-  const [streamingText, setStreamingText] = useState("");
+export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AISearchResultsProps) => {
+  const [streamingText, setStreamingText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!properties.length) return;
-
-    // Generate the summary text
-    const summary = `I found ${properties.length} properties matching your search for "${searchQuery}". Here's a detailed breakdown:\n\n`;
+    let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's a summary of what's available:\n\n`;
     
-    const propertyDescriptions = properties.map(property => (
-      `🏠 ${property.title}\n` +
-      `Located in ${property.city}, this property is priced at €${property.price.toLocaleString()}. ` +
-      `${property.description}\n\n`
-    )).join("");
+    if (properties.length > 0) {
+      const priceRange = {
+        min: Math.min(...properties.map(p => p.price)),
+        max: Math.max(...properties.map(p => p.price))
+      };
+      
+      summary += `Price Range: $${priceRange.min.toLocaleString()} - $${priceRange.max.toLocaleString()}\n`;
+      summary += `Available Properties: ${properties.length}\n\n`;
+      summary += `Let me break down these properties for you:\n\n`;
+    } else {
+      summary += "I couldn't find any properties matching your search criteria. Try adjusting your search terms or filters.\n";
+    }
 
-    const fullText = summary + propertyDescriptions;
     let currentIndex = 0;
-
-    // Simulate streaming effect
-    const streamInterval = setInterval(() => {
-      if (currentIndex < fullText.length) {
-        setStreamingText(prev => prev + fullText[currentIndex]);
+    const interval = setInterval(() => {
+      if (currentIndex < summary.length) {
+        setStreamingText(prev => prev + summary[currentIndex]);
         currentIndex++;
       } else {
-        clearInterval(streamInterval);
+        clearInterval(interval);
         setIsComplete(true);
       }
     }, 20);
 
-    return () => clearInterval(streamInterval);
+    return () => clearInterval(interval);
   }, [properties, searchQuery]);
 
-  if (!properties.length) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">No properties found matching your search.</p>
-      </div>
-    );
-  }
+  const handlePropertyClick = (property: Property) => {
+    onPropertyClick({
+      listingId: property.id,
+      sellerId: property.created_by,
+      productTitle: property.title,
+      price: property.price,
+      isNegotiable: property.is_negotiable,
+      description: property.description
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -58,38 +70,47 @@ export const AISearchResults = ({ properties, searchQuery }: AISearchResultsProp
         {streamingText}
         {!isComplete && (
           <span className="inline-flex ml-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="animate-pulse">▊</span>
           </span>
         )}
       </div>
 
-      {/* Clickable property cards */}
-      {isComplete && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-          {properties.map((property) => (
-            <Card
-              key={property.id}
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => navigate(`/property/${property.id}`)}
-            >
-              <div className="aspect-video relative overflow-hidden rounded-md mb-4">
-                <img
-                  src={property.image_url}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
+      {/* Property cards */}
+      <div className="grid grid-cols-1 gap-6 mt-6">
+        {properties.map((property) => (
+          <Card 
+            key={property.id}
+            className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handlePropertyClick(property)}
+          >
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-48 h-48">
+                {property.image_url ? (
+                  <img
+                    src={property.image_url}
+                    alt={property.title}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ) : (
+                  <Skeleton className="w-full h-full rounded-lg" />
+                )}
               </div>
-              <h3 className="font-semibold mb-2">{property.title}</h3>
-              <p className="text-lg font-bold text-[#D3E4FD] mb-2">
-                €{property.price.toLocaleString()}
-              </p>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {property.description}
-              </p>
-            </Card>
-          ))}
-        </div>
-      )}
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold mb-2">{property.title}</h3>
+                <p className="text-2xl font-bold mb-4">
+                  ${property.price.toLocaleString()}
+                </p>
+                <p className="text-muted-foreground line-clamp-3">
+                  {property.description}
+                </p>
+                <div className="mt-4 text-sm text-muted-foreground">
+                  {property.address_line1}, {property.city}, {property.state} {property.zip_code}
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
