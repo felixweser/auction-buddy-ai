@@ -3,11 +3,11 @@ import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { Property } from "@/types/property";
 
-const priceComparisonData = [
-  { name: 'This Property', value: 2500 },
-  { name: 'Neighborhood Avg', value: 2200 },
-];
+interface KeyMetricsProps {
+  property: Property;
+}
 
 const historicalPriceData = [
   { month: 'Jan', price: 450000 },
@@ -39,8 +39,17 @@ const charts = [
   { id: 'cost-projection', label: 'Cost Projection' },
 ];
 
-export const KeyMetrics = () => {
+export const KeyMetrics = ({ property }: KeyMetricsProps) => {
   const [activeChart, setActiveChart] = useState(charts[0].id);
+
+  // Calculate price per square meter
+  const pricePerSqm = property.price / property.property_details[0].square_footage;
+  const avgNeighborhoodPricePerSqm = pricePerSqm * 0.9; // Example: 90% of property's price for demonstration
+
+  const priceComparisonData = [
+    { name: 'This Property', value: Math.round(pricePerSqm) },
+    { name: 'Neighborhood Avg', value: Math.round(avgNeighborhoodPricePerSqm) },
+  ];
 
   const renderChart = () => {
     switch (activeChart) {
@@ -53,7 +62,7 @@ export const KeyMetrics = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip formatter={(value) => `€${value}/m²`} />
                 <Bar dataKey="value" fill="#4f46e5" />
               </BarChart>
             </ResponsiveContainer>
