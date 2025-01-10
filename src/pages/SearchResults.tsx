@@ -18,12 +18,12 @@ const SearchResults = () => {
             onClick={() => navigate("/")}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            Zurück zur Startseite
           </Button>
 
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold mb-8 text-foreground">
-              Search results for "<span className="text-[#D3E4FD]">{query}</span>"
+              Suchergebnisse für "<span className="text-[#D3E4FD]">{query}</span>"
             </h1>
             <SearchResultsComponent />
           </div>

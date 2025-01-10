@@ -51,7 +51,7 @@ export const ListingCard = ({
             €{price.toLocaleString()}
             {isNegotiable && (
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                (Negotiable)
+                (Verhandelbar)
               </span>
             )}
           </p>
@@ -70,7 +70,7 @@ export const ListingCard = ({
           }}
         >
           <MessageCircle />
-          <span>Contact Seller</span>
+          <span>Verkäufer kontaktieren</span>
         </Button>
       </CardFooter>
     </Card>
