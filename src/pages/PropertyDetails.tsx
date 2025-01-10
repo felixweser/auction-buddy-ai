@@ -87,12 +87,12 @@ const PropertyDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Button
-        variant="outline"
+        variant="agora"
         className="fixed top-6 left-6 z-10"
         onClick={() => navigate(-1)}
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Zurück
+        <ArrowLeft />
+        <span>Zurück</span>
       </Button>
 
       <PropertyHero
