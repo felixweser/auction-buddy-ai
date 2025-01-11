@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { useToast } from "@/hooks/use-toast";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const SearchResults = () => {
   const navigate = useNavigate();
@@ -52,24 +53,28 @@ const SearchResults = () => {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Button>
-      </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <div className="container mx-auto py-6">
+          <div className="flex items-center mb-6">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </div>
 
-      <AISearchResults 
-        properties={properties} 
-        searchQuery={query} 
-        onPropertyClick={handlePropertyClick}
-      />
-    </div>
+          <AISearchResults 
+            properties={properties} 
+            searchQuery={query} 
+            onPropertyClick={handlePropertyClick}
+          />
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
