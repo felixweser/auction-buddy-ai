@@ -9,29 +9,37 @@ import {
 
 interface PropertyStatsProps {
   price: number;
-  details: PropertyDetails;
+  details: PropertyDetails | null | undefined;
 }
 
 export const PropertyStats = ({ price, details }: PropertyStatsProps) => {
+  // Provide default values when details are undefined
+  const defaultDetails = {
+    square_footage: 0,
+    bedrooms: 0,
+    bathrooms: 0,
+    year_built: 0,
+  };
+
   const stats = [
     {
       label: "Quadratmeter",
-      value: details.square_footage.toLocaleString(),
+      value: details?.square_footage?.toLocaleString() ?? defaultDetails.square_footage.toLocaleString(),
       icon: Ruler,
     },
     {
       label: "Schlafzimmer",
-      value: details.bedrooms,
+      value: details?.bedrooms ?? defaultDetails.bedrooms,
       icon: BedDouble,
     },
     {
       label: "Badezimmer",
-      value: details.bathrooms,
+      value: details?.bathrooms ?? defaultDetails.bathrooms,
       icon: Bath,
     },
     {
       label: "Baujahr",
-      value: details.year_built,
+      value: details?.year_built ?? defaultDetails.year_built,
       icon: Calendar,
     },
     {
