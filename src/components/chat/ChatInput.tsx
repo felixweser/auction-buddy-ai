@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mic, Send } from "lucide-react";
+import { Mic } from "lucide-react";
 
 interface ChatInputProps {
   value: string;
@@ -21,27 +21,18 @@ export const ChatInput = ({ value, onChange, onSend }: ChatInputProps) => {
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Ask a question..."
+        placeholder="Wonach suchen Sie? (z.B. 'eine 3-Zimmer Wohnung mit Balkon')"
         onKeyDown={handleKeyDown}
         className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
       />
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-        <Button 
-          variant="agora" 
-          size="sm"
-          className="rounded-lg"
-        >
-          <Mic className="h-5 w-5" />
-        </Button>
-        <Button 
-          variant="agora"
-          size="sm"
-          className="rounded-lg"
-          onClick={onSend}
-        >
-          <Send className="h-5 w-5" />
-        </Button>
-      </div>
+      <Button
+        variant="agora"
+        size="icon"
+        className="absolute right-2 top-1/2 -translate-y-1/2"
+        onClick={onSend}
+      >
+        <Mic className="h-5 w-5" />
+      </Button>
     </div>
   );
 };
