@@ -3,6 +3,9 @@ import { Property } from '@/types/property';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Mic, Send } from 'lucide-react';
 
 interface AISearchResultsProps {
   properties: Property[];
@@ -20,6 +23,7 @@ interface AISearchResultsProps {
 export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AISearchResultsProps) => {
   const [streamingText, setStreamingText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
 
   useEffect(() => {
     let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's a summary of what's available:\n\n`;
@@ -50,6 +54,13 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
     return () => clearInterval(interval);
   }, [properties, searchQuery]);
+
+  const handleFollowUpQuestion = () => {
+    if (!followUpQuestion.trim()) return;
+    // Handle the follow-up question here
+    console.log('Follow-up question:', followUpQuestion);
+    setFollowUpQuestion('');
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -126,6 +137,38 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
           </div>
         </div>
       </ScrollArea>
+
+      {/* Chat Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border/50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative">
+            <Input
+              value={followUpQuestion}
+              onChange={(e) => setFollowUpQuestion(e.target.value)}
+              placeholder="Ask a follow-up question..."
+              onKeyDown={(e) => e.key === "Enter" && handleFollowUpQuestion()}
+              className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              <Button 
+                variant="agora" 
+                size="sm"
+                className="rounded-lg"
+              >
+                <Mic className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="agora"
+                size="sm"
+                className="rounded-lg"
+                onClick={handleFollowUpQuestion}
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
