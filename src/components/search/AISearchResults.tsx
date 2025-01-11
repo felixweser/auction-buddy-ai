@@ -3,7 +3,9 @@ import { Property } from '@/types/property';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MessageCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { MessageCircle, Send } from 'lucide-react';
 
 interface AISearchResultsProps {
   properties: Property[];
@@ -21,6 +23,7 @@ interface AISearchResultsProps {
 export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AISearchResultsProps) => {
   const [streamingText, setStreamingText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
 
   useEffect(() => {
     let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's a summary of what's available:\n\n`;
@@ -51,6 +54,20 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
     return () => clearInterval(interval);
   }, [properties, searchQuery]);
+
+  const handleFollowUpQuestion = () => {
+    if (!followUpQuestion.trim()) return;
+    // Here you would handle the follow-up question
+    // For now, we'll just clear the input
+    setFollowUpQuestion('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleFollowUpQuestion();
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -121,6 +138,29 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                       </div>
                     </Card>
                   ))}
+                </div>
+              )}
+
+              {/* Follow-up Question Input */}
+              {isComplete && (
+                <div className="mt-6">
+                  <div className="relative">
+                    <Input
+                      value={followUpQuestion}
+                      onChange={(e) => setFollowUpQuestion(e.target.value)}
+                      placeholder="Ask a follow-up question..."
+                      onKeyDown={handleKeyDown}
+                      className="pr-24 bg-card/50 border-none text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-12"
+                    />
+                    <Button
+                      onClick={handleFollowUpQuestion}
+                      className="absolute right-2 top-1/2 -translate-y-1/2"
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
