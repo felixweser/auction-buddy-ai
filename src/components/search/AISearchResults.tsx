@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChatInput } from '@/components/chat/ChatInput';
+import { Robot, User } from 'lucide-react';
 
 interface Message {
   content: string;
@@ -42,7 +43,6 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
         clearInterval(interval);
         setIsComplete(true);
         
-        // Add initial messages
         const initialMessage = { content: summary, sender: 'ai' as const, type: 'initial' as const };
         const summaryMessage = {
           content: generateSummary(properties),
@@ -75,14 +75,12 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   const handleFollowUpQuestion = () => {
     if (!followUpQuestion.trim()) return;
     
-    // Add user's question
     const userMessage = { 
       content: followUpQuestion, 
       sender: 'user' as const,
       type: 'followup' as const 
     };
     
-    // Add AI response
     const aiResponse = {
       content: `Let me help you with that question about ${followUpQuestion}...\n\nBased on the available properties, here's what I can tell you...`,
       sender: 'ai' as const,
@@ -99,21 +97,27 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
         <div className="max-w-3xl mx-auto space-y-6 py-6">
           {/* Initial AI Response */}
           {!isComplete ? (
-            <div className="bg-muted rounded-lg p-4">
-              <div className="prose prose-sm max-w-none">
-                <div className="text-foreground">
-                  {streamingText}
-                  <span className="inline-flex ml-1">
-                    <span className="animate-pulse">▊</span>
-                  </span>
+            <div className="flex items-start gap-3">
+              <Robot className="w-6 h-6 text-primary shrink-0 mt-1" />
+              <div className="flex-1 bg-muted rounded-lg p-4">
+                <div className="prose prose-sm max-w-none">
+                  <div className="text-foreground">
+                    {streamingText}
+                    <span className="inline-flex ml-1">
+                      <span className="animate-pulse">▊</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-muted rounded-lg p-4">
-              <div className="prose prose-sm max-w-none">
-                <div className="text-foreground">
-                  {messages[0]?.content}
+            <div className="flex items-start gap-3">
+              <Robot className="w-6 h-6 text-primary shrink-0 mt-1" />
+              <div className="flex-1 bg-muted rounded-lg p-4">
+                <div className="prose prose-sm max-w-none">
+                  <div className="text-foreground">
+                    {messages[0]?.content}
+                  </div>
                 </div>
               </div>
             </div>
@@ -163,15 +167,17 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             </Card>
           ))}
 
-          {/* Summary and Follow-up Messages */}
+          {/* Messages Section */}
           <div className="space-y-6 mt-8">
             {messages.slice(1).map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={index} className="flex items-start gap-3">
+                {message.sender === 'ai' ? (
+                  <Robot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                ) : (
+                  <User className="w-6 h-6 text-muted-foreground shrink-0 mt-1" />
+                )}
                 <div
-                  className={`rounded-lg p-4 max-w-[80%] ${
+                  className={`flex-1 rounded-lg p-4 ${
                     message.sender === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted'
@@ -186,7 +192,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
       </ScrollArea>
 
       {/* Chat Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/30">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/30 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto p-4">
           <ChatInput
             value={followUpQuestion}
