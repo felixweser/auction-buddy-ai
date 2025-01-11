@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { Bot, User } from 'lucide-react';
+import { House, User } from 'lucide-react';
 
 interface Message {
   content: string;
@@ -104,7 +104,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
           {!isComplete ? (
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                <House className="w-6 h-6 text-primary shrink-0 mt-1" />
                 <div className="flex-1">
                   <div className="text-foreground">
                     {streamingText}
@@ -118,7 +118,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
           ) : (
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                <House className="w-6 h-6 text-primary shrink-0 mt-1" />
                 <div className="flex-1">
                   <div className="text-foreground">
                     {messages[0]?.content}
@@ -187,7 +187,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                 {(message.type !== 'followup' || message.sender === 'ai') && (
                   <div className="flex items-start gap-3">
                     {message.sender === 'ai' ? (
-                      <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                      <House className="w-6 h-6 text-primary shrink-0 mt-1" />
                     ) : (
                       <User className="w-6 h-6 text-muted-foreground shrink-0 mt-1" />
                     )}
