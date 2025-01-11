@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import {
@@ -16,25 +15,27 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-const DAYS_OF_WEEK = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export function ViewingSchedule() {
   const { toast } = useToast();
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isAddSlotDialogOpen, setIsAddSlotDialogOpen] = useState(false);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [slotDuration, setSlotDuration] = useState("30");
   const [bufferTime, setBufferTime] = useState("15");
+  const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
   const { data: properties, isLoading: propertiesLoading } = useQuery({
     queryKey: ["my-properties"],
@@ -52,17 +53,15 @@ export function ViewingSchedule() {
     },
   });
 
-  // Fetch viewing slots for selected property
   const { data: viewingSlots, refetch: refetchSlots } = useQuery({
-    queryKey: ["viewing-slots", selectedProperty],
-    enabled: !!selectedProperty,
+    queryKey: ["viewing-slots", selectedProperty, selectedDate],
+    enabled: !!selectedProperty && !!selectedDate,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", selectedProperty)
-        .order("day_of_week")
-        .order("start_time");
+        .eq("day_of_week", selectedDate?.getDay());
 
       if (error) throw error;
       return data;
@@ -70,7 +69,7 @@ export function ViewingSchedule() {
   });
 
   const handleAddSlot = async () => {
-    if (!selectedProperty || !selectedDay || !startTime || !endTime) {
+    if (!selectedProperty || !selectedDate || !startTime || !endTime) {
       toast({
         title: "Missing information",
         description: "Please fill in all fields",
@@ -81,7 +80,7 @@ export function ViewingSchedule() {
 
     const { error } = await supabase.from("property_viewing_slots").insert({
       property_id: selectedProperty,
-      day_of_week: DAYS_OF_WEEK.indexOf(selectedDay),
+      day_of_week: selectedDate.getDay(),
       start_time: startTime,
       end_time: endTime,
       slot_duration_minutes: parseInt(slotDuration),
@@ -102,10 +101,8 @@ export function ViewingSchedule() {
       description: "Viewing slot added successfully",
     });
 
-    // Reset form and refresh slots
-    setSelectedDay(null);
-    setStartTime("");
-    setEndTime("");
+    setIsAddSlotDialogOpen(false);
+    resetForm();
     refetchSlots();
   };
 
@@ -132,6 +129,23 @@ export function ViewingSchedule() {
     refetchSlots();
   };
 
+  const handleEditSlot = (slot: any) => {
+    setStartTime(slot.start_time);
+    setEndTime(slot.end_time);
+    setSlotDuration(slot.slot_duration_minutes.toString());
+    setBufferTime(slot.buffer_minutes.toString());
+    setEditingSlotId(slot.id);
+    setIsAddSlotDialogOpen(true);
+  };
+
+  const resetForm = () => {
+    setStartTime("");
+    setEndTime("");
+    setSlotDuration("30");
+    setBufferTime("15");
+    setEditingSlotId(null);
+  };
+
   if (propertiesLoading) {
     return <div>Loading...</div>;
   }
@@ -143,145 +157,157 @@ export function ViewingSchedule() {
           <CardTitle>Viewing Schedule Management</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <Select
-              value={selectedProperty || ""}
-              onValueChange={setSelectedProperty}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a property" />
-              </SelectTrigger>
-              <SelectContent>
-                {properties?.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
-                    {property.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select
+            value={selectedProperty || ""}
+            onValueChange={setSelectedProperty}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a property" />
+            </SelectTrigger>
+            <SelectContent>
+              {properties?.map((property) => (
+                <SelectItem key={property.id} value={property.id}>
+                  {property.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-            {selectedProperty && (
-              <>
-                <Separator className="my-4" />
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Add New Viewing Slot</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Slot Duration (minutes)</Label>
-                      <Select value={slotDuration} onValueChange={setSlotDuration}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="45">45 minutes</SelectItem>
-                          <SelectItem value="60">1 hour</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Buffer Time (minutes)</Label>
-                      <Select value={bufferTime} onValueChange={setBufferTime}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select buffer time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">No buffer</SelectItem>
-                          <SelectItem value="5">5 minutes</SelectItem>
-                          <SelectItem value="10">10 minutes</SelectItem>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Select value={selectedDay || ""} onValueChange={setSelectedDay}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Day of week" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DAYS_OF_WEEK.map((day) => (
-                          <SelectItem key={day} value={day}>
-                            {day}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      placeholder="Start time"
-                    />
-                    <Input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      placeholder="End time"
-                    />
-                    <Button onClick={handleAddSlot}>Add Slot</Button>
-                  </div>
-                </div>
+          {selectedProperty && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border"
+                />
+              </div>
 
-                <Separator className="my-4" />
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Current Viewing Slots</h3>
-                  <div className="space-y-2">
-                    {viewingSlots?.map((slot) => (
-                      <div
-                        key={slot.id}
-                        className="flex items-center justify-between p-4 bg-muted rounded-lg"
-                      >
-                        <div className="space-y-1">
-                          <div>
-                            <span className="font-medium">
-                              {DAYS_OF_WEEK[slot.day_of_week]}:
-                            </span>{" "}
-                            {format(new Date(`2024-01-01T${slot.start_time}`), "h:mm a")} -{" "}
-                            {format(new Date(`2024-01-01T${slot.end_time}`), "h:mm a")}
+              <div className="space-y-4">
+                {selectedDate && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">
+                        Slots for {format(selectedDate, "EEEE, MMMM d")}
+                      </h3>
+                      <Dialog open={isAddSlotDialogOpen} onOpenChange={setIsAddSlotDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button onClick={() => {
+                            resetForm();
+                            setIsAddSlotDialogOpen(true);
+                          }}>
+                            Add Slot
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              {editingSlotId ? "Edit Viewing Slot" : "Add New Viewing Slot"}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Slot Duration (minutes)</Label>
+                                <Select value={slotDuration} onValueChange={setSlotDuration}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select duration" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="15">15 minutes</SelectItem>
+                                    <SelectItem value="30">30 minutes</SelectItem>
+                                    <SelectItem value="45">45 minutes</SelectItem>
+                                    <SelectItem value="60">1 hour</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Buffer Time (minutes)</Label>
+                                <Select value={bufferTime} onValueChange={setBufferTime}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select buffer time" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="0">No buffer</SelectItem>
+                                    <SelectItem value="5">5 minutes</SelectItem>
+                                    <SelectItem value="10">10 minutes</SelectItem>
+                                    <SelectItem value="15">15 minutes</SelectItem>
+                                    <SelectItem value="30">30 minutes</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Start Time</Label>
+                                <Input
+                                  type="time"
+                                  value={startTime}
+                                  onChange={(e) => setStartTime(e.target.value)}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>End Time</Label>
+                                <Input
+                                  type="time"
+                                  value={endTime}
+                                  onChange={(e) => setEndTime(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <Button onClick={handleAddSlot}>
+                              {editingSlotId ? "Update Slot" : "Add Slot"}
+                            </Button>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {slot.slot_duration_minutes} min slots with {slot.buffer_minutes} min buffer
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
+                    <div className="space-y-2">
+                      {viewingSlots?.map((slot) => (
+                        <div
+                          key={slot.id}
+                          className="flex items-center justify-between p-4 bg-muted rounded-lg"
+                        >
+                          <div className="space-y-1">
+                            <div>
+                              {format(new Date(`2024-01-01T${slot.start_time}`), "h:mm a")} -{" "}
+                              {format(new Date(`2024-01-01T${slot.end_time}`), "h:mm a")}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {slot.slot_duration_minutes} min slots with {slot.buffer_minutes} min buffer
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditSlot(slot)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteSlot(slot.id)}
+                            >
+                              Delete
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedDay(DAYS_OF_WEEK[slot.day_of_week]);
-                              setStartTime(slot.start_time);
-                              setEndTime(slot.end_time);
-                              setSlotDuration(slot.slot_duration_minutes.toString());
-                              setBufferTime(slot.buffer_minutes.toString());
-                              handleDeleteSlot(slot.id);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteSlot(slot.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                    {viewingSlots?.length === 0 && (
-                      <p className="text-muted-foreground">
-                        No viewing slots set for this property
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+                      ))}
+                      {viewingSlots?.length === 0 && (
+                        <p className="text-muted-foreground">
+                          No viewing slots set for this day
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
