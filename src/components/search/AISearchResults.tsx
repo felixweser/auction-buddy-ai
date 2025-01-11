@@ -94,8 +94,10 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   };
 
   const toggleShowAllProperties = () => {
-    setShowAllProperties(prevState => !prevState);
+    setShowAllProperties(prev => !prev);
   };
+
+  const displayedProperties = showAllProperties ? properties : properties.slice(0, 3);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -147,8 +149,10 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
           {/* Property Listings */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Best Matches</h3>
-            {(showAllProperties ? properties : properties.slice(0, 3)).map((property) => (
+            <h3 className="text-lg font-medium">
+              {showAllProperties ? "All Properties" : "Best Matches"}
+            </h3>
+            {displayedProperties.map((property) => (
               <Card 
                 key={property.id}
                 className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
