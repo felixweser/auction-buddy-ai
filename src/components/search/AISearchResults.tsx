@@ -145,8 +145,8 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
       {/* Follow-up Question Input */}
       {isComplete && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t z-50">
-          <div className="max-w-4xl mx-auto relative">
+        <div className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t z-50">
+          <div className="max-w-4xl mx-auto relative p-4">
             <div className="relative">
               <Input
                 value={followUpQuestion}
