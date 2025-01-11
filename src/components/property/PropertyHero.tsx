@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 interface PropertyHeroProps {
   imageUrl: string;
@@ -33,6 +34,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
   const { toast } = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showViewingDialog, setShowViewingDialog] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const images = [imageUrl, imageUrl, imageUrl];
 
@@ -52,16 +54,28 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     enabled: showViewingDialog,
   });
 
-  const getDayName = (dayOfWeek: number) => {
-    const date = new Date(2024, 0, dayOfWeek);
-    return format(date, "EEEE", { locale: de });
-  };
+  const availableTimeSlots = viewingSlots?.filter(
+    (slot) => slot.day_of_week === selectedDate?.getDay()
+  ) || [];
 
   const handleVirtualTour = () => {
     toast({
       title: "Demnächst verfügbar",
       description: "Virtuelle Besichtigungen werden in Kürze verfügbar sein!",
     });
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+  };
+
+  const handleTimeSelect = (slot: any) => {
+    toast({
+      title: "Termin angefragt",
+      description: "Wir werden uns in Kürze bei Ihnen melden!",
+    });
+    setShowViewingDialog(false);
+    setSelectedDate(undefined);
   };
 
   return (
@@ -86,43 +100,44 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
       <Dialog open={showViewingDialog} onOpenChange={setShowViewingDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Verfügbare Besichtigungstermine</DialogTitle>
+            <DialogTitle>Besichtigungstermin auswählen</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            {isLoading ? (
-              <p className="text-center text-muted-foreground">Lade Termine...</p>
-            ) : viewingSlots && viewingSlots.length > 0 ? (
+            <div className="mb-6">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                locale={de}
+                className="rounded-md border"
+              />
+            </div>
+            
+            {selectedDate && (
               <div className="space-y-4">
-                {viewingSlots.map((slot) => (
-                  <div
-                    key={slot.id}
-                    className="flex items-center justify-between p-3 rounded-lg border"
-                  >
-                    <div>
-                      <p className="font-medium">{getDayName(slot.day_of_week)}</p>
-                      <p className="text-sm text-muted-foreground">
+                <h3 className="font-medium text-lg">
+                  Verfügbare Zeiten am {format(selectedDate, 'EEEE, dd. MMMM', { locale: de })}:
+                </h3>
+                {availableTimeSlots.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {availableTimeSlots.map((slot) => (
+                      <Button
+                        key={slot.id}
+                        variant="outline"
+                        onClick={() => handleTimeSelect(slot)}
+                        className="text-sm"
+                      >
                         {format(new Date(`2024-01-01T${slot.start_time}`), 'HH:mm')} - 
                         {format(new Date(`2024-01-01T${slot.end_time}`), 'HH:mm')}
-                      </p>
-                    </div>
-                    <Button
-                      onClick={() => {
-                        toast({
-                          title: "Termin angefragt",
-                          description: "Wir werden uns in Kürze bei Ihnen melden!",
-                        });
-                        setShowViewingDialog(false);
-                      }}
-                    >
-                      Auswählen
-                    </Button>
+                      </Button>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    Keine Termine an diesem Tag verfügbar
+                  </p>
+                )}
               </div>
-            ) : (
-              <p className="text-center text-muted-foreground">
-                Keine Besichtigungstermine verfügbar
-              </p>
             )}
           </div>
         </DialogContent>
