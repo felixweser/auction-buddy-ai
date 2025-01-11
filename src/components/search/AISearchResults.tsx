@@ -4,7 +4,8 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { House, User } from 'lucide-react';
+import { House, User, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Message {
   content: string;
@@ -30,6 +31,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   const [isComplete, setIsComplete] = useState(false);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [showAllProperties, setShowAllProperties] = useState(false);
 
   useEffect(() => {
     let summary = `Based on your search, I found ${properties.length} properties that might interest you. Here's what I found:\n\n`;
@@ -95,9 +97,20 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
     <div className="min-h-screen flex flex-col bg-background">
       <ScrollArea className="flex-1 px-4 pb-24">
         <div className="max-w-3xl mx-auto space-y-8 py-6">
-          {/* Original Search Query */}
-          <div className="text-2xl font-semibold border-b pb-4">
-            "{searchQuery}"
+          {/* Header with search query and view all button */}
+          <div className="flex justify-between items-center border-b pb-4">
+            <div className="text-2xl font-semibold">
+              "{searchQuery}"
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-primary/10 hover:text-primary transition-colors"
+              onClick={() => setShowAllProperties(!showAllProperties)}
+              title="View all properties"
+            >
+              <List className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* Initial AI Response */}
@@ -131,7 +144,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
           {/* Property Listings */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Best Matches</h3>
-            {properties.map((property) => (
+            {(showAllProperties ? properties : properties.slice(0, 3)).map((property) => (
               <Card 
                 key={property.id}
                 className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
