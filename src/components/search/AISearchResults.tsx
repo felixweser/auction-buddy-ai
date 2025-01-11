@@ -92,7 +92,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
               {/* Property Results */}
               {isComplete && properties.length > 0 && (
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-4 mb-24">
                   {properties.map((property) => (
                     <Card 
                       key={property.id}
@@ -140,33 +140,33 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                   ))}
                 </div>
               )}
-
-              {/* Follow-up Question Input */}
-              {isComplete && (
-                <div className="mt-6">
-                  <div className="relative">
-                    <Input
-                      value={followUpQuestion}
-                      onChange={(e) => setFollowUpQuestion(e.target.value)}
-                      placeholder="Ask a follow-up question..."
-                      onKeyDown={handleKeyDown}
-                      className="pr-24 bg-card/50 border-none text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-12"
-                    />
-                    <Button
-                      onClick={handleFollowUpQuestion}
-                      className="absolute right-2 top-1/2 -translate-y-1/2"
-                      size="sm"
-                      variant="ghost"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </ScrollArea>
+
+      {/* Follow-up Question Input */}
+      {isComplete && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t z-50">
+          <div className="max-w-4xl mx-auto relative">
+            <Input
+              value={followUpQuestion}
+              onChange={(e) => setFollowUpQuestion(e.target.value)}
+              placeholder="Ask a follow-up question..."
+              onKeyDown={handleKeyDown}
+              className="pr-24 bg-card/50 border-none text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-12"
+            />
+            <Button
+              onClick={handleFollowUpQuestion}
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+              size="sm"
+              variant="ghost"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
