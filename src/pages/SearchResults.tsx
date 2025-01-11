@@ -52,25 +52,23 @@ const SearchResults = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6">
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Button>
-        </div>
-
-        <AISearchResults 
-          properties={properties} 
-          searchQuery={query} 
-          onPropertyClick={handlePropertyClick}
-        />
+    <div className="container mx-auto py-6">
+      <div className="flex items-center mb-6">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Button>
       </div>
+
+      <AISearchResults 
+        properties={properties} 
+        searchQuery={query} 
+        onPropertyClick={handlePropertyClick}
+      />
     </div>
   );
 };
