@@ -55,15 +55,14 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
   const handleFollowUpQuestion = () => {
     if (!followUpQuestion.trim()) return;
-    // Handle the follow-up question here
     console.log('Follow-up question:', followUpQuestion);
     setFollowUpQuestion('');
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <ScrollArea className="min-h-0">
-        <div className="space-y-6 p-6">
+    <div className="flex flex-col h-[calc(100vh-8rem)]">
+      <ScrollArea className="flex-1 px-6">
+        <div className="space-y-6 max-w-4xl mx-auto pb-24">
           {/* AI Response */}
           <div className="flex gap-4">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
