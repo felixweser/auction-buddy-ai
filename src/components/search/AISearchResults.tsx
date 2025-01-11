@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChatInput } from '@/components/chat/ChatInput';
+import { SearchBar } from '@/components/SearchBar';
 
 interface AISearchResultsProps {
   properties: Property[];
@@ -60,17 +61,24 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <ScrollArea className="flex-1 px-6">
-        <div className="space-y-6 max-w-4xl mx-auto pb-24">
-          {/* AI Response */}
-          <div className="flex gap-4">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-              AI
-            </div>
-            <div className="flex-1">
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+      <div className="container mx-auto py-8 px-4">
+        <div className="mb-8">
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearchChange={() => {}}
+            onSearch={() => {}}
+            priceRange={[0, 1000]}
+            onPriceRangeChange={() => {}}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* AI Chat Section */}
+          <div className="lg:col-span-4 space-y-4">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
               <div className="prose prose-sm max-w-none">
-                <div className="bg-card/50 rounded-lg p-6">
+                <div className="text-foreground">
                   {streamingText}
                   {!isComplete && (
                     <span className="inline-flex ml-1">
@@ -79,67 +87,71 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                   )}
                 </div>
               </div>
-
-              {/* Property Results */}
-              {isComplete && properties.length > 0 && (
-                <div className="mt-6 space-y-4">
-                  {properties.map((property) => (
-                    <Card 
-                      key={property.id}
-                      className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => onPropertyClick({
-                        listingId: property.id,
-                        sellerId: property.created_by,
-                        productTitle: property.title,
-                        price: Number(property.price),
-                        isNegotiable: property.is_negotiable,
-                        description: property.description
-                      })}
-                    >
-                      <div className="flex gap-4">
-                        <div className="w-32 h-32">
-                          {property.image_url ? (
-                            <img
-                              src={property.image_url}
-                              alt={property.title}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Skeleton className="w-full h-full rounded-lg" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold mb-2">{property.title}</h3>
-                          <p className="text-xl font-bold mb-2">
-                            €{Number(property.price).toLocaleString()}
-                            {property.is_negotiable && (
-                              <span className="text-sm font-normal text-muted-foreground ml-2">
-                                (Negotiable)
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-muted-foreground text-sm line-clamp-2">
-                            {property.description}
-                          </p>
-                          <div className="mt-2 text-sm text-muted-foreground">
-                            {property.address_line1}, {property.city}, {property.state} {property.zip_code}
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
+            </Card>
+            
+            <div className="sticky bottom-4">
+              <ChatInput
+                value={followUpQuestion}
+                onChange={setFollowUpQuestion}
+                onSend={handleFollowUpQuestion}
+              />
             </div>
           </div>
-        </div>
-      </ScrollArea>
 
-      <ChatInput
-        value={followUpQuestion}
-        onChange={setFollowUpQuestion}
-        onSend={handleFollowUpQuestion}
-      />
+          {/* Property Results */}
+          <div className="lg:col-span-8">
+            <ScrollArea className="h-[calc(100vh-12rem)]">
+              <div className="space-y-4 pr-4">
+                {properties.map((property) => (
+                  <Card 
+                    key={property.id}
+                    className="p-4 hover:shadow-lg transition-all duration-300 hover:bg-card/80 cursor-pointer"
+                    onClick={() => onPropertyClick({
+                      listingId: property.id,
+                      sellerId: property.created_by,
+                      productTitle: property.title,
+                      price: Number(property.price),
+                      isNegotiable: property.is_negotiable,
+                      description: property.description
+                    })}
+                  >
+                    <div className="flex gap-6">
+                      <div className="w-40 h-32 shrink-0">
+                        {property.image_url ? (
+                          <img
+                            src={property.image_url}
+                            alt={property.title}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <Skeleton className="w-full h-full rounded-lg" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold mb-2 truncate">{property.title}</h3>
+                        <p className="text-xl font-bold mb-2 text-primary">
+                          €{Number(property.price).toLocaleString()}
+                          {property.is_negotiable && (
+                            <span className="text-sm font-normal text-muted-foreground ml-2">
+                              (Negotiable)
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-muted-foreground text-sm line-clamp-2 mb-2">
+                          {property.description}
+                        </p>
+                        <div className="text-sm text-muted-foreground">
+                          {property.address_line1}, {property.city}, {property.state} {property.zip_code}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
