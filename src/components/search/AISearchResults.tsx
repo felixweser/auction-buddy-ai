@@ -53,7 +53,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
   return (
     <div className="max-w-4xl mx-auto">
-      <ScrollArea className="h-[calc(100vh-12rem)]">
+      <ScrollArea className="min-h-0">
         <div className="space-y-6 p-6">
           {/* AI Response */}
           <div className="flex gap-4">
