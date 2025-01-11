@@ -176,12 +176,12 @@ export function ViewingSchedule() {
 
           {selectedProperty && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+              <div className="flex">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  className="rounded-md border"
+                  className="border-0"
                   locale={de}
                 />
               </div>
