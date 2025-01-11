@@ -207,10 +207,8 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
           {/* Property Listings */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">
-              {showAllProperties ? "All Properties" : "Best Matches"}
-            </h3>
-            {properties.map((property) => (
+            <h3 className="text-lg font-medium">Best Matches</h3>
+            {properties.slice(0, 3).map((property) => (
               <Card 
                 key={property.id}
                 className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
@@ -259,8 +257,19 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             {messages.slice(1).map((message, index) => (
               <div key={index}>
                 {message.type === 'followup' && message.sender === 'user' && (
-                  <div className="text-xl font-semibold mb-4">
-                    "{message.content}"
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-xl font-semibold">
+                      "{message.content}"
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => setShowAllProperties(true)}
+                      title="View all properties"
+                    >
+                      <List className="h-5 w-5" />
+                    </Button>
                   </div>
                 )}
                 {(message.type !== 'followup' || message.sender === 'ai') && (
@@ -275,6 +284,53 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                         {message.content}
                       </div>
                     </div>
+                  </div>
+                )}
+                {message.type === 'followup' && message.sender === 'user' && (
+                  <div className="mt-4 space-y-4">
+                    <h3 className="text-lg font-medium">Related Properties</h3>
+                    {properties.slice(0, 3).map((property) => (
+                      <Card 
+                        key={property.id}
+                        className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
+                        onClick={() => onPropertyClick({
+                          listingId: property.id,
+                          sellerId: property.created_by,
+                          productTitle: property.title,
+                          price: Number(property.price),
+                          isNegotiable: property.is_negotiable,
+                          description: property.description
+                        })}
+                      >
+                        <div className="flex gap-4 p-4">
+                          <div className="w-32 h-24 shrink-0">
+                            {property.image_url ? (
+                              <img
+                                src={property.image_url}
+                                alt={property.title}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            ) : (
+                              <Skeleton className="w-full h-full rounded-lg" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-base mb-1 truncate">{property.title}</h3>
+                            <p className="text-lg font-bold text-primary mb-1">
+                              €{Number(property.price).toLocaleString()}
+                              {property.is_negotiable && (
+                                <span className="text-sm font-normal text-muted-foreground ml-2">
+                                  (Negotiable)
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-muted-foreground text-sm line-clamp-2">
+                              {property.description}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </div>
