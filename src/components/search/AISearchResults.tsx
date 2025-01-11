@@ -8,6 +8,7 @@ import { ChatInput } from '@/components/chat/ChatInput';
 interface Message {
   content: string;
   sender: 'ai' | 'user';
+  type?: 'initial' | 'summary' | 'followup';
 }
 
 interface AISearchResultsProps {
@@ -30,21 +31,8 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's a summary of what's available:\n\n`;
+    let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's what I found:\n\n`;
     
-    if (properties.length > 0) {
-      const priceRange = {
-        min: Math.min(...properties.map(p => p.price)),
-        max: Math.max(...properties.map(p => p.price))
-      };
-      
-      summary += `Price Range: €${priceRange.min.toLocaleString()} - €${priceRange.max.toLocaleString()}\n`;
-      summary += `Available Properties: ${properties.length}\n\n`;
-      summary += `Let me break down these properties for you:\n\n`;
-    } else {
-      summary += "I couldn't find any properties matching your search criteria. Try adjusting your search terms or filters.\n";
-    }
-
     let currentIndex = 0;
     const interval = setInterval(() => {
       if (currentIndex < summary.length) {
@@ -53,21 +41,55 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
       } else {
         clearInterval(interval);
         setIsComplete(true);
-        // Add initial AI message to chat
-        setMessages([{ content: summary, sender: 'ai' }]);
+        
+        // Add initial messages
+        const initialMessage = { content: summary, sender: 'ai' as const, type: 'initial' as const };
+        const summaryMessage = {
+          content: generateSummary(properties),
+          sender: 'ai' as const,
+          type: 'summary' as const
+        };
+        setMessages([initialMessage, summaryMessage]);
       }
     }, 20);
 
     return () => clearInterval(interval);
   }, [properties, searchQuery]);
 
+  const generateSummary = (properties: Property[]) => {
+    if (properties.length === 0) {
+      return "I couldn't find any properties matching your search criteria. Try adjusting your search terms or filters.\n";
+    }
+
+    const priceRange = {
+      min: Math.min(...properties.map(p => p.price)),
+      max: Math.max(...properties.map(p => p.price))
+    };
+
+    return `To summarize what I found:\n` +
+           `• Price Range: €${priceRange.min.toLocaleString()} - €${priceRange.max.toLocaleString()}\n` +
+           `• ${properties.length} properties available\n\n` +
+           `Feel free to ask me any specific questions about these properties!`;
+  };
+
   const handleFollowUpQuestion = () => {
     if (!followUpQuestion.trim()) return;
     
-    // Add user's question to messages
-    setMessages(prev => [...prev, { content: followUpQuestion, sender: 'user' }]);
+    // Add user's question
+    const userMessage = { 
+      content: followUpQuestion, 
+      sender: 'user' as const,
+      type: 'followup' as const 
+    };
     
-    // Clear input after sending
+    // Add AI response
+    const aiResponse = {
+      content: `Let me help you with that question about ${followUpQuestion}...\n\nBased on the available properties, here's what I can tell you...`,
+      sender: 'ai' as const,
+      type: 'followup' as const
+    };
+    
+    setMessages(prev => [...prev, userMessage, aiResponse]);
     setFollowUpQuestion('');
   };
 
@@ -75,8 +97,8 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
     <div className="min-h-screen flex flex-col bg-background">
       <ScrollArea className="flex-1 px-4 pb-24">
         <div className="max-w-3xl mx-auto space-y-6 py-6">
-          {/* Initial Loading Message */}
-          {!isComplete && (
+          {/* Initial AI Response */}
+          {!isComplete ? (
             <div className="bg-muted rounded-lg p-4">
               <div className="prose prose-sm max-w-none">
                 <div className="text-foreground">
@@ -87,9 +109,17 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="bg-muted rounded-lg p-4">
+              <div className="prose prose-sm max-w-none">
+                <div className="text-foreground">
+                  {messages[0]?.content}
+                </div>
+              </div>
+            </div>
           )}
 
-          {/* Property Results */}
+          {/* Property Listings */}
           {properties.map((property) => (
             <Card 
               key={property.id}
@@ -133,9 +163,9 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             </Card>
           ))}
 
-          {/* Chat Messages */}
+          {/* Summary and Follow-up Messages */}
           <div className="space-y-6 mt-8">
-            {messages.map((message, index) => (
+            {messages.slice(1).map((message, index) => (
               <div
                 key={index}
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -155,7 +185,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
         </div>
       </ScrollArea>
 
-      {/* Sticky Chat Input */}
+      {/* Chat Input */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/30">
         <div className="max-w-3xl mx-auto p-4">
           <ChatInput
