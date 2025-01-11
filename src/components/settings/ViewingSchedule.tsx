@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import {
   Select,
   SelectContent,
@@ -24,7 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAYS_OF_WEEK = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 
 export function ViewingSchedule() {
   const { toast } = useToast();
@@ -71,8 +72,8 @@ export function ViewingSchedule() {
   const handleAddSlot = async () => {
     if (!selectedProperty || !selectedDate || !startTime || !endTime) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
+        title: "Fehlende Informationen",
+        description: "Bitte füllen Sie alle Felder aus",
         variant: "destructive",
       });
       return;
@@ -89,16 +90,16 @@ export function ViewingSchedule() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to add viewing slot",
+        title: "Fehler",
+        description: "Fehler beim Hinzufügen des Besichtigungstermins",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Viewing slot added successfully",
+      title: "Erfolg",
+      description: "Besichtigungstermin erfolgreich hinzugefügt",
     });
 
     setIsAddSlotDialogOpen(false);
@@ -114,16 +115,16 @@ export function ViewingSchedule() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete viewing slot",
+        title: "Fehler",
+        description: "Fehler beim Löschen des Besichtigungstermins",
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Viewing slot deleted successfully",
+      title: "Erfolg",
+      description: "Besichtigungstermin erfolgreich gelöscht",
     });
 
     refetchSlots();
@@ -147,14 +148,14 @@ export function ViewingSchedule() {
   };
 
   if (propertiesLoading) {
-    return <div>Loading...</div>;
+    return <div>Laden...</div>;
   }
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Viewing Schedule Management</CardTitle>
+          <CardTitle>Besichtigungstermine Verwaltung</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <Select
@@ -162,7 +163,7 @@ export function ViewingSchedule() {
             onValueChange={setSelectedProperty}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a property" />
+              <SelectValue placeholder="Immobilie auswählen" />
             </SelectTrigger>
             <SelectContent>
               {properties?.map((property) => (
@@ -181,6 +182,7 @@ export function ViewingSchedule() {
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   className="rounded-md border"
+                  locale={de}
                 />
               </div>
 
@@ -189,7 +191,7 @@ export function ViewingSchedule() {
                   <>
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold">
-                        Slots for {format(selectedDate, "EEEE, MMMM d")}
+                        Termine für {format(selectedDate, "EEEE, d. MMMM", { locale: de })}
                       </h3>
                       <Dialog open={isAddSlotDialogOpen} onOpenChange={setIsAddSlotDialogOpen}>
                         <DialogTrigger asChild>
@@ -197,50 +199,50 @@ export function ViewingSchedule() {
                             resetForm();
                             setIsAddSlotDialogOpen(true);
                           }}>
-                            Add Slot
+                            Termin hinzufügen
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>
-                              {editingSlotId ? "Edit Viewing Slot" : "Add New Viewing Slot"}
+                              {editingSlotId ? "Besichtigungstermin bearbeiten" : "Neuen Besichtigungstermin hinzufügen"}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <Label>Slot Duration (minutes)</Label>
+                                <Label>Terminlänge (Minuten)</Label>
                                 <Select value={slotDuration} onValueChange={setSlotDuration}>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select duration" />
+                                    <SelectValue placeholder="Dauer auswählen" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="15">15 minutes</SelectItem>
-                                    <SelectItem value="30">30 minutes</SelectItem>
-                                    <SelectItem value="45">45 minutes</SelectItem>
-                                    <SelectItem value="60">1 hour</SelectItem>
+                                    <SelectItem value="15">15 Minuten</SelectItem>
+                                    <SelectItem value="30">30 Minuten</SelectItem>
+                                    <SelectItem value="45">45 Minuten</SelectItem>
+                                    <SelectItem value="60">1 Stunde</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
                               <div className="space-y-2">
-                                <Label>Buffer Time (minutes)</Label>
+                                <Label>Pufferzeit (Minuten)</Label>
                                 <Select value={bufferTime} onValueChange={setBufferTime}>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select buffer time" />
+                                    <SelectValue placeholder="Pufferzeit auswählen" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="0">No buffer</SelectItem>
-                                    <SelectItem value="5">5 minutes</SelectItem>
-                                    <SelectItem value="10">10 minutes</SelectItem>
-                                    <SelectItem value="15">15 minutes</SelectItem>
-                                    <SelectItem value="30">30 minutes</SelectItem>
+                                    <SelectItem value="0">Kein Puffer</SelectItem>
+                                    <SelectItem value="5">5 Minuten</SelectItem>
+                                    <SelectItem value="10">10 Minuten</SelectItem>
+                                    <SelectItem value="15">15 Minuten</SelectItem>
+                                    <SelectItem value="30">30 Minuten</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <Label>Start Time</Label>
+                                <Label>Startzeit</Label>
                                 <Input
                                   type="time"
                                   value={startTime}
@@ -248,7 +250,7 @@ export function ViewingSchedule() {
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label>End Time</Label>
+                                <Label>Endzeit</Label>
                                 <Input
                                   type="time"
                                   value={endTime}
@@ -257,7 +259,7 @@ export function ViewingSchedule() {
                               </div>
                             </div>
                             <Button onClick={handleAddSlot}>
-                              {editingSlotId ? "Update Slot" : "Add Slot"}
+                              {editingSlotId ? "Termin aktualisieren" : "Termin hinzufügen"}
                             </Button>
                           </div>
                         </DialogContent>
@@ -272,11 +274,11 @@ export function ViewingSchedule() {
                         >
                           <div className="space-y-1">
                             <div>
-                              {format(new Date(`2024-01-01T${slot.start_time}`), "h:mm a")} -{" "}
-                              {format(new Date(`2024-01-01T${slot.end_time}`), "h:mm a")}
+                              {format(new Date(`2024-01-01T${slot.start_time}`), "HH:mm", { locale: de })} -{" "}
+                              {format(new Date(`2024-01-01T${slot.end_time}`), "HH:mm", { locale: de })}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {slot.slot_duration_minutes} min slots with {slot.buffer_minutes} min buffer
+                              {slot.slot_duration_minutes} Min. Termine mit {slot.buffer_minutes} Min. Puffer
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -285,21 +287,21 @@ export function ViewingSchedule() {
                               size="sm"
                               onClick={() => handleEditSlot(slot)}
                             >
-                              Edit
+                              Bearbeiten
                             </Button>
                             <Button
                               variant="destructive"
                               size="sm"
                               onClick={() => handleDeleteSlot(slot.id)}
                             >
-                              Delete
+                              Löschen
                             </Button>
                           </div>
                         </div>
                       ))}
                       {viewingSlots?.length === 0 && (
                         <p className="text-muted-foreground">
-                          No viewing slots set for this day
+                          Keine Besichtigungstermine für diesen Tag
                         </p>
                       )}
                     </div>
