@@ -80,7 +80,14 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                     <Card 
                       key={property.id}
                       className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => onPropertyClick(property)}
+                      onClick={() => onPropertyClick({
+                        listingId: property.id,
+                        sellerId: property.created_by,
+                        productTitle: property.title,
+                        price: Number(property.price),
+                        isNegotiable: property.is_negotiable,
+                        description: property.description
+                      })}
                     >
                       <div className="flex gap-4">
                         <div className="w-32 h-32">
@@ -97,7 +104,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold mb-2">{property.title}</h3>
                           <p className="text-xl font-bold mb-2">
-                            €{property.price.toLocaleString()}
+                            €{Number(property.price).toLocaleString()}
                             {property.is_negotiable && (
                               <span className="text-sm font-normal text-muted-foreground ml-2">
                                 (Negotiable)
