@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Send, Mic } from 'lucide-react';
+import { MessageCircle, Send } from 'lucide-react';
 
 interface AISearchResultsProps {
   properties: Property[];
@@ -145,40 +145,28 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
         </div>
       </ScrollArea>
 
+      {/* Follow-up Question Input */}
       {isComplete && (
-        <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 fixed bottom-0 left-0 right-0 z-50">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative">
-              <Input
-                value={followUpQuestion}
-                onChange={(e) => setFollowUpQuestion(e.target.value)}
-                placeholder="Ask a follow-up question..."
-                onKeyDown={handleKeyDown}
-                className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                <Button 
-                  variant="agora" 
-                  size="sm"
-                  className="rounded-lg"
-                >
-                  <Mic className="h-5 w-5" />
-                </Button>
-                <Button 
-                  variant="agora"
-                  size="sm"
-                  className="rounded-lg"
-                  onClick={handleFollowUpQuestion}
-                >
-                  <Send className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t z-50">
+          <div className="max-w-4xl mx-auto relative">
+            <Input
+              value={followUpQuestion}
+              onChange={(e) => setFollowUpQuestion(e.target.value)}
+              placeholder="Ask a follow-up question..."
+              onKeyDown={handleKeyDown}
+              className="pr-24 bg-card/50 border-none text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-12"
+            />
+            <Button
+              onClick={handleFollowUpQuestion}
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+              size="sm"
+              variant="ghost"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}
     </div>
   );
 };
-
-export default AISearchResults;
