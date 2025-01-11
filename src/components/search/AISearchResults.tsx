@@ -93,6 +93,10 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
     setFollowUpQuestion('');
   };
 
+  const toggleShowAllProperties = () => {
+    setShowAllProperties(prevState => !prevState);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <ScrollArea className="flex-1 px-4 pb-24">
@@ -106,8 +110,8 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
               variant="ghost"
               size="icon"
               className="hover:bg-primary/10 hover:text-primary transition-colors"
-              onClick={() => setShowAllProperties(!showAllProperties)}
-              title="View all properties"
+              onClick={toggleShowAllProperties}
+              title={showAllProperties ? "Show less" : "View all properties"}
             >
               <List className="h-5 w-5" />
             </Button>
