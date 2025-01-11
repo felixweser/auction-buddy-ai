@@ -257,19 +257,21 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             {messages.slice(1).map((message, index) => (
               <div key={index}>
                 {message.type === 'followup' && message.sender === 'user' && (
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="text-xl font-semibold">
-                      "{message.content}"
+                  <div className="border-b pb-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="text-xl font-semibold">
+                        "{message.content}"
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-primary/10 hover:text-primary transition-colors"
+                        onClick={() => setShowAllProperties(true)}
+                        title="View all properties"
+                      >
+                        <List className="h-5 w-5" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="hover:bg-primary/10 hover:text-primary transition-colors"
-                      onClick={() => setShowAllProperties(true)}
-                      title="View all properties"
-                    >
-                      <List className="h-5 w-5" />
-                    </Button>
                   </div>
                 )}
                 {(message.type !== 'followup' || message.sender === 'ai') && (
