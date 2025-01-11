@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const DAYS_OF_WEEK = [
   "Sunday",
@@ -32,8 +33,9 @@ export function ViewingSchedule() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [slotDuration, setSlotDuration] = useState("30");
+  const [bufferTime, setBufferTime] = useState("15");
 
-  // Fetch user's properties
   const { data: properties, isLoading: propertiesLoading } = useQuery({
     queryKey: ["my-properties"],
     queryFn: async () => {
@@ -82,6 +84,8 @@ export function ViewingSchedule() {
       day_of_week: DAYS_OF_WEEK.indexOf(selectedDay),
       start_time: startTime,
       end_time: endTime,
+      slot_duration_minutes: parseInt(slotDuration),
+      buffer_minutes: parseInt(bufferTime),
     });
 
     if (error) {
@@ -161,6 +165,37 @@ export function ViewingSchedule() {
                 <Separator className="my-4" />
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Add New Viewing Slot</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Slot Duration (minutes)</Label>
+                      <Select value={slotDuration} onValueChange={setSlotDuration}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="45">45 minutes</SelectItem>
+                          <SelectItem value="60">1 hour</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Buffer Time (minutes)</Label>
+                      <Select value={bufferTime} onValueChange={setBufferTime}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select buffer time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">No buffer</SelectItem>
+                          <SelectItem value="5">5 minutes</SelectItem>
+                          <SelectItem value="10">10 minutes</SelectItem>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Select value={selectedDay || ""} onValueChange={setSelectedDay}>
                       <SelectTrigger>
@@ -200,12 +235,17 @@ export function ViewingSchedule() {
                         key={slot.id}
                         className="flex items-center justify-between p-4 bg-muted rounded-lg"
                       >
-                        <div>
-                          <span className="font-medium">
-                            {DAYS_OF_WEEK[slot.day_of_week]}:
-                          </span>{" "}
-                          {format(new Date(`2024-01-01T${slot.start_time}`), "h:mm a")} -{" "}
-                          {format(new Date(`2024-01-01T${slot.end_time}`), "h:mm a")}
+                        <div className="space-y-1">
+                          <div>
+                            <span className="font-medium">
+                              {DAYS_OF_WEEK[slot.day_of_week]}:
+                            </span>{" "}
+                            {format(new Date(`2024-01-01T${slot.start_time}`), "h:mm a")} -{" "}
+                            {format(new Date(`2024-01-01T${slot.end_time}`), "h:mm a")}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {slot.slot_duration_minutes} min slots with {slot.buffer_minutes} min buffer
+                          </div>
                         </div>
                         <Button
                           variant="destructive"
