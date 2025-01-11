@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { Robot, User } from 'lucide-react';
+import { Bot, User } from 'lucide-react';
 
 interface Message {
   content: string;
@@ -98,7 +98,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
           {/* Initial AI Response */}
           {!isComplete ? (
             <div className="flex items-start gap-3">
-              <Robot className="w-6 h-6 text-primary shrink-0 mt-1" />
+              <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div className="flex-1 bg-muted rounded-lg p-4">
                 <div className="prose prose-sm max-w-none">
                   <div className="text-foreground">
@@ -112,7 +112,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             </div>
           ) : (
             <div className="flex items-start gap-3">
-              <Robot className="w-6 h-6 text-primary shrink-0 mt-1" />
+              <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div className="flex-1 bg-muted rounded-lg p-4">
                 <div className="prose prose-sm max-w-none">
                   <div className="text-foreground">
@@ -172,7 +172,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             {messages.slice(1).map((message, index) => (
               <div key={index} className="flex items-start gap-3">
                 {message.sender === 'ai' ? (
-                  <Robot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                  <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
                 ) : (
                   <User className="w-6 h-6 text-muted-foreground shrink-0 mt-1" />
                 )}
