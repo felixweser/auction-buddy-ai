@@ -3,9 +3,6 @@ import { Property } from '@/types/property';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { MessageCircle, Send } from 'lucide-react';
 
 interface AISearchResultsProps {
   properties: Property[];
@@ -23,7 +20,6 @@ interface AISearchResultsProps {
 export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AISearchResultsProps) => {
   const [streamingText, setStreamingText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
-  const [followUpQuestion, setFollowUpQuestion] = useState('');
 
   useEffect(() => {
     let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's a summary of what's available:\n\n`;
@@ -55,18 +51,6 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
     return () => clearInterval(interval);
   }, [properties, searchQuery]);
 
-  const handleFollowUpQuestion = () => {
-    if (!followUpQuestion.trim()) return;
-    setFollowUpQuestion('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleFollowUpQuestion();
-    }
-  };
-
   return (
     <div className="max-w-4xl mx-auto">
       <ScrollArea className="h-[calc(100vh-12rem)]">
@@ -90,7 +74,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
 
               {/* Property Results */}
               {isComplete && properties.length > 0 && (
-                <div className="mt-6 space-y-4 mb-24">
+                <div className="mt-6 space-y-4">
                   {properties.map((property) => (
                     <Card 
                       key={property.id}
@@ -142,31 +126,6 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
           </div>
         </div>
       </ScrollArea>
-
-      {/* Follow-up Question Input */}
-      {isComplete && (
-        <div className="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t z-50">
-          <div className="max-w-4xl mx-auto relative p-4">
-            <div className="relative">
-              <Input
-                value={followUpQuestion}
-                onChange={(e) => setFollowUpQuestion(e.target.value)}
-                placeholder="Ask a follow-up question..."
-                onKeyDown={handleKeyDown}
-                className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
-              />
-              <Button
-                onClick={handleFollowUpQuestion}
-                variant="agora"
-                size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
