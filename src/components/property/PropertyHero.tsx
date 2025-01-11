@@ -54,6 +54,11 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     enabled: showViewingDialog,
   });
 
+  // Get unique days of the week with available slots
+  const availableDays = viewingSlots 
+    ? [...new Set(viewingSlots.map(slot => slot.day_of_week))]
+    : [];
+
   const availableTimeSlots = viewingSlots?.filter(
     (slot) => slot.day_of_week === selectedDate?.getDay()
   ) || [];
@@ -76,6 +81,12 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     });
     setShowViewingDialog(false);
     setSelectedDate(undefined);
+  };
+
+  // Function to determine if a date should be disabled
+  const isDateDisabled = (date: Date) => {
+    const dayOfWeek = date.getDay();
+    return !availableDays.includes(dayOfWeek);
   };
 
   return (
@@ -103,41 +114,51 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
             <DialogTitle>Besichtigungstermin auswählen</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <div className="mb-6">
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                locale={de}
-                className="rounded-md border"
-              />
-            </div>
-            
-            {selectedDate && (
-              <div className="space-y-4">
-                <h3 className="font-medium text-lg">
-                  Verfügbare Zeiten am {format(selectedDate, 'EEEE, dd. MMMM', { locale: de })}:
-                </h3>
-                {availableTimeSlots.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {availableTimeSlots.map((slot) => (
-                      <Button
-                        key={slot.id}
-                        variant="outline"
-                        onClick={() => handleTimeSelect(slot)}
-                        className="text-sm"
-                      >
-                        {format(new Date(`2024-01-01T${slot.start_time}`), 'HH:mm')} - 
-                        {format(new Date(`2024-01-01T${slot.end_time}`), 'HH:mm')}
-                      </Button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground">
-                    Keine Termine an diesem Tag verfügbar
+            {isLoading ? (
+              <p className="text-center text-muted-foreground">Lade Termine...</p>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    disabled={isDateDisabled}
+                    locale={de}
+                    className="rounded-md border"
+                  />
+                  <p className="text-sm text-muted-foreground mt-2 text-center">
+                    Tage ohne Verfügbarkeit sind ausgegraut
                   </p>
+                </div>
+                
+                {selectedDate && (
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">
+                      Verfügbare Zeiten am {format(selectedDate, 'EEEE, dd. MMMM', { locale: de })}:
+                    </h3>
+                    {availableTimeSlots.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {availableTimeSlots.map((slot) => (
+                          <Button
+                            key={slot.id}
+                            variant="outline"
+                            onClick={() => handleTimeSelect(slot)}
+                            className="text-sm"
+                          >
+                            {format(new Date(`2024-01-01T${slot.start_time}`), 'HH:mm')} - 
+                            {format(new Date(`2024-01-01T${slot.end_time}`), 'HH:mm')}
+                          </Button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-muted-foreground">
+                        Keine Termine an diesem Tag verfügbar
+                      </p>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </DialogContent>
