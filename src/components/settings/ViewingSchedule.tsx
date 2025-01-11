@@ -247,13 +247,29 @@ export function ViewingSchedule() {
                             {slot.slot_duration_minutes} min slots with {slot.buffer_minutes} min buffer
                           </div>
                         </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteSlot(slot.id)}
-                        >
-                          Delete
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDay(DAYS_OF_WEEK[slot.day_of_week]);
+                              setStartTime(slot.start_time);
+                              setEndTime(slot.end_time);
+                              setSlotDuration(slot.slot_duration_minutes.toString());
+                              setBufferTime(slot.buffer_minutes.toString());
+                              handleDeleteSlot(slot.id);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteSlot(slot.id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </div>
                     ))}
                     {viewingSlots?.length === 0 && (
