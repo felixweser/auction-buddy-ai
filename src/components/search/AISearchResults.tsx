@@ -149,32 +149,30 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
       {isComplete && (
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t z-50">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
-              <div className="relative">
-                <Input
-                  value={followUpQuestion}
-                  onChange={(e) => setFollowUpQuestion(e.target.value)}
-                  placeholder="Ask a follow-up question..."
-                  onKeyDown={handleKeyDown}
-                  className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  <Button 
-                    variant="agora" 
-                    size="sm"
-                    className="rounded-lg"
-                  >
-                    <Mic className="h-5 w-5" />
-                  </Button>
-                  <Button 
-                    variant="agora"
-                    size="sm"
-                    className="rounded-lg"
-                    onClick={handleFollowUpQuestion}
-                  >
-                    <Send className="h-5 w-5" />
-                  </Button>
-                </div>
+            <div className="relative">
+              <Input
+                value={followUpQuestion}
+                onChange={(e) => setFollowUpQuestion(e.target.value)}
+                placeholder="Ask a follow-up question..."
+                onKeyDown={handleKeyDown}
+                className="bg-card border-none text-foreground text-lg placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:ring-offset-0 rounded-xl h-14"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <Button 
+                  variant="agora" 
+                  size="sm"
+                  className="rounded-lg"
+                >
+                  <Mic className="h-5 w-5" />
+                </Button>
+                <Button 
+                  variant="agora"
+                  size="sm"
+                  className="rounded-lg"
+                  onClick={handleFollowUpQuestion}
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
               </div>
             </div>
           </div>
