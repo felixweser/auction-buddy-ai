@@ -6,6 +6,7 @@ import MyItems from "./pages/MyItems";
 import CreateListing from "./pages/CreateListing";
 import SearchResults from "./pages/SearchResults";
 import PropertyDetails from "./pages/PropertyDetails";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/property/:id" element={<PropertyDetails />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </BrowserRouter>
   );
