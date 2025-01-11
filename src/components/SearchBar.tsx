@@ -30,7 +30,7 @@ export const SearchBar = ({
     <div className={`mx-auto space-y-4 transition-all duration-300 ease-in-out
       ${state === "expanded" ? "max-w-4xl" : "max-w-7xl"}`}>
       <div className="relative">
-        <div className="bg-background/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
+        <div>
           <div className="relative">
             <Input
               placeholder="Wonach suchen Sie? (z.B. 'eine 3-Zimmer Wohnung mit Balkon')"
