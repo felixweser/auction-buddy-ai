@@ -32,7 +32,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    let summary = `Based on your search for "${searchQuery}", I found ${properties.length} properties that might interest you. Here's what I found:\n\n`;
+    let summary = `Based on your search, I found ${properties.length} properties that might interest you. Here's what I found:\n\n`;
     
     let currentIndex = 0;
     const interval = setInterval(() => {
@@ -94,89 +94,110 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <ScrollArea className="flex-1 px-4 pb-24">
-        <div className="max-w-3xl mx-auto space-y-6 py-6">
+        <div className="max-w-3xl mx-auto space-y-8 py-6">
+          {/* Original Search Query */}
+          <div className="text-2xl font-semibold border-b pb-4">
+            "{searchQuery}"
+          </div>
+
           {/* Initial AI Response */}
           {!isComplete ? (
-            <div className="flex items-start gap-3">
-              <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
-              <div className="flex-1">
-                <div className="text-foreground">
-                  {streamingText}
-                  <span className="inline-flex ml-1">
-                    <span className="animate-pulse">▊</span>
-                  </span>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                <div className="flex-1">
+                  <div className="text-foreground">
+                    {streamingText}
+                    <span className="inline-flex ml-1">
+                      <span className="animate-pulse">▊</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-3">
-              <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
-              <div className="flex-1">
-                <div className="text-foreground">
-                  {messages[0]?.content}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                <div className="flex-1">
+                  <div className="text-foreground">
+                    {messages[0]?.content}
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
           {/* Property Listings */}
-          {properties.map((property) => (
-            <Card 
-              key={property.id}
-              className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
-              onClick={() => onPropertyClick({
-                listingId: property.id,
-                sellerId: property.created_by,
-                productTitle: property.title,
-                price: Number(property.price),
-                isNegotiable: property.is_negotiable,
-                description: property.description
-              })}
-            >
-              <div className="flex gap-4 p-4">
-                <div className="w-32 h-24 shrink-0">
-                  {property.image_url ? (
-                    <img
-                      src={property.image_url}
-                      alt={property.title}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  ) : (
-                    <Skeleton className="w-full h-full rounded-lg" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-base mb-1 truncate">{property.title}</h3>
-                  <p className="text-lg font-bold text-primary mb-1">
-                    €{Number(property.price).toLocaleString()}
-                    {property.is_negotiable && (
-                      <span className="text-sm font-normal text-muted-foreground ml-2">
-                        (Negotiable)
-                      </span>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Best Matches</h3>
+            {properties.map((property) => (
+              <Card 
+                key={property.id}
+                className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
+                onClick={() => onPropertyClick({
+                  listingId: property.id,
+                  sellerId: property.created_by,
+                  productTitle: property.title,
+                  price: Number(property.price),
+                  isNegotiable: property.is_negotiable,
+                  description: property.description
+                })}
+              >
+                <div className="flex gap-4 p-4">
+                  <div className="w-32 h-24 shrink-0">
+                    {property.image_url ? (
+                      <img
+                        src={property.image_url}
+                        alt={property.title}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <Skeleton className="w-full h-full rounded-lg" />
                     )}
-                  </p>
-                  <p className="text-muted-foreground text-sm line-clamp-2">
-                    {property.description}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          ))}
-
-          {/* Messages Section */}
-          <div className="space-y-6 mt-8">
-            {messages.slice(1).map((message, index) => (
-              <div key={index} className="flex items-start gap-3">
-                {message.sender === 'ai' ? (
-                  <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
-                ) : (
-                  <User className="w-6 h-6 text-muted-foreground shrink-0 mt-1" />
-                )}
-                <div className="flex-1">
-                  <div className="text-foreground">
-                    {message.content}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base mb-1 truncate">{property.title}</h3>
+                    <p className="text-lg font-bold text-primary mb-1">
+                      €{Number(property.price).toLocaleString()}
+                      {property.is_negotiable && (
+                        <span className="text-sm font-normal text-muted-foreground ml-2">
+                          (Negotiable)
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-muted-foreground text-sm line-clamp-2">
+                      {property.description}
+                    </p>
                   </div>
                 </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Messages Section */}
+          <div className="space-y-6">
+            {messages.slice(1).map((message, index) => (
+              <div key={index}>
+                {message.type === 'followup' && message.sender === 'user' && (
+                  <div className="text-xl font-semibold mb-4">
+                    "{message.content}"
+                  </div>
+                )}
+                {(message.type !== 'followup' || message.sender === 'ai') && (
+                  <div className="flex items-start gap-3">
+                    {message.sender === 'ai' ? (
+                      <Bot className="w-6 h-6 text-primary shrink-0 mt-1" />
+                    ) : (
+                      <User className="w-6 h-6 text-muted-foreground shrink-0 mt-1" />
+                    )}
+                    <div className="flex-1">
+                      <div className="text-foreground">
+                        {message.content}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
