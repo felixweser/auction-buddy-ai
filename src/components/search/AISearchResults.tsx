@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { House, User, List } from 'lucide-react';
+import { House, User, List, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Message {
@@ -93,11 +93,69 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
     setFollowUpQuestion('');
   };
 
-  const toggleShowAllProperties = () => {
-    setShowAllProperties(prev => !prev);
-  };
-
-  const displayedProperties = showAllProperties ? properties : properties.slice(0, 3);
+  if (showAllProperties) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => setShowAllProperties(false)}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to AI Search
+            </Button>
+            <div className="text-lg font-medium">
+              {properties.length} Properties Found
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {properties.map((property) => (
+              <Card 
+                key={property.id}
+                className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
+                onClick={() => onPropertyClick({
+                  listingId: property.id,
+                  sellerId: property.created_by,
+                  productTitle: property.title,
+                  price: Number(property.price),
+                  isNegotiable: property.is_negotiable,
+                  description: property.description
+                })}
+              >
+                <div className="p-4">
+                  <div className="w-full aspect-video mb-4">
+                    {property.image_url ? (
+                      <img
+                        src={property.image_url}
+                        alt={property.title}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <Skeleton className="w-full h-full rounded-lg" />
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-base mb-2 truncate">{property.title}</h3>
+                  <p className="text-lg font-bold text-primary mb-2">
+                    €{Number(property.price).toLocaleString()}
+                    {property.is_negotiable && (
+                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                        (Negotiable)
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-muted-foreground text-sm line-clamp-2">
+                    {property.description}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -112,8 +170,8 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
               variant="ghost"
               size="icon"
               className="hover:bg-primary/10 hover:text-primary transition-colors"
-              onClick={toggleShowAllProperties}
-              title={showAllProperties ? "Show less" : "View all properties"}
+              onClick={() => setShowAllProperties(true)}
+              title="View all properties"
             >
               <List className="h-5 w-5" />
             </Button>
@@ -152,7 +210,7 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
             <h3 className="text-lg font-medium">
               {showAllProperties ? "All Properties" : "Best Matches"}
             </h3>
-            {displayedProperties.map((property) => (
+            {properties.map((property) => (
               <Card 
                 key={property.id}
                 className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-card/50"
