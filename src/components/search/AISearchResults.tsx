@@ -135,15 +135,13 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
         </div>
       </ScrollArea>
 
-      {/* Chat Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border/50">
-        <div className="max-w-4xl mx-auto p-4">
-          <ChatInput
-            value={followUpQuestion}
-            onChange={setFollowUpQuestion}
-            onSend={handleFollowUpQuestion}
-          />
-        </div>
+      {/* Chat Input */}
+      <div className="max-w-4xl mx-auto p-4">
+        <ChatInput
+          value={followUpQuestion}
+          onChange={setFollowUpQuestion}
+          onSend={handleFollowUpQuestion}
+        />
       </div>
     </div>
   );
