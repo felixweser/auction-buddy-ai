@@ -75,38 +75,19 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
     <div className="min-h-screen flex flex-col bg-background">
       <ScrollArea className="flex-1 px-4 pb-24">
         <div className="max-w-3xl mx-auto space-y-6 py-6">
-          {/* Chat Messages */}
-          <div className="space-y-6">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`rounded-lg p-4 max-w-[80%] ${
-                    message.sender === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+          {/* Initial Loading Message */}
+          {!isComplete && (
+            <div className="bg-muted rounded-lg p-4">
+              <div className="prose prose-sm max-w-none">
+                <div className="text-foreground">
+                  {streamingText}
+                  <span className="inline-flex ml-1">
+                    <span className="animate-pulse">▊</span>
+                  </span>
                 </div>
               </div>
-            ))}
-            
-            {!isComplete && (
-              <div className="bg-muted rounded-lg p-4">
-                <div className="prose prose-sm max-w-none">
-                  <div className="text-foreground">
-                    {streamingText}
-                    <span className="inline-flex ml-1">
-                      <span className="animate-pulse">▊</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Property Results */}
           {properties.map((property) => (
@@ -151,6 +132,26 @@ export const AISearchResults = ({ properties, searchQuery, onPropertyClick }: AI
               </div>
             </Card>
           ))}
+
+          {/* Chat Messages */}
+          <div className="space-y-6 mt-8">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`rounded-lg p-4 max-w-[80%] ${
+                    message.sender === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </ScrollArea>
 
