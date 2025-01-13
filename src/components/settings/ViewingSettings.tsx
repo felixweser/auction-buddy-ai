@@ -40,9 +40,20 @@ export function ViewingSettings() {
         .from("property_viewing_settings")
         .select("*")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== "PGRST116") throw error;
+      
+      // If no settings exist, return default values
+      if (!data) {
+        return {
+          viewing_duration: 30,
+          buffer_time: 15,
+          default_time_window_start: "09:00",
+          default_time_window_end: "17:00",
+        };
+      }
+
       return data;
     },
   });
