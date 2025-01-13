@@ -39,7 +39,7 @@ export function ViewingSchedule() {
   const [bufferTime, setBufferTime] = useState("15");
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
-  const { data: session, isLoading: sessionLoading } = useQuery({
+  const { data: session } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -51,8 +51,7 @@ export function ViewingSchedule() {
     },
   });
 
-  // Fetch properties
-  const { data: properties, isLoading: propertiesLoading } = useQuery({
+  const { data: properties } = useQuery({
     queryKey: ["my-properties"],
     enabled: !!session?.user,
     queryFn: async () => {
@@ -183,14 +182,6 @@ export function ViewingSchedule() {
     setBufferTime("15");
     setEditingSlotId(null);
   };
-
-  if (sessionLoading || propertiesLoading) {
-    return <div>Laden...</div>;
-  }
-
-  if (!session) {
-    return null; // The useQuery hook will handle the redirect
-  }
 
   return (
     <div className="space-y-6">
