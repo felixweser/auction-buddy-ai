@@ -39,7 +39,6 @@ export function ViewingSchedule() {
   const [bufferTime, setBufferTime] = useState("15");
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
-  // Check authentication status
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
@@ -69,7 +68,6 @@ export function ViewingSchedule() {
     },
   });
 
-  // Fetch viewing slots for the selected date and property
   const { data: viewingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["viewing-slots", selectedProperty, selectedDate],
     enabled: !!selectedProperty && !!selectedDate && !!session?.user,
@@ -78,7 +76,7 @@ export function ViewingSchedule() {
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", selectedProperty)
-        .eq("slot_date", format(selectedDate!, 'yyyy-MM-dd')); // Format date correctly
+        .eq("slot_date", format(selectedDate!, 'yyyy-MM-dd'));
 
       if (error) throw error;
       return data;
@@ -115,7 +113,6 @@ export function ViewingSchedule() {
     });
 
     try {
-      // Insert all generated slots
       const { error } = await supabase.from("property_viewing_slots").insert(
         slots.map(slot => ({
           property_id: selectedProperty,

@@ -1,5 +1,4 @@
 import { format, parse, addMinutes } from "date-fns";
-import { de } from "date-fns/locale";
 
 interface GenerateTimeSlotsParams {
   startTime: string;
@@ -23,7 +22,7 @@ export const generateTimeSlots = ({
   date,
 }: GenerateTimeSlotsParams): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-  const baseDate = "2024-01-01"; // Use a fixed date for time calculations
+  const baseDate = date || "2024-01-01"; // Use provided date or fallback
 
   let currentTime = parse(startTime, "HH:mm", new Date(`${baseDate}T00:00:00`));
   const endTimeDate = parse(endTime, "HH:mm", new Date(`${baseDate}T00:00:00`));
@@ -31,7 +30,7 @@ export const generateTimeSlots = ({
   while (currentTime < endTimeDate) {
     const slotEnd = addMinutes(currentTime, slotDuration);
     
-    // Check if the slot end time exceeds the end time
+    // Check if adding the full slot would exceed the end time
     if (slotEnd > endTimeDate) {
       break;
     }
