@@ -9,57 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      bookings: {
-        Row: {
-          client_email: string
-          client_name: string
-          client_phone: string | null
-          created_at: string
-          id: string
-          property_id: string
-          status: Database["public"]["Enums"]["booking_status"]
-          time_slot_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_email: string
-          client_name: string
-          client_phone?: string | null
-          created_at?: string
-          id?: string
-          property_id: string
-          status?: Database["public"]["Enums"]["booking_status"]
-          time_slot_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_email?: string
-          client_name?: string
-          client_phone?: string | null
-          created_at?: string
-          id?: string
-          property_id?: string
-          status?: Database["public"]["Enums"]["booking_status"]
-          time_slot_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bookings_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_time_slot_id_fkey"
-            columns: ["time_slot_id"]
-            isOneToOne: false
-            referencedRelation: "time_slots"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       messages: {
         Row: {
           content: string
@@ -291,47 +240,6 @@ export type Database = {
           },
         ]
       }
-      time_slots: {
-        Row: {
-          booking_id: string | null
-          created_at: string
-          end_time: string
-          id: string
-          start_time: string
-          status: Database["public"]["Enums"]["slot_status"]
-          time_window_id: string
-          updated_at: string
-        }
-        Insert: {
-          booking_id?: string | null
-          created_at?: string
-          end_time: string
-          id?: string
-          start_time: string
-          status?: Database["public"]["Enums"]["slot_status"]
-          time_window_id: string
-          updated_at?: string
-        }
-        Update: {
-          booking_id?: string | null
-          created_at?: string
-          end_time?: string
-          id?: string
-          start_time?: string
-          status?: Database["public"]["Enums"]["slot_status"]
-          time_window_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "time_slots_time_window_id_fkey"
-            columns: ["time_window_id"]
-            isOneToOne: false
-            referencedRelation: "time_windows"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       time_windows: {
         Row: {
           created_at: string
@@ -373,8 +281,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      booking_status: "confirmed" | "cancelled" | "completed"
-      slot_status: "available" | "booked" | "blocked"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
