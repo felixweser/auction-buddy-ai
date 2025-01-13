@@ -2,10 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Calendar } from "@/components/ui/calendar";
-import { de } from "date-fns/locale";
 import { CalendarSection } from "./time-windows/CalendarSection";
 import { PropertySelect } from "./time-windows/PropertySelect";
 import { TimeWindowDialog } from "./time-windows/TimeWindowDialog";
@@ -65,60 +63,55 @@ export function TimeWindowManager() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Zeitfenster Verwaltung</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <PropertySelect
-            properties={properties}
-            selectedProperty={selectedProperty}
-            onPropertyChange={(value) => {
-              setSelectedProperty(value);
-              setSelectedDate(new Date());
-            }}
-          />
+    <Card className="border-none shadow-none">
+      <CardContent className="space-y-6 pt-0">
+        <PropertySelect
+          properties={properties}
+          selectedProperty={selectedProperty}
+          onPropertyChange={(value) => {
+            setSelectedProperty(value);
+            setSelectedDate(new Date());
+          }}
+        />
 
-          {selectedProperty ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <CalendarSection 
-                selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-                selectedProperty={selectedProperty}
-              />
+        {selectedProperty ? (
+          <div className="grid grid-cols-1 gap-6">
+            <CalendarSection 
+              selectedDate={selectedDate}
+              onDateSelect={setSelectedDate}
+              selectedProperty={selectedProperty}
+            />
 
-              <TimeWindowDialog
-                isOpen={isAddWindowDialogOpen}
-                onOpenChange={setIsAddWindowDialogOpen}
-                selectedDate={selectedDate}
-                editingWindow={editingWindow}
-                onAdd={handleAddWindow}
-                onEdit={handleEditWindow}
-                onClose={() => {
-                  setEditingWindow(null);
-                  setIsAddWindowDialogOpen(false);
-                }}
-              />
+            <TimeWindowDialog
+              isOpen={isAddWindowDialogOpen}
+              onOpenChange={setIsAddWindowDialogOpen}
+              selectedDate={selectedDate}
+              editingWindow={editingWindow}
+              onAdd={handleAddWindow}
+              onEdit={handleEditWindow}
+              onClose={() => {
+                setEditingWindow(null);
+                setIsAddWindowDialogOpen(false);
+              }}
+            />
 
-              <div className="space-y-4">
-                {selectedDate && (
-                  <TimeWindowsList
-                    windows={timeWindows || []}
-                    onDelete={handleDeleteWindow}
-                    onEdit={handleStartEdit}
-                    onOpenDialog={() => setIsAddWindowDialogOpen(true)}
-                  />
-                )}
-              </div>
+            <div className="space-y-4">
+              {selectedDate && (
+                <TimeWindowsList
+                  windows={timeWindows || []}
+                  onDelete={handleDeleteWindow}
+                  onEdit={handleStartEdit}
+                  onOpenDialog={() => setIsAddWindowDialogOpen(true)}
+                />
+              )}
             </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Bitte wählen Sie zuerst eine Immobilie aus, um Zeitfenster zu verwalten.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            Bitte wählen Sie zuerst eine Immobilie aus, um Zeitfenster zu verwalten.
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
