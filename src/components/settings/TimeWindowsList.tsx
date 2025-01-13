@@ -14,6 +14,7 @@ interface TimeWindow {
 
 interface TimeSlot {
   id: string;
+  slot_date: string;  // Added this property to match the database schema
   start_time: string;
   end_time: string;
   slot_duration_minutes: number;
