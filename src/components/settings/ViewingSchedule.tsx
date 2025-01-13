@@ -62,7 +62,7 @@ export function ViewingSchedule() {
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", selectedProperty)
-        .eq("slot_date", selectedDate?.toISOString().split('T')[0]);
+        .eq("slot_date", format(selectedDate!, 'yyyy-MM-dd')); // Format date correctly
 
       if (error) throw error;
       return data;
@@ -79,9 +79,11 @@ export function ViewingSchedule() {
       return;
     }
 
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd'); // Format date correctly
+
     const { error } = await supabase.from("property_viewing_slots").insert({
       property_id: selectedProperty,
-      slot_date: selectedDate.toISOString().split('T')[0],
+      slot_date: formattedDate,
       start_time: startTime,
       end_time: endTime,
       slot_duration_minutes: parseInt(slotDuration),
