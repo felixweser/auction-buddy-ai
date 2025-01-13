@@ -92,10 +92,18 @@ export function ViewingSchedule() {
     return new Set(allViewingSlots.map(slot => slot.day_of_week));
   }, [allViewingSlots]);
 
+  // Function to check if a date is in the past (including today)
+  const isPastDate = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
   // Custom modifiers for the calendar
   const modifiers = useMemo(() => ({
     hasSlots: (date: Date) => {
-      // Check if this day of the week has any slots for the selected property
+      // Only show slots for future dates
+      if (isPastDate(date)) return false;
       return daysWithSlots.has(date.getDay());
     }
   }), [daysWithSlots]);
@@ -202,7 +210,7 @@ export function ViewingSchedule() {
             value={selectedProperty || ""}
             onValueChange={(value) => {
               setSelectedProperty(value);
-              setSelectedDate(undefined); // Reset selected date when property changes
+              setSelectedDate(undefined);
             }}
           >
             <SelectTrigger>
@@ -228,9 +236,12 @@ export function ViewingSchedule() {
                   locale={de}
                   modifiers={modifiers}
                   modifiersStyles={modifiersStyles}
+                  disabled={isPastDate}
+                  fromDate={new Date()} // Only allow future dates
                 />
                 <div className="mt-2 text-sm text-muted-foreground">
                   <p>Tage mit Besichtigungsterminen sind hervorgehoben</p>
+                  <p>Vergangene Tage sind nicht auswählbar</p>
                 </div>
               </div>
 
