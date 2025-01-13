@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Toaster } from "@/components/ui/toaster";
 
 interface BookingDialogProps {
   propertyId: string;
@@ -180,83 +181,86 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
   const availableTimeSlots = getAvailableTimeSlots();
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Besichtigungstermin auswählen</DialogTitle>
-          <DialogDescription>
-            Wählen Sie einen Tag und eine Uhrzeit für die Besichtigung von {propertyTitle}.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4">
-          {isLoading ? (
-            <p className="text-center text-muted-foreground">Lade Termine...</p>
-          ) : (
-            <>
-              <div className="mb-6">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  disabled={isDateDisabled}
-                  locale={de}
-                  className="rounded-md border"
-                  modifiers={{
-                    hasSlots: (date) => {
-                      if (isBefore(date, startOfDay(new Date()))) return false;
-                      const dateStr = date.toISOString().split('T')[0];
-                      return availableDates.includes(dateStr);
-                    }
-                  }}
-                  modifiersStyles={{
-                    hasSlots: {
-                      color: 'hsl(var(--primary))',
-                      backgroundColor: 'hsl(var(--primary) / 0.1)',
-                      borderRadius: 'var(--radius)'
-                    }
-                  }}
-                />
-                <p className="text-sm text-muted-foreground mt-2 text-center">
-                  Tage ohne Verfügbarkeit sind ausgegraut
-                </p>
-              </div>
-              
-              {selectedDate && (
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">
-                    Verfügbare Zeiten am {format(selectedDate, 'EEEE, dd. MMMM', { locale: de })}:
-                  </h3>
-                  {availableTimeSlots.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      {availableTimeSlots.map((slot, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          onClick={() => handleTimeSelect(slot)}
-                          className="text-sm hover:bg-primary hover:text-primary-foreground"
-                        >
-                          {slot.start} - {slot.end}
-                        </Button>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground">
-                      Keine Termine an diesem Tag verfügbar
-                    </p>
-                  )}
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        if (!open) onClose();
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Besichtigungstermin auswählen</DialogTitle>
+            <DialogDescription>
+              Wählen Sie einen Tag und eine Uhrzeit für die Besichtigung von {propertyTitle}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {isLoading ? (
+              <p className="text-center text-muted-foreground">Lade Termine...</p>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    disabled={isDateDisabled}
+                    locale={de}
+                    className="rounded-md border"
+                    modifiers={{
+                      hasSlots: (date) => {
+                        if (isBefore(date, startOfDay(new Date()))) return false;
+                        const dateStr = date.toISOString().split('T')[0];
+                        return availableDates.includes(dateStr);
+                      }
+                    }}
+                    modifiersStyles={{
+                      hasSlots: {
+                        color: 'hsl(var(--primary))',
+                        backgroundColor: 'hsl(var(--primary) / 0.1)',
+                        borderRadius: 'var(--radius)'
+                      }
+                    }}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2 text-center">
+                    Tage ohne Verfügbarkeit sind ausgegraut
+                  </p>
                 </div>
-              )}
-            </>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Abbrechen
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+                
+                {selectedDate && (
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">
+                      Verfügbare Zeiten am {format(selectedDate, 'EEEE, dd. MMMM', { locale: de })}:
+                    </h3>
+                    {availableTimeSlots.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {availableTimeSlots.map((slot, index) => (
+                          <Button
+                            key={index}
+                            variant="outline"
+                            onClick={() => handleTimeSelect(slot)}
+                            className="text-sm hover:bg-primary hover:text-primary-foreground"
+                          >
+                            {slot.start} - {slot.end}
+                          </Button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-muted-foreground">
+                        Keine Termine an diesem Tag verfügbar
+                      </p>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>
+              Abbrechen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Toaster />
+    </>
   );
 }
