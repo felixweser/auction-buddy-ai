@@ -147,6 +147,38 @@ export function ViewingSchedule() {
     }
   };
 
+  const handleDeleteSlot = async (slotId: string) => {
+    const { error } = await supabase
+      .from("property_viewing_slots")
+      .delete()
+      .eq("id", slotId);
+
+    if (error) {
+      toast({
+        title: "Fehler",
+        description: "Fehler beim Löschen des Besichtigungstermins",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Erfolg",
+      description: "Besichtigungstermin erfolgreich gelöscht",
+    });
+
+    refetchSlots();
+  };
+
+  const handleEditSlot = (slot: any) => {
+    setStartTime(slot.start_time);
+    setEndTime(slot.end_time);
+    setSlotDuration(slot.slot_duration_minutes.toString());
+    setBufferTime(slot.buffer_minutes.toString());
+    setEditingSlotId(slot.id);
+    setIsAddSlotDialogOpen(true);
+  };
+
   const resetForm = () => {
     setStartTime("");
     setEndTime("");
