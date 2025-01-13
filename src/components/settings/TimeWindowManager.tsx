@@ -2,50 +2,21 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { PropertySelect } from "./time-windows/PropertySelect";
+import { TimeWindowDialog } from "./time-windows/TimeWindowDialog";
 import { TimeWindowsList } from "./TimeWindowsList";
-import { TimeWindowForm } from "./TimeWindowForm";
-
-interface TimeWindow {
-  id: string;
-  date: string;
-  window_start: string;
-  window_end: string;
-  is_available: boolean;
-  property_id: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-}
+import { useTimeWindows } from "./time-windows/useTimeWindows";
 
 export function TimeWindowManager() {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isAddWindowDialogOpen, setIsAddWindowDialogOpen] = useState(false);
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
   const [editingWindow, setEditingWindow] = useState<TimeWindow | null>(null);
 
   const { data: session } = useQuery({
@@ -76,164 +47,14 @@ export function TimeWindowManager() {
     },
   });
 
-  const { data: timeWindows, refetch: refetchWindows } = useQuery({
-    queryKey: ["time-windows", selectedProperty, selectedDate],
-    enabled: !!selectedProperty && !!selectedDate && !!session?.user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("time_windows")
-        .select("*")
-        .eq("property_id", selectedProperty)
-        .eq("date", format(selectedDate!, 'yyyy-MM-dd'));
-
-      if (error) throw error;
-      return data as TimeWindow[];
-    },
+  const { timeWindows, handleAddWindow, handleEditWindow, handleDeleteWindow, refetchWindows } = useTimeWindows({
+    selectedProperty,
+    selectedDate,
+    session,
   });
-
-  const validateTimeWindow = (start: string, end: string) => {
-    const startTime = new Date(`2000-01-01T${start}`);
-    const endTime = new Date(`2000-01-01T${end}`);
-    
-    if (startTime >= endTime) {
-      throw new Error("Die Startzeit muss vor der Endzeit liegen");
-    }
-  };
-
-  const handleAddWindow = async () => {
-    if (!session?.user) {
-      toast({
-        title: "Nicht authentifiziert",
-        description: "Bitte melden Sie sich an",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    if (!selectedProperty || !selectedDate || !startTime || !endTime) {
-      toast({
-        title: "Fehlende Informationen",
-        description: "Bitte füllen Sie alle Felder aus",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      validateTimeWindow(startTime, endTime);
-      
-      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-
-      const { error } = await supabase.from("time_windows").insert({
-        user_id: session.user.id,
-        property_id: selectedProperty,
-        date: formattedDate,
-        window_start: startTime,
-        window_end: endTime,
-        is_available: true,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Erfolg",
-        description: "Zeitfenster erfolgreich hinzugefügt",
-      });
-
-      setIsAddWindowDialogOpen(false);
-      resetForm();
-      refetchWindows();
-    } catch (error) {
-      console.error("Error adding time window:", error);
-      toast({
-        title: "Fehler",
-        description: error instanceof Error ? error.message : "Fehler beim Hinzufügen des Zeitfensters",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEditWindow = async () => {
-    if (!editingWindow || !session?.user) return;
-
-    try {
-      validateTimeWindow(startTime, endTime);
-
-      // First, delete existing slots for this time window
-      const { error: deleteError } = await supabase
-        .from("property_viewing_slots")
-        .delete()
-        .eq("slot_date", editingWindow.date)
-        .gte("start_time", editingWindow.window_start)
-        .lte("end_time", editingWindow.window_end);
-
-      if (deleteError) throw deleteError;
-
-      // Then update the time window
-      const { error: updateError } = await supabase
-        .from("time_windows")
-        .update({
-          window_start: startTime,
-          window_end: endTime,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", editingWindow.id);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: "Erfolg",
-        description: "Zeitfenster erfolgreich aktualisiert",
-      });
-
-      setIsAddWindowDialogOpen(false);
-      setEditingWindow(null);
-      resetForm();
-      refetchWindows();
-    } catch (error) {
-      console.error("Error updating time window:", error);
-      toast({
-        title: "Fehler",
-        description: error instanceof Error ? error.message : "Fehler beim Aktualisieren des Zeitfensters",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteWindow = async (windowId: string) => {
-    const { error } = await supabase
-      .from("time_windows")
-      .delete()
-      .eq("id", windowId);
-
-    if (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Löschen des Zeitfensters",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Erfolg",
-      description: "Zeitfenster erfolgreich gelöscht",
-    });
-
-    refetchWindows();
-  };
-
-  const resetForm = () => {
-    setStartTime("");
-    setEndTime("");
-    setEditingWindow(null);
-  };
 
   const handleStartEdit = (window: TimeWindow) => {
     setEditingWindow(window);
-    setStartTime(window.window_start);
-    setEndTime(window.window_end);
     setIsAddWindowDialogOpen(true);
   };
 
@@ -244,24 +65,14 @@ export function TimeWindowManager() {
           <CardTitle>Zeitfenster Verwaltung</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Select
-            value={selectedProperty || ""}
-            onValueChange={(value) => {
+          <PropertySelect
+            properties={properties}
+            selectedProperty={selectedProperty}
+            onPropertyChange={(value) => {
               setSelectedProperty(value);
               setSelectedDate(new Date());
             }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Immobilie auswählen" />
-            </SelectTrigger>
-            <SelectContent>
-              {properties?.map((property) => (
-                <SelectItem key={property.id} value={property.id}>
-                  {property.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
 
           {selectedProperty ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -276,48 +87,28 @@ export function TimeWindowManager() {
                 />
               </div>
 
+              <TimeWindowDialog
+                isOpen={isAddWindowDialogOpen}
+                onOpenChange={setIsAddWindowDialogOpen}
+                selectedDate={selectedDate}
+                editingWindow={editingWindow}
+                onAdd={handleAddWindow}
+                onEdit={handleEditWindow}
+                onClose={() => {
+                  setEditingWindow(null);
+                  setIsAddWindowDialogOpen(false);
+                }}
+              />
+
               <div className="space-y-4">
                 {selectedDate && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">
-                        Zeitfenster für {format(selectedDate, "EEEE, d. MMMM", { locale: de })}
-                      </h3>
-                      <Dialog open={isAddWindowDialogOpen} onOpenChange={setIsAddWindowDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button onClick={() => {
-                            resetForm();
-                            setIsAddWindowDialogOpen(true);
-                          }}>
-                            Zeitfenster hinzufügen
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>
-                              {editingWindow ? "Zeitfenster bearbeiten" : "Neues Zeitfenster hinzufügen"}
-                            </DialogTitle>
-                          </DialogHeader>
-                          <TimeWindowForm
-                            date={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-                            startTime={startTime}
-                            endTime={endTime}
-                            onDateChange={() => {}} // Date is controlled by calendar
-                            onStartTimeChange={setStartTime}
-                            onEndTimeChange={setEndTime}
-                            onSubmit={editingWindow ? handleEditWindow : handleAddWindow}
-                            isEditing={!!editingWindow}
-                          />
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-
-                    <TimeWindowsList
-                      windows={timeWindows || []}
-                      onDelete={handleDeleteWindow}
-                      onEdit={handleStartEdit}
-                    />
-                  </>
+                  <TimeWindowsList
+                    date={selectedDate}
+                    windows={timeWindows || []}
+                    onDelete={handleDeleteWindow}
+                    onEdit={handleStartEdit}
+                    onOpenDialog={() => setIsAddWindowDialogOpen(true)}
+                  />
                 )}
               </div>
             </div>
