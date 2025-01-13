@@ -164,6 +164,25 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         return;
       }
 
+      // Check if the slot is already booked
+      const { data: existingBooking } = await supabase
+        .from("property_viewing_bookings")
+        .select("*")
+        .eq("viewing_slot_id", selectedSlot.slotId)
+        .eq("booking_date", selectedDate.toISOString().split('T')[0])
+        .eq("start_time", `${selectedSlot.start}:00`)
+        .single();
+
+      if (existingBooking) {
+        toast({
+          title: "Termin nicht verfügbar",
+          description: "Dieser Termin wurde leider bereits gebucht. Bitte wählen Sie einen anderen Termin.",
+          variant: "destructive",
+        });
+        setShowConfirmDialog(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("property_viewing_bookings")
         .insert({
@@ -175,7 +194,22 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           end_time: `${selectedSlot.end}:00`,
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Termin nicht verfügbar",
+            description: "Dieser Termin wurde leider bereits gebucht. Bitte wählen Sie einen anderen Termin.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Fehler",
+            description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
 
       toast({
         title: "Termin gebucht",
