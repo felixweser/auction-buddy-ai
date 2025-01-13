@@ -32,9 +32,12 @@ interface TimeWindowsListProps {
 export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListProps) {
   const [expandedWindows, setExpandedWindows] = useState<Record<string, boolean>>({});
 
+  // Fetch slots for all dates in the windows
   const { data: slotsData } = useQuery({
-    queryKey: ["timeWindowSlots"],
+    queryKey: ["timeWindowSlots", windows.map(w => w.date).join(',')],
     queryFn: async () => {
+      if (windows.length === 0) return [];
+      
       const { data, error } = await supabase
         .from("property_viewing_slots")
         .select("*")
@@ -56,18 +59,24 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
     }));
   };
 
-  if (windows.length === 0) {
-    return (
-      <p className="text-muted-foreground">
-        Keine Zeitfenster verfügbar
-      </p>
-    );
-  }
+  // Helper function to check if a slot falls within a time window
+  const isSlotInWindow = (slot: TimeSlot, window: TimeWindow) => {
+    const slotStart = slot.start_time;
+    const slotEnd = slot.end_time;
+    const windowStart = window.window_start;
+    const windowEnd = window.window_end;
 
-  const getSlotsByDate = (date: string) => {
-    const slots = slotsData?.filter((slot) => slot.slot_date === date) || [];
-    // Sort slots by start time
-    return slots.sort((a, b) => a.start_time.localeCompare(b.start_time));
+    return (
+      slot.slot_date === window.date &&
+      slotStart >= windowStart &&
+      slotEnd <= windowEnd
+    );
+  };
+
+  // Get slots for a specific time window
+  const getWindowSlots = (window: TimeWindow) => {
+    const windowSlots = slotsData?.filter(slot => isSlotInWindow(slot, window)) || [];
+    return windowSlots.sort((a, b) => a.start_time.localeCompare(b.start_time));
   };
 
   // Sort windows first by date, then by start time
@@ -76,6 +85,14 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
     if (dateCompare !== 0) return dateCompare;
     return a.window_start.localeCompare(b.window_start);
   });
+
+  if (windows.length === 0) {
+    return (
+      <p className="text-muted-foreground">
+        Keine Zeitfenster verfügbar
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -123,10 +140,9 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
             </div>
           </div>
           
-          {/* Display slots for this time window only if expanded */}
           {expandedWindows[window.id] && (
             <div className="ml-4 space-y-2">
-              {getSlotsByDate(window.date).map((slot) => (
+              {getWindowSlots(window).map((slot) => (
                 <div
                   key={slot.id}
                   className="p-2 bg-muted/50 rounded text-sm flex justify-between items-center"
