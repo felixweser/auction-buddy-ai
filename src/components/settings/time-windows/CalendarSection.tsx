@@ -36,22 +36,8 @@ export function CalendarSection({ selectedDate, onDateSelect, selectedProperty }
         locale={de}
         fromDate={new Date()}
         modifiers={{ hasSlot: daysWithSlots || [] }}
-        modifiersStyles={{
-          hasSlot: {
-            textDecoration: "none",
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: "0",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              backgroundColor: "hsl(var(--primary))",
-            }
-          }
+        modifiersClassNames={{
+          hasSlot: "relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-primary"
         }}
       />
     </div>
