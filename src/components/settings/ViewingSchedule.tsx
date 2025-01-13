@@ -119,12 +119,14 @@ export function ViewingSchedule() {
     hasSlots: {
       backgroundColor: 'hsl(var(--primary) / 0.1)',
       color: 'hsl(var(--primary))',
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      borderRadius: 'var(--radius)'
     },
     today: {
       backgroundColor: 'hsl(var(--accent))',
       color: 'hsl(var(--accent-foreground))',
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      borderRadius: 'var(--radius)'
     }
   };
 
