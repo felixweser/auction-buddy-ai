@@ -48,6 +48,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
   const [showViewingDialog, setShowViewingDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{
     start: string;
     end: string;
@@ -220,14 +221,8 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         return;
       }
 
-      toast({
-        title: "Termin gebucht",
-        description: "Ihre Besichtigung wurde erfolgreich gebucht!",
-      });
       setShowConfirmDialog(false);
-      setShowViewingDialog(false);
-      setSelectedDate(undefined);
-      setSelectedSlot(null);
+      setShowSuccessDialog(true);
     } catch (error) {
       toast({
         title: "Fehler",
@@ -350,6 +345,38 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Besichtigungstermin erfolgreich gebucht!</DialogTitle>
+            <DialogDescription>
+              Ihr Besichtigungstermin wurde erfolgreich gebucht für:
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <p className="font-medium">{title}</p>
+                <p className="mt-2">
+                  Datum: {selectedDate && format(selectedDate, 'EEEE, dd. MMMM yyyy', { locale: de })}
+                </p>
+                <p>
+                  Uhrzeit: {selectedSlot?.start} - {selectedSlot?.end} Uhr
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              onClick={() => {
+                setShowSuccessDialog(false);
+                setShowViewingDialog(false);
+                setSelectedDate(undefined);
+                setSelectedSlot(null);
+              }}
+            >
+              Schließen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Carousel className="w-full h-full">
         <CarouselContent>
