@@ -43,22 +43,22 @@ export default function Auth() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to your account to continue
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-primary">Willkommen</h1>
+          <p className="text-muted-foreground">
+            Melden Sie sich an, um fortzufahren
           </p>
         </div>
 
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="mb-4">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
-        <div className="rounded-lg border bg-card p-8">
+        <div className="rounded-lg border bg-card p-8 shadow-sm">
           <SupabaseAuth
             supabaseClient={supabase}
             appearance={{
@@ -66,13 +66,35 @@ export default function Auth() {
               variables: {
                 default: {
                   colors: {
-                    brand: 'rgb(var(--foreground))',
-                    brandAccent: 'rgb(var(--primary))',
+                    brand: 'hsl(var(--primary))',
+                    brandAccent: 'hsl(var(--primary))',
+                    brandButtonText: 'hsl(var(--primary-foreground))',
+                    defaultButtonBackground: 'hsl(var(--secondary))',
+                    defaultButtonBackgroundHover: 'hsl(var(--accent))',
+                    inputBackground: 'hsl(var(--background))',
+                    inputBorder: 'hsl(var(--border))',
+                    inputBorderHover: 'hsl(var(--ring))',
+                    inputBorderFocus: 'hsl(var(--ring))',
+                  },
+                  borderWidths: {
+                    buttonBorderWidth: '1px',
+                    inputBorderWidth: '1px',
+                  },
+                  radii: {
+                    borderRadiusButton: 'var(--radius)',
+                    buttonBorderRadius: 'var(--radius)',
+                    inputBorderRadius: 'var(--radius)',
                   },
                 },
               },
+              className: {
+                container: 'space-y-4',
+                label: 'text-sm font-medium text-foreground',
+                button: 'w-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90',
+                input: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+              }
             }}
-            theme="light"
+            theme="custom"
             providers={[]}
           />
         </div>
