@@ -123,10 +123,22 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         const slotEndTime = addMinutes(currentTime, slot.slot_duration_minutes);
         if (!isBefore(slotEndTime, endTime)) break;
 
-        const isBooked = viewingData.bookings.some(booking => 
-          booking.start_time === format(currentTime, 'HH:mm:ss') &&
-          booking.end_time === format(slotEndTime, 'HH:mm:ss')
-        );
+        const currentTimeStr = format(currentTime, 'HH:mm:ss');
+        const slotEndTimeStr = format(slotEndTime, 'HH:mm:ss');
+
+        // Check if there's any booking that overlaps with this time slot
+        const isBooked = viewingData.bookings.some(booking => {
+          const bookingStart = new Date(`2024-01-01T${booking.start_time}`);
+          const bookingEnd = new Date(`2024-01-01T${booking.end_time}`);
+          const slotStart = new Date(`2024-01-01T${currentTimeStr}`);
+          const slotEnd = new Date(`2024-01-01T${slotEndTimeStr}`);
+
+          // Check for any overlap between the booking and the slot
+          return (
+            (slotStart <= bookingEnd && slotEnd >= bookingStart) ||
+            (bookingStart <= slotEnd && bookingEnd >= slotStart)
+          );
+        });
 
         if (!isBooked) {
           timeSlots.push({
