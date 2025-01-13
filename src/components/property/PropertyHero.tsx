@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, addMinutes, isBefore, startOfDay } from "date-fns";
 import { de } from "date-fns/locale";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
@@ -38,30 +38,83 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
 
   const images = [imageUrl, imageUrl, imageUrl];
 
-  const { data: viewingSlots, isLoading } = useQuery({
-    queryKey: ["viewingSlots", details.property_id],
+  // Fetch viewing slots and existing bookings
+  const { data: viewingData, isLoading } = useQuery({
+    queryKey: ["viewingSlots", details.property_id, selectedDate],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch viewing slots
+      const { data: slots, error: slotsError } = await supabase
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", details.property_id)
         .order("day_of_week")
         .order("start_time");
 
-      if (error) throw error;
-      return data;
+      if (slotsError) throw slotsError;
+
+      // If a date is selected, fetch bookings for that date
+      let bookings = [];
+      if (selectedDate) {
+        const { data: bookingsData, error: bookingsError } = await supabase
+          .from("property_viewing_bookings")
+          .select("*")
+          .eq("property_id", details.property_id)
+          .eq("booking_date", selectedDate.toISOString().split('T')[0]);
+
+        if (bookingsError) throw bookingsError;
+        bookings = bookingsData;
+      }
+
+      return {
+        slots: slots || [],
+        bookings: bookings || []
+      };
     },
     enabled: showViewingDialog,
   });
 
   // Get unique days of the week with available slots
-  const availableDays = viewingSlots 
-    ? [...new Set(viewingSlots.map(slot => slot.day_of_week))]
+  const availableDays = viewingData?.slots 
+    ? [...new Set(viewingData.slots.map(slot => slot.day_of_week))]
     : [];
 
-  const availableTimeSlots = viewingSlots?.filter(
-    (slot) => slot.day_of_week === selectedDate?.getDay()
-  ) || [];
+  // Get available slots for the selected date
+  const getAvailableTimeSlots = () => {
+    if (!selectedDate || !viewingData?.slots) return [];
+
+    const daySlots = viewingData.slots.filter(
+      (slot) => slot.day_of_week === selectedDate.getDay()
+    );
+
+    const timeSlots = [];
+    for (const slot of daySlots) {
+      const startTime = new Date(`2024-01-01T${slot.start_time}`);
+      const endTime = new Date(`2024-01-01T${slot.end_time}`);
+
+      let currentTime = startTime;
+      while (isBefore(currentTime, endTime)) {
+        const slotEndTime = addMinutes(currentTime, slot.slot_duration_minutes);
+        if (!isBefore(slotEndTime, endTime)) break;
+
+        const isBooked = viewingData.bookings.some(booking => 
+          booking.start_time === format(currentTime, 'HH:mm:ss') &&
+          booking.end_time === format(slotEndTime, 'HH:mm:ss')
+        );
+
+        if (!isBooked) {
+          timeSlots.push({
+            start: format(currentTime, 'HH:mm'),
+            end: format(slotEndTime, 'HH:mm'),
+            slotId: slot.id
+          });
+        }
+
+        currentTime = addMinutes(slotEndTime, slot.buffer_minutes);
+      }
+    }
+
+    return timeSlots;
+  };
 
   const handleVirtualTour = () => {
     toast({
@@ -74,20 +127,57 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     setSelectedDate(date);
   };
 
-  const handleTimeSelect = (slot: any) => {
-    toast({
-      title: "Termin angefragt",
-      description: "Wir werden uns in Kürze bei Ihnen melden!",
-    });
-    setShowViewingDialog(false);
-    setSelectedDate(undefined);
+  const handleTimeSelect = async (slot: { start: string; end: string; slotId: string }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Fehler",
+          description: "Bitte melden Sie sich an, um einen Termin zu buchen.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from("property_viewing_bookings")
+        .insert({
+          viewing_slot_id: slot.slotId,
+          property_id: details.property_id,
+          booked_by: user.id,
+          booking_date: selectedDate?.toISOString().split('T')[0],
+          start_time: `${slot.start}:00`,
+          end_time: `${slot.end}:00`,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Termin gebucht",
+        description: "Ihre Besichtigung wurde erfolgreich gebucht!",
+      });
+      setShowViewingDialog(false);
+      setSelectedDate(undefined);
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Function to determine if a date should be disabled
   const isDateDisabled = (date: Date) => {
+    // Disable past dates
+    if (isBefore(date, startOfDay(new Date()))) return true;
+    
+    // Disable days without available slots
     const dayOfWeek = date.getDay();
     return !availableDays.includes(dayOfWeek);
   };
+
+  const availableTimeSlots = getAvailableTimeSlots();
 
   return (
     <div className="relative h-[70vh] group">
@@ -126,6 +216,19 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
                     disabled={isDateDisabled}
                     locale={de}
                     className="rounded-md border"
+                    modifiers={{
+                      hasSlots: (date) => {
+                        if (isBefore(date, startOfDay(new Date()))) return false;
+                        return availableDays.includes(date.getDay());
+                      }
+                    }}
+                    modifiersStyles={{
+                      hasSlots: {
+                        color: 'hsl(var(--primary))',
+                        backgroundColor: 'hsl(var(--primary) / 0.1)',
+                        borderRadius: 'var(--radius)'
+                      }
+                    }}
                   />
                   <p className="text-sm text-muted-foreground mt-2 text-center">
                     Tage ohne Verfügbarkeit sind ausgegraut
@@ -139,15 +242,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
                     </h3>
                     {availableTimeSlots.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2">
-                        {availableTimeSlots.map((slot) => (
+                        {availableTimeSlots.map((slot, index) => (
                           <Button
-                            key={slot.id}
+                            key={index}
                             variant="outline"
                             onClick={() => handleTimeSelect(slot)}
-                            className="text-sm"
+                            className="text-sm hover:bg-primary hover:text-primary-foreground"
                           >
-                            {format(new Date(`2024-01-01T${slot.start_time}`), 'HH:mm')} - 
-                            {format(new Date(`2024-01-01T${slot.end_time}`), 'HH:mm')}
+                            {slot.start} - {slot.end}
                           </Button>
                         ))}
                       </div>
