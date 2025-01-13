@@ -165,13 +165,22 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
       }
 
       // Check if the slot is already booked
-      const { data: existingBooking } = await supabase
+      const { data: existingBooking, error: checkError } = await supabase
         .from("property_viewing_bookings")
         .select("*")
         .eq("viewing_slot_id", selectedSlot.slotId)
         .eq("booking_date", selectedDate.toISOString().split('T')[0])
         .eq("start_time", `${selectedSlot.start}:00`)
-        .single();
+        .maybeSingle();
+
+      if (checkError) {
+        toast({
+          title: "Fehler",
+          description: "Der Termin konnte nicht überprüft werden. Bitte versuchen Sie es später erneut.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (existingBooking) {
         toast({
