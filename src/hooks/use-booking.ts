@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, addMinutes, isBefore } from "date-fns";
+import { format, isBefore } from "date-fns";
 import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,7 @@ export function useBooking(propertyId: string, onClose: () => void) {
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", propertyId)
-        .gte("slot_date", startOfDay(new Date()).toISOString())
+        .gte("slot_date", format(startOfDay(new Date()), 'yyyy-MM-dd'))
         .order("slot_date")
         .order("start_time");
 
@@ -49,14 +49,14 @@ export function useBooking(propertyId: string, onClose: () => void) {
   const getAvailableTimeSlots = () => {
     if (!selectedDate || !viewingData?.slots) return [];
 
-    const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
     const daySlots = viewingData.slots.filter(
       (slot) => slot.slot_date === selectedDateStr
     );
 
     return daySlots.map(slot => ({
-      start: format(new Date(`2024-01-01T${slot.start_time}`), 'HH:mm'),
-      end: format(new Date(`2024-01-01T${slot.end_time}`), 'HH:mm'),
+      start: format(new Date(`2000-01-01T${slot.start_time}`), 'HH:mm'),
+      end: format(new Date(`2000-01-01T${slot.end_time}`), 'HH:mm'),
       slotId: slot.id
     }));
   };
@@ -81,7 +81,7 @@ export function useBooking(propertyId: string, onClose: () => void) {
         viewing_slot_id: slot.slotId,
         property_id: propertyId,
         booked_by: user.id,
-        booking_date: selectedDate.toISOString().split('T')[0],
+        booking_date: format(selectedDate, 'yyyy-MM-dd'),
         start_time: `${slot.start}:00`,
         end_time: `${slot.end}:00`,
       };
