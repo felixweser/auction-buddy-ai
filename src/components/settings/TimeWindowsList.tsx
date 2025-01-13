@@ -4,6 +4,7 @@ import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { TimeSlotsList } from "./TimeSlotsList";
 
 interface TimeWindow {
   id: string;
