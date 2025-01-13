@@ -253,7 +253,7 @@ export type Database = {
           created_at: string
           end_time: string
           id: string
-          property_id: string
+          property_id: string | null
           slot_date: string
           slot_duration_minutes: number
           start_time: string
@@ -263,7 +263,7 @@ export type Database = {
           created_at?: string
           end_time: string
           id?: string
-          property_id: string
+          property_id?: string | null
           slot_date: string
           slot_duration_minutes?: number
           start_time: string
@@ -273,7 +273,7 @@ export type Database = {
           created_at?: string
           end_time?: string
           id?: string
-          property_id?: string
+          property_id?: string | null
           slot_date?: string
           slot_duration_minutes?: number
           start_time?: string
