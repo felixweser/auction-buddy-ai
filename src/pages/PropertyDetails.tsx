@@ -12,11 +12,14 @@ import { KeyMetrics } from "@/components/property/KeyMetrics";
 import { SatelliteView } from "@/components/property/SatelliteView";
 import { LocationAnalysis } from "@/components/property/LocationAnalysis";
 import { PropertySpecs } from "@/components/property/PropertySpecs";
+import { BookingDialog } from "@/components/property/BookingDialog";
+import { useState } from "react";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
 
   const { data: property, isLoading, error } = useQuery({
     queryKey: ["property", id],
@@ -86,14 +89,21 @@ const PropertyDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Button
-        variant="agora"
-        className="fixed top-6 left-6 z-10"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft />
-        <span>Zurück</span>
-      </Button>
+      <div className="fixed top-6 left-6 right-6 z-10 flex justify-between">
+        <Button
+          variant="agora"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft />
+          <span>Zurück</span>
+        </Button>
+        <Button
+          variant="agora"
+          onClick={() => setIsBookingDialogOpen(true)}
+        >
+          Besichtigung buchen
+        </Button>
+      </div>
 
       <PropertyHero
         imageUrl={property.image_url}
@@ -125,6 +135,13 @@ const PropertyDetails = () => {
         price={property.price}
         isNegotiable={property.is_negotiable}
         description={property.description}
+      />
+
+      <BookingDialog
+        propertyId={property.id}
+        propertyTitle={property.title}
+        isOpen={isBookingDialogOpen}
+        onClose={() => setIsBookingDialogOpen(false)}
       />
     </div>
   );

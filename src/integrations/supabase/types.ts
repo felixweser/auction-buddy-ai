@@ -253,6 +253,7 @@ export type Database = {
           created_at: string
           end_time: string
           id: string
+          is_booked: boolean
           property_id: string | null
           slot_date: string
           slot_duration_minutes: number
@@ -263,6 +264,7 @@ export type Database = {
           created_at?: string
           end_time: string
           id?: string
+          is_booked?: boolean
           property_id?: string | null
           slot_date: string
           slot_duration_minutes?: number
@@ -273,6 +275,7 @@ export type Database = {
           created_at?: string
           end_time?: string
           id?: string
+          is_booked?: boolean
           property_id?: string | null
           slot_date?: string
           slot_duration_minutes?: number
