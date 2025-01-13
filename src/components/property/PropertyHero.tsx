@@ -55,6 +55,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     slotId: string;
   } | null>(null);
 
+  const resetAllStates = () => {
+    setShowViewingDialog(false);
+    setSelectedDate(undefined);
+    setShowConfirmDialog(false);
+    setShowSuccessDialog(false);
+    setSelectedSlot(null);
+  };
+
   const images = [imageUrl, imageUrl, imageUrl];
 
   // Fetch viewing slots and existing bookings
@@ -262,7 +270,10 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         </Button>
       </div>
 
-      <Dialog open={showViewingDialog} onOpenChange={setShowViewingDialog}>
+      <Dialog open={showViewingDialog} onOpenChange={(open) => {
+        if (!open) resetAllStates();
+        else setShowViewingDialog(true);
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Besichtigungstermin auswählen</DialogTitle>
@@ -330,7 +341,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialog 
+        open={showConfirmDialog} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowConfirmDialog(false);
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Besichtigungstermin bestätigen</AlertDialogTitle>
@@ -346,7 +364,12 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <Dialog 
+        open={showSuccessDialog} 
+        onOpenChange={(open) => {
+          if (!open) resetAllStates();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Besichtigungstermin erfolgreich gebucht!</DialogTitle>
@@ -364,14 +387,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button 
-              onClick={() => {
-                setShowSuccessDialog(false);
-                setShowViewingDialog(false);
-                setSelectedDate(undefined);
-                setSelectedSlot(null);
-              }}
-            >
+            <Button onClick={resetAllStates}>
               Schließen
             </Button>
           </DialogFooter>
