@@ -99,18 +99,7 @@ export function useTimeWindows({ selectedProperty, selectedDate, session }: UseT
     try {
       validateTimeWindow(startTime, endTime);
 
-      // First, delete existing slots for this time window
-      const { error: deleteError } = await supabase
-        .from("property_viewing_slots")
-        .delete()
-        .eq("slot_date", editingWindow.date)
-        .gte("start_time", editingWindow.window_start)
-        .lte("end_time", editingWindow.window_end);
-
-      if (deleteError) throw deleteError;
-
-      // Then update the time window
-      const { error: updateError } = await supabase
+      const { error } = await supabase
         .from("time_windows")
         .update({
           window_start: startTime,
@@ -119,7 +108,7 @@ export function useTimeWindows({ selectedProperty, selectedDate, session }: UseT
         })
         .eq("id", editingWindow.id);
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
       toast({
         title: "Erfolg",
@@ -168,6 +157,5 @@ export function useTimeWindows({ selectedProperty, selectedDate, session }: UseT
     handleAddWindow,
     handleEditWindow,
     handleDeleteWindow,
-    refetchWindows,
   };
 }

@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { Calendar } from "@/components/ui/calendar";
+import { de } from "date-fns/locale";
+import { CalendarSection } from "./time-windows/CalendarSection";
 import { PropertySelect } from "./time-windows/PropertySelect";
 import { TimeWindowDialog } from "./time-windows/TimeWindowDialog";
 import { TimeWindowsList } from "./TimeWindowsList";
@@ -53,7 +53,6 @@ export function TimeWindowManager() {
     handleAddWindow,
     handleEditWindow,
     handleDeleteWindow,
-    refetchWindows
   } = useTimeWindows({
     selectedProperty,
     selectedDate,
@@ -83,16 +82,10 @@ export function TimeWindowManager() {
 
           {selectedProperty ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  className="border-0"
-                  locale={de}
-                  fromDate={new Date()}
-                />
-              </div>
+              <CalendarSection 
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+              />
 
               <TimeWindowDialog
                 isOpen={isAddWindowDialogOpen}
@@ -110,7 +103,6 @@ export function TimeWindowManager() {
               <div className="space-y-4">
                 {selectedDate && (
                   <TimeWindowsList
-                    date={selectedDate}
                     windows={timeWindows || []}
                     onDelete={handleDeleteWindow}
                     onEdit={handleStartEdit}
