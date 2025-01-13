@@ -30,7 +30,7 @@ const DAYS_OF_WEEK = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag",
 export function ViewingSchedule() {
   const { toast } = useToast();
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Initialize with current date
   const [isAddSlotDialogOpen, setIsAddSlotDialogOpen] = useState(false);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -105,6 +105,12 @@ export function ViewingSchedule() {
       // Only show slots for future dates
       if (isPastDate(date)) return false;
       return daysWithSlots.has(date.getDay());
+    },
+    today: (date: Date) => {
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
     }
   }), [daysWithSlots]);
 
@@ -113,6 +119,11 @@ export function ViewingSchedule() {
     hasSlots: {
       backgroundColor: 'hsl(var(--primary) / 0.1)',
       color: 'hsl(var(--primary))',
+      fontWeight: 'bold'
+    },
+    today: {
+      backgroundColor: 'hsl(var(--accent))',
+      color: 'hsl(var(--accent-foreground))',
       fontWeight: 'bold'
     }
   };
@@ -210,7 +221,7 @@ export function ViewingSchedule() {
             value={selectedProperty || ""}
             onValueChange={(value) => {
               setSelectedProperty(value);
-              setSelectedDate(undefined);
+              setSelectedDate(new Date()); // Reset to current date when property changes
             }}
           >
             <SelectTrigger>
@@ -238,6 +249,7 @@ export function ViewingSchedule() {
                   modifiersStyles={modifiersStyles}
                   disabled={isPastDate}
                   fromDate={new Date()} // Only allow future dates
+                  defaultMonth={selectedDate}
                 />
                 <div className="mt-2 text-sm text-muted-foreground">
                   <p>Tage mit Besichtigungsterminen sind hervorgehoben</p>
