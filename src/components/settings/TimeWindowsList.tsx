@@ -3,8 +3,6 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
-import { TimeSlotsList } from "./TimeSlotsList";
 
 interface TimeWindow {
   id: string;
@@ -16,12 +14,11 @@ interface TimeWindow {
 
 interface TimeSlot {
   id: string;
-  slot_date: string;
+  slot_date: string;  // Added this property to match the database schema
   start_time: string;
   end_time: string;
   slot_duration_minutes: number;
   buffer_minutes: number;
-  is_selected?: boolean;
 }
 
 interface TimeWindowsListProps {
@@ -31,8 +28,6 @@ interface TimeWindowsListProps {
 }
 
 export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListProps) {
-  const [selectedSlots, setSelectedSlots] = useState<Record<string, boolean>>({});
-
   const { data: slotsData } = useQuery({
     queryKey: ["timeWindowSlots"],
     queryFn: async () => {
@@ -50,20 +45,6 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
     enabled: windows.length > 0,
   });
 
-  const getSlotsByDate = (date: string) => {
-    return (slotsData?.filter((slot) => slot.slot_date === date) || []).map(slot => ({
-      ...slot,
-      is_selected: selectedSlots[slot.id] || false
-    }));
-  };
-
-  const handleSlotToggle = (slot: TimeSlot) => {
-    setSelectedSlots(prev => ({
-      ...prev,
-      [slot.id]: !prev[slot.id]
-    }));
-  };
-
   if (windows.length === 0) {
     return (
       <p className="text-muted-foreground">
@@ -71,6 +52,10 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
       </p>
     );
   }
+
+  const getSlotsByDate = (date: string) => {
+    return slotsData?.filter((slot) => slot.slot_date === date) || [];
+  };
 
   return (
     <div className="space-y-4">
@@ -109,12 +94,20 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
           
           {/* Display slots for this time window */}
           <div className="ml-4 space-y-2">
-            <TimeSlotsList
-              slots={getSlotsByDate(window.date)}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              onToggle={handleSlotToggle}
-            />
+            {getSlotsByDate(window.date).map((slot) => (
+              <div
+                key={slot.id}
+                className="p-2 bg-muted/50 rounded text-sm flex justify-between items-center"
+              >
+                <span>
+                  {format(new Date(`2024-01-01T${slot.start_time}`), "HH:mm", { locale: de })} -{" "}
+                  {format(new Date(`2024-01-01T${slot.end_time}`), "HH:mm", { locale: de })}
+                </span>
+                <span className="text-muted-foreground">
+                  {slot.slot_duration_minutes} Min. + {slot.buffer_minutes} Min. Puffer
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       ))}
