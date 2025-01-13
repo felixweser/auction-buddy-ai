@@ -3,13 +3,14 @@ import { MessagesTable } from './messages'
 import { ProfilesTable } from './profiles'
 import { PropertiesTable } from './properties'
 import { PropertyDetailsTable } from './property-details'
-import { PropertyViewingSettingsTable, PropertyViewingSlotsTable, TimeWindowsTable } from './viewing'
+import { PropertyViewingBookingsTable, PropertyViewingSettingsTable, PropertyViewingSlotsTable, TimeWindowsTable } from './viewing'
 
 export interface TablesDefinition {
   messages: MessagesTable
   profiles: ProfilesTable
   properties: PropertiesTable
   property_details: PropertyDetailsTable
+  property_viewing_bookings: PropertyViewingBookingsTable
   property_viewing_settings: PropertyViewingSettingsTable
   property_viewing_slots: PropertyViewingSlotsTable
   time_windows: TimeWindowsTable

@@ -1,5 +1,61 @@
 import { Json } from './base'
 
+export interface PropertyViewingBookingsTable {
+  Row: {
+    id: string
+    viewing_slot_id: string
+    property_id: string
+    booked_by: string
+    booking_date: string
+    start_time: string
+    end_time: string
+    created_at: string
+  }
+  Insert: {
+    id?: string
+    viewing_slot_id: string
+    property_id: string
+    booked_by: string
+    booking_date: string
+    start_time: string
+    end_time: string
+    created_at?: string
+  }
+  Update: {
+    id?: string
+    viewing_slot_id?: string
+    property_id?: string
+    booked_by?: string
+    booking_date?: string
+    start_time?: string
+    end_time?: string
+    created_at?: string
+  }
+  Relationships: [
+    {
+      foreignKeyName: "property_viewing_bookings_viewing_slot_id_fkey"
+      columns: ["viewing_slot_id"]
+      isOneToOne: false
+      referencedRelation: "property_viewing_slots"
+      referencedColumns: ["id"]
+    },
+    {
+      foreignKeyName: "property_viewing_bookings_property_id_fkey"
+      columns: ["property_id"]
+      isOneToOne: false
+      referencedRelation: "properties"
+      referencedColumns: ["id"]
+    },
+    {
+      foreignKeyName: "property_viewing_bookings_booked_by_fkey"
+      columns: ["booked_by"]
+      isOneToOne: false
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
+  ]
+}
+
 export interface PropertyViewingSettingsTable {
   Row: {
     buffer_time: number

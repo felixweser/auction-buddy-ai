@@ -1,3 +1,5 @@
+import { TablesDefinition } from './index'
+
 export type Json =
   | string
   | number
@@ -13,6 +15,7 @@ export type Database = {
       profiles: TablesDefinition['profiles']
       properties: TablesDefinition['properties']
       property_details: TablesDefinition['property_details']
+      property_viewing_bookings: TablesDefinition['property_viewing_bookings']
       property_viewing_settings: TablesDefinition['property_viewing_settings']
       property_viewing_slots: TablesDefinition['property_viewing_slots']
       time_windows: TablesDefinition['time_windows']
