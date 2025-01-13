@@ -26,6 +26,18 @@ import {
 import { TimeWindowsList } from "./TimeWindowsList";
 import { TimeWindowForm } from "./TimeWindowForm";
 
+interface TimeWindow {
+  id: string;
+  date: string;
+  window_start: string;
+  window_end: string;
+  is_available: boolean;
+  property_id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export function TimeWindowManager() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -34,6 +46,7 @@ export function TimeWindowManager() {
   const [isAddWindowDialogOpen, setIsAddWindowDialogOpen] = useState(false);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [editingWindow, setEditingWindow] = useState<TimeWindow | null>(null);
 
   const { data: session } = useQuery({
     queryKey: ["session"],
@@ -74,7 +87,7 @@ export function TimeWindowManager() {
         .eq("date", format(selectedDate!, 'yyyy-MM-dd'));
 
       if (error) throw error;
-      return data;
+      return data as TimeWindow[];
     },
   });
 
@@ -130,6 +143,40 @@ export function TimeWindowManager() {
     }
   };
 
+  const handleEditWindow = async () => {
+    if (!editingWindow || !session?.user) return;
+
+    try {
+      const { error } = await supabase
+        .from("time_windows")
+        .update({
+          window_start: startTime,
+          window_end: endTime,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", editingWindow.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Erfolg",
+        description: "Zeitfenster erfolgreich aktualisiert",
+      });
+
+      setIsAddWindowDialogOpen(false);
+      setEditingWindow(null);
+      resetForm();
+      refetchWindows();
+    } catch (error) {
+      console.error("Error updating time window:", error);
+      toast({
+        title: "Fehler",
+        description: "Fehler beim Aktualisieren des Zeitfensters",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteWindow = async (windowId: string) => {
     const { error } = await supabase
       .from("time_windows")
@@ -156,6 +203,14 @@ export function TimeWindowManager() {
   const resetForm = () => {
     setStartTime("");
     setEndTime("");
+    setEditingWindow(null);
+  };
+
+  const handleStartEdit = (window: TimeWindow) => {
+    setEditingWindow(window);
+    setStartTime(window.window_start);
+    setEndTime(window.window_end);
+    setIsAddWindowDialogOpen(true);
   };
 
   return (
@@ -216,15 +271,18 @@ export function TimeWindowManager() {
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>
-                              Neues Zeitfenster hinzufügen
+                              {editingWindow ? "Zeitfenster bearbeiten" : "Neues Zeitfenster hinzufügen"}
                             </DialogTitle>
                           </DialogHeader>
                           <TimeWindowForm
+                            date={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
                             startTime={startTime}
                             endTime={endTime}
+                            onDateChange={() => {}} // Date is controlled by calendar
                             onStartTimeChange={setStartTime}
                             onEndTimeChange={setEndTime}
-                            onSubmit={handleAddWindow}
+                            onSubmit={editingWindow ? handleEditWindow : handleAddWindow}
+                            isEditing={!!editingWindow}
                           />
                         </DialogContent>
                       </Dialog>
@@ -233,6 +291,7 @@ export function TimeWindowManager() {
                     <TimeWindowsList
                       windows={timeWindows || []}
                       onDelete={handleDeleteWindow}
+                      onEdit={handleStartEdit}
                     />
                   </>
                 )}
