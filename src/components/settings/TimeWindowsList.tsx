@@ -65,12 +65,21 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
   }
 
   const getSlotsByDate = (date: string) => {
-    return slotsData?.filter((slot) => slot.slot_date === date) || [];
+    const slots = slotsData?.filter((slot) => slot.slot_date === date) || [];
+    // Sort slots by start time
+    return slots.sort((a, b) => a.start_time.localeCompare(b.start_time));
   };
+
+  // Sort windows first by date, then by start time
+  const sortedWindows = [...windows].sort((a, b) => {
+    const dateCompare = a.date.localeCompare(b.date);
+    if (dateCompare !== 0) return dateCompare;
+    return a.window_start.localeCompare(b.window_start);
+  });
 
   return (
     <div className="space-y-4">
-      {windows.map((window) => (
+      {sortedWindows.map((window) => (
         <div
           key={window.id}
           className="space-y-2"
