@@ -122,7 +122,7 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
-          title: "Fehler",
+          title: "Anmeldung erforderlich",
           description: "Bitte melden Sie sich an, um einen Termin zu buchen.",
           variant: "destructive",
         });
@@ -147,7 +147,7 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
       if (error) {
         console.error('Booking error:', error);
         toast({
-          title: "Fehler",
+          title: "Buchung fehlgeschlagen",
           description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
           variant: "destructive",
         });
@@ -156,14 +156,15 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
 
       await refetch();
       toast({
-        title: "Erfolg",
-        description: `Ihr Besichtigungstermin wurde erfolgreich für ${format(selectedDate, 'EEEE, dd. MMMM', { locale: de })} von ${slot.start} bis ${slot.end} Uhr gebucht.`,
+        title: "Besichtigungstermin gebucht!",
+        description: `Ihr Termin für ${format(selectedDate, 'EEEE, dd. MMMM', { locale: de })} von ${slot.start} bis ${slot.end} Uhr wurde erfolgreich gebucht. Sie erhalten in Kürze eine Bestätigung per E-Mail.`,
+        variant: "default",
       });
       onClose();
     } catch (error) {
       console.error('Booking error:', error);
       toast({
-        title: "Fehler",
+        title: "Buchung fehlgeschlagen",
         description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
         variant: "destructive",
       });
