@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
@@ -14,8 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
@@ -24,13 +22,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-const DAYS_OF_WEEK = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+import { TimeSlotsList } from "./TimeSlotsList";
+import { SlotForm } from "./SlotForm";
 
 export function ViewingSchedule() {
   const { toast } = useToast();
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Initialize with current date
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isAddSlotDialogOpen, setIsAddSlotDialogOpen] = useState(false);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -55,21 +53,6 @@ export function ViewingSchedule() {
     },
   });
 
-  // Fetch all viewing slots for the selected property
-  const { data: allViewingSlots } = useQuery({
-    queryKey: ["all-viewing-slots", selectedProperty],
-    enabled: !!selectedProperty,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("property_viewing_slots")
-        .select("*")
-        .eq("property_id", selectedProperty);
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
   // Fetch viewing slots for the selected date and property
   const { data: viewingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["viewing-slots", selectedProperty, selectedDate],
@@ -79,57 +62,12 @@ export function ViewingSchedule() {
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", selectedProperty)
-        .eq("day_of_week", selectedDate?.getDay());
+        .eq("slot_date", selectedDate?.toISOString().split('T')[0]);
 
       if (error) throw error;
       return data;
     },
   });
-
-  // Create a set of days that have slots for the selected property
-  const daysWithSlots = useMemo(() => {
-    if (!allViewingSlots) return new Set<number>();
-    return new Set(allViewingSlots.map(slot => slot.day_of_week));
-  }, [allViewingSlots]);
-
-  // Function to check if a date is in the past (including today)
-  const isPastDate = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  };
-
-  // Custom modifiers for the calendar
-
-  // Custom modifiers for the calendar
-  const modifiers = useMemo(() => ({
-    hasSlots: (date: Date) => {
-      // Only show slots for future dates
-      if (isPastDate(date)) return false;
-      return daysWithSlots.has(date.getDay());
-    },
-    selected: (date: Date) => {
-      if (!selectedDate) return false;
-      return date.getDate() === selectedDate.getDate() &&
-             date.getMonth() === selectedDate.getMonth() &&
-             date.getFullYear() === selectedDate.getFullYear();
-    }
-  }), [daysWithSlots, selectedDate]);
-
-  // Custom modifier styles using the site's color scheme
-  const modifiersStyles = {
-    hasSlots: {
-      color: 'hsl(var(--primary))',
-      backgroundColor: 'hsl(var(--primary) / 0.1)',
-      borderRadius: 'var(--radius)'
-    },
-    selected: {
-      color: 'white',
-      backgroundColor: 'hsl(var(--primary))',
-      borderRadius: 'var(--radius)',
-      fontWeight: 'bold'
-    }
-  };
 
   const handleAddSlot = async () => {
     if (!selectedProperty || !selectedDate || !startTime || !endTime) {
@@ -143,7 +81,7 @@ export function ViewingSchedule() {
 
     const { error } = await supabase.from("property_viewing_slots").insert({
       property_id: selectedProperty,
-      day_of_week: selectedDate.getDay(),
+      slot_date: selectedDate.toISOString().split('T')[0],
       start_time: startTime,
       end_time: endTime,
       slot_duration_minutes: parseInt(slotDuration),
@@ -224,7 +162,7 @@ export function ViewingSchedule() {
             value={selectedProperty || ""}
             onValueChange={(value) => {
               setSelectedProperty(value);
-              setSelectedDate(new Date()); // Reset to current date when property changes
+              setSelectedDate(new Date());
             }}
           >
             <SelectTrigger>
@@ -248,16 +186,8 @@ export function ViewingSchedule() {
                   onSelect={setSelectedDate}
                   className="border-0"
                   locale={de}
-                  modifiers={modifiers}
-                  modifiersStyles={modifiersStyles}
-                  disabled={isPastDate}
-                  fromDate={new Date()} // Only allow future dates
-                  defaultMonth={selectedDate}
+                  fromDate={new Date()}
                 />
-                <div className="mt-2 text-sm text-muted-foreground">
-                  <p>Tage mit Besichtigungsterminen sind hervorgehoben</p>
-                  <p>Vergangene Tage sind nicht auswählbar</p>
-                </div>
               </div>
 
               <div className="space-y-4">
@@ -282,103 +212,27 @@ export function ViewingSchedule() {
                               {editingSlotId ? "Besichtigungstermin bearbeiten" : "Neuen Besichtigungstermin hinzufügen"}
                             </DialogTitle>
                           </DialogHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Terminlänge (Minuten)</Label>
-                                <Select value={slotDuration} onValueChange={setSlotDuration}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Dauer auswählen" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="15">15 Minuten</SelectItem>
-                                    <SelectItem value="30">30 Minuten</SelectItem>
-                                    <SelectItem value="45">45 Minuten</SelectItem>
-                                    <SelectItem value="60">1 Stunde</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Pufferzeit (Minuten)</Label>
-                                <Select value={bufferTime} onValueChange={setBufferTime}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Pufferzeit auswählen" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="0">Kein Puffer</SelectItem>
-                                    <SelectItem value="5">5 Minuten</SelectItem>
-                                    <SelectItem value="10">10 Minuten</SelectItem>
-                                    <SelectItem value="15">15 Minuten</SelectItem>
-                                    <SelectItem value="30">30 Minuten</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Startzeit</Label>
-                                <Input
-                                  type="time"
-                                  value={startTime}
-                                  onChange={(e) => setStartTime(e.target.value)}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Endzeit</Label>
-                                <Input
-                                  type="time"
-                                  value={endTime}
-                                  onChange={(e) => setEndTime(e.target.value)}
-                                />
-                              </div>
-                            </div>
-                            <Button onClick={handleAddSlot}>
-                              {editingSlotId ? "Termin aktualisieren" : "Termin hinzufügen"}
-                            </Button>
-                          </div>
+                          <SlotForm
+                            startTime={startTime}
+                            endTime={endTime}
+                            slotDuration={slotDuration}
+                            bufferTime={bufferTime}
+                            onStartTimeChange={setStartTime}
+                            onEndTimeChange={setEndTime}
+                            onSlotDurationChange={setSlotDuration}
+                            onBufferTimeChange={setBufferTime}
+                            onSubmit={handleAddSlot}
+                            isEditing={!!editingSlotId}
+                          />
                         </DialogContent>
                       </Dialog>
                     </div>
 
-                    <div className="space-y-2">
-                      {viewingSlots?.map((slot) => (
-                        <div
-                          key={slot.id}
-                          className="flex items-center justify-between p-4 bg-muted rounded-lg"
-                        >
-                          <div className="space-y-1">
-                            <div>
-                              {format(new Date(`2024-01-01T${slot.start_time}`), "HH:mm", { locale: de })} -{" "}
-                              {format(new Date(`2024-01-01T${slot.end_time}`), "HH:mm", { locale: de })}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {slot.slot_duration_minutes} Min. Termine mit {slot.buffer_minutes} Min. Puffer
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditSlot(slot)}
-                            >
-                              Bearbeiten
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteSlot(slot.id)}
-                            >
-                              Löschen
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      {viewingSlots?.length === 0 && (
-                        <p className="text-muted-foreground">
-                          Keine Besichtigungstermine für diesen Tag
-                        </p>
-                      )}
-                    </div>
+                    <TimeSlotsList
+                      slots={viewingSlots || []}
+                      onEdit={handleEditSlot}
+                      onDelete={handleDeleteSlot}
+                    />
                   </>
                 )}
               </div>

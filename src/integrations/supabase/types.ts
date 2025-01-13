@@ -218,30 +218,30 @@ export type Database = {
         Row: {
           buffer_minutes: number
           created_at: string
-          day_of_week: number
           end_time: string
           id: string
           property_id: string
+          slot_date: string
           slot_duration_minutes: number
           start_time: string
         }
         Insert: {
           buffer_minutes?: number
           created_at?: string
-          day_of_week: number
           end_time: string
           id?: string
           property_id: string
+          slot_date: string
           slot_duration_minutes?: number
           start_time: string
         }
         Update: {
           buffer_minutes?: number
           created_at?: string
-          day_of_week?: number
           end_time?: string
           id?: string
           property_id?: string
+          slot_date?: string
           slot_duration_minutes?: number
           start_time?: string
         }
