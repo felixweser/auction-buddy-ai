@@ -2,7 +2,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 
 interface CalendarSectionProps {
   selectedDate: Date | undefined;
@@ -19,10 +19,15 @@ export function CalendarSection({ selectedDate, onDateSelect, selectedProperty }
         .from("property_viewing_slots")
         .select("slot_date")
         .eq("property_id", selectedProperty)
-        .gte("slot_date", format(new Date(), 'yyyy-MM-dd'));
+        .gte("slot_date", format(startOfDay(new Date()), 'yyyy-MM-dd'));
 
       if (error) throw error;
-      return data.map(slot => new Date(slot.slot_date));
+      
+      // Convert the dates to Date objects
+      return data.map(slot => {
+        const [year, month, day] = slot.slot_date.split('-').map(Number);
+        return new Date(year, month - 1, day); // month is 0-based in JS Date
+      });
     },
   });
 
