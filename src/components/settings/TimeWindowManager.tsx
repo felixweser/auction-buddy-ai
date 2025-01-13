@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TimeWindowsList } from "./TimeWindowsList";
 import { TimeWindowForm } from "./TimeWindowForm";
+import { useNavigate } from "react-router-dom";
 
 interface TimeWindow {
   id: string;
@@ -17,6 +18,7 @@ interface TimeWindow {
 
 export function TimeWindowManager() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWindow, setEditingWindow] = useState<TimeWindow | null>(null);
@@ -24,12 +26,29 @@ export function TimeWindowManager() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
+  // Check authentication status
+  const { data: session, isLoading: sessionLoading } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        navigate("/auth");
+        throw error || new Error("No session found");
+      }
+      return session;
+    },
+  });
+
   const { data: timeWindows, isLoading } = useQuery({
     queryKey: ["timeWindows"],
+    enabled: !!session?.user,
     queryFn: async () => {
+      if (!session?.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("time_windows")
         .select("*")
+        .eq("user_id", session.user.id)
         .order("date", { ascending: true });
 
       if (error) throw error;
@@ -39,9 +58,11 @@ export function TimeWindowManager() {
 
   const createMutation = useMutation({
     mutationFn: async (newWindow: Omit<TimeWindow, "id">) => {
+      if (!session?.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("time_windows")
-        .insert([newWindow])
+        .insert([{ ...newWindow, user_id: session.user.id }])
         .select()
         .single();
 
@@ -69,6 +90,8 @@ export function TimeWindowManager() {
 
   const updateMutation = useMutation({
     mutationFn: async (window: TimeWindow) => {
+      if (!session?.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("time_windows")
         .update({
@@ -77,6 +100,7 @@ export function TimeWindowManager() {
           window_end: window.window_end,
         })
         .eq("id", window.id)
+        .eq("user_id", session.user.id)
         .select()
         .single();
 
@@ -104,10 +128,13 @@ export function TimeWindowManager() {
 
   const deleteMutation = useMutation({
     mutationFn: async (windowId: string) => {
+      if (!session?.user) throw new Error("Not authenticated");
+
       const { error } = await supabase
         .from("time_windows")
         .delete()
-        .eq("id", windowId);
+        .eq("id", windowId)
+        .eq("user_id", session.user.id);
 
       if (error) throw error;
     },
@@ -169,6 +196,10 @@ export function TimeWindowManager() {
       });
     }
   };
+
+  if (sessionLoading) {
+    return <div>Laden...</div>;
+  }
 
   return (
     <div className="space-y-4">
