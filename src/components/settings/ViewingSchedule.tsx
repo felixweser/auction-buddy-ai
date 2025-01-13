@@ -70,7 +70,7 @@ export function ViewingSchedule() {
     },
   });
 
-  // Fetch viewing slots for the selected date
+  // Fetch viewing slots for the selected date and property
   const { data: viewingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["viewing-slots", selectedProperty, selectedDate],
     enabled: !!selectedProperty && !!selectedDate,
@@ -86,7 +86,7 @@ export function ViewingSchedule() {
     },
   });
 
-  // Create a set of days that have viewing slots
+  // Create a set of days that have slots for the selected property
   const daysWithSlots = useMemo(() => {
     if (!allViewingSlots) return new Set<number>();
     return new Set(allViewingSlots.map(slot => slot.day_of_week));
@@ -94,10 +94,13 @@ export function ViewingSchedule() {
 
   // Custom modifiers for the calendar
   const modifiers = useMemo(() => ({
-    hasSlots: (date: Date) => daysWithSlots.has(date.getDay()),
+    hasSlots: (date: Date) => {
+      // Check if this day of the week has any slots for the selected property
+      return daysWithSlots.has(date.getDay());
+    }
   }), [daysWithSlots]);
 
-  // Custom modifier styles
+  // Custom modifier styles using the site's color scheme
   const modifiersStyles = {
     hasSlots: {
       backgroundColor: 'hsl(var(--primary) / 0.1)',
@@ -197,7 +200,10 @@ export function ViewingSchedule() {
         <CardContent className="space-y-6">
           <Select
             value={selectedProperty || ""}
-            onValueChange={setSelectedProperty}
+            onValueChange={(value) => {
+              setSelectedProperty(value);
+              setSelectedDate(undefined); // Reset selected date when property changes
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Immobilie auswählen" />
@@ -213,7 +219,7 @@ export function ViewingSchedule() {
 
           {selectedProperty && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex">
+              <div className="flex flex-col">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
