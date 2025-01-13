@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format, addMinutes, isBefore } from "date-fns";
+import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
