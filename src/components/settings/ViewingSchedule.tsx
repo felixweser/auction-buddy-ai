@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/property";
@@ -38,6 +38,7 @@ export function ViewingSchedule() {
   const [bufferTime, setBufferTime] = useState("15");
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
+  // Fetch properties
   const { data: properties, isLoading: propertiesLoading } = useQuery({
     queryKey: ["my-properties"],
     queryFn: async () => {
@@ -54,6 +55,22 @@ export function ViewingSchedule() {
     },
   });
 
+  // Fetch all viewing slots for the selected property
+  const { data: allViewingSlots } = useQuery({
+    queryKey: ["all-viewing-slots", selectedProperty],
+    enabled: !!selectedProperty,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("property_viewing_slots")
+        .select("*")
+        .eq("property_id", selectedProperty);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch viewing slots for the selected date
   const { data: viewingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["viewing-slots", selectedProperty, selectedDate],
     enabled: !!selectedProperty && !!selectedDate,
@@ -68,6 +85,26 @@ export function ViewingSchedule() {
       return data;
     },
   });
+
+  // Create a set of days that have viewing slots
+  const daysWithSlots = useMemo(() => {
+    if (!allViewingSlots) return new Set<number>();
+    return new Set(allViewingSlots.map(slot => slot.day_of_week));
+  }, [allViewingSlots]);
+
+  // Custom modifiers for the calendar
+  const modifiers = useMemo(() => ({
+    hasSlots: (date: Date) => daysWithSlots.has(date.getDay()),
+  }), [daysWithSlots]);
+
+  // Custom modifier styles
+  const modifiersStyles = {
+    hasSlots: {
+      backgroundColor: 'hsl(var(--primary) / 0.1)',
+      color: 'hsl(var(--primary))',
+      fontWeight: 'bold'
+    }
+  };
 
   const handleAddSlot = async () => {
     if (!selectedProperty || !selectedDate || !startTime || !endTime) {
@@ -183,7 +220,12 @@ export function ViewingSchedule() {
                   onSelect={setSelectedDate}
                   className="border-0"
                   locale={de}
+                  modifiers={modifiers}
+                  modifiersStyles={modifiersStyles}
                 />
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <p>Tage mit Besichtigungsterminen sind hervorgehoben</p>
+                </div>
               </div>
 
               <div className="space-y-4">
