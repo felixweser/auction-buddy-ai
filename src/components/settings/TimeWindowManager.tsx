@@ -85,6 +85,7 @@ export function TimeWindowManager() {
               <CalendarSection 
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
+                selectedProperty={selectedProperty}
               />
 
               <TimeWindowDialog

@@ -56,7 +56,7 @@ function Calendar({
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
       }}
       modifiersClassNames={{
-        hasSlot: "has-slot",
+        hasSlot: "has-slot relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-primary",
       }}
       {...props}
     />
