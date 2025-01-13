@@ -16,7 +16,19 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addMinutes, isBefore, startOfDay } from "date-fns";
@@ -35,6 +47,12 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showViewingDialog, setShowViewingDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{
+    start: string;
+    end: string;
+    slotId: string;
+  } | null>(null);
 
   const images = [imageUrl, imageUrl, imageUrl];
 
@@ -127,7 +145,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     setSelectedDate(date);
   };
 
-  const handleTimeSelect = async (slot: { start: string; end: string; slotId: string }) => {
+  const handleTimeSelect = (slot: { start: string; end: string; slotId: string }) => {
+    setSelectedSlot(slot);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!selectedSlot || !selectedDate) return;
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -142,12 +167,12 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
       const { error } = await supabase
         .from("property_viewing_bookings")
         .insert({
-          viewing_slot_id: slot.slotId,
+          viewing_slot_id: selectedSlot.slotId,
           property_id: details.property_id,
           booked_by: user.id,
-          booking_date: selectedDate?.toISOString().split('T')[0],
-          start_time: `${slot.start}:00`,
-          end_time: `${slot.end}:00`,
+          booking_date: selectedDate.toISOString().split('T')[0],
+          start_time: `${selectedSlot.start}:00`,
+          end_time: `${selectedSlot.end}:00`,
         });
 
       if (error) throw error;
@@ -156,8 +181,10 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         title: "Termin gebucht",
         description: "Ihre Besichtigung wurde erfolgreich gebucht!",
       });
+      setShowConfirmDialog(false);
       setShowViewingDialog(false);
       setSelectedDate(undefined);
+      setSelectedSlot(null);
     } catch (error) {
       toast({
         title: "Fehler",
@@ -167,7 +194,6 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     }
   };
 
-  // Function to determine if a date should be disabled
   const isDateDisabled = (date: Date) => {
     // Disable past dates
     if (isBefore(date, startOfDay(new Date()))) return true;
@@ -265,6 +291,22 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Besichtigungstermin bestätigen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Möchten Sie den Besichtigungstermin am {selectedDate && format(selectedDate, 'EEEE, dd. MMMM', { locale: de })} 
+              von {selectedSlot?.start} bis {selectedSlot?.end} Uhr buchen?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmBooking}>Termin buchen</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Carousel className="w-full h-full">
         <CarouselContent>
