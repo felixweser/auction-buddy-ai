@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface ConfirmationStepProps {
   selectedDate: Date;
@@ -11,6 +12,7 @@ interface ConfirmationStepProps {
   propertyTitle: string;
   onConfirm: () => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
 export function ConfirmationStep({
@@ -19,6 +21,7 @@ export function ConfirmationStep({
   propertyTitle,
   onConfirm,
   onCancel,
+  isLoading = false,
 }: ConfirmationStepProps) {
   return (
     <div className="space-y-6">
@@ -35,11 +38,18 @@ export function ConfirmationStep({
       </div>
 
       <div className="flex gap-3 justify-end">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel} disabled={isLoading}>
           Zurück
         </Button>
-        <Button onClick={onConfirm}>
-          Termin bestätigen
+        <Button onClick={onConfirm} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Wird gebucht...
+            </>
+          ) : (
+            "Termin bestätigen"
+          )}
         </Button>
       </div>
     </div>

@@ -28,7 +28,8 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
     isLoading,
     availableDates,
     getAvailableTimeSlots,
-    handleTimeSelect
+    handleTimeSelect,
+    isBookingInProgress
   } = useBooking(propertyId, onClose);
 
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<{
@@ -59,6 +60,7 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
         if (!open) {
           onClose();
           setSelectedTimeSlot(null);
+          setSelectedDate(undefined);
         }
       }}>
         <DialogContent className="max-w-md">
@@ -86,6 +88,7 @@ export function BookingDialog({ propertyId, propertyTitle, isOpen, onClose }: Bo
                 propertyTitle={propertyTitle}
                 onConfirm={handleConfirm}
                 onCancel={handleBack}
+                isLoading={isBookingInProgress}
               />
             ) : (
               <>

@@ -9,11 +9,11 @@ import { startOfDay } from "date-fns";
 export function useBooking(propertyId: string, onClose: () => void) {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isBookingInProgress, setIsBookingInProgress] = useState(false);
 
   const { data: viewingData, isLoading } = useQuery({
     queryKey: ["viewingSlots", propertyId, selectedDate],
     queryFn: async () => {
-      // Fetch available slots - RLS policy will automatically filter out booked slots
       const { data: slots, error: slotsError } = await supabase
         .from("property_viewing_slots")
         .select("*")
@@ -24,8 +24,19 @@ export function useBooking(propertyId: string, onClose: () => void) {
 
       if (slotsError) throw slotsError;
 
+      // Filter out slots that are already booked
+      const { data: bookings, error: bookingsError } = await supabase
+        .from("property_viewing_bookings")
+        .select("viewing_slot_id")
+        .eq("property_id", propertyId);
+
+      if (bookingsError) throw bookingsError;
+
+      const bookedSlotIds = new Set(bookings?.map(b => b.viewing_slot_id));
+      const availableSlots = slots?.filter(slot => !bookedSlotIds.has(slot.id)) || [];
+
       return {
-        slots: slots || [],
+        slots: availableSlots,
       };
     },
     enabled: true,
@@ -52,7 +63,9 @@ export function useBooking(propertyId: string, onClose: () => void) {
 
   const handleTimeSelect = async (slot: { start: string; end: string; slotId: string }) => {
     try {
+      setIsBookingInProgress(true);
       const { data: { user } } = await supabase.auth.getUser();
+      
       if (!user) {
         toast({
           title: "Anmeldung erforderlich",
@@ -89,9 +102,9 @@ export function useBooking(propertyId: string, onClose: () => void) {
 
       toast({
         title: "Besichtigungstermin gebucht!",
-        description: `Ihr Termin für ${format(selectedDate, 'EEEE, dd. MMMM', { locale: de })} von ${slot.start} bis ${slot.end} Uhr wurde erfolgreich gebucht. Sie erhalten in Kürze eine Bestätigung per E-Mail.`,
-        variant: "default",
+        description: `Ihr Termin für ${format(selectedDate, 'EEEE, dd. MMMM', { locale: de })} von ${slot.start} bis ${slot.end} Uhr wurde erfolgreich gebucht.`,
       });
+      
       onClose();
     } catch (error) {
       console.error('Booking error:', error);
@@ -100,6 +113,8 @@ export function useBooking(propertyId: string, onClose: () => void) {
         description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
         variant: "destructive",
       });
+    } finally {
+      setIsBookingInProgress(false);
     }
   };
 
@@ -109,6 +124,7 @@ export function useBooking(propertyId: string, onClose: () => void) {
     isLoading,
     availableDates,
     getAvailableTimeSlots,
-    handleTimeSelect
+    handleTimeSelect,
+    isBookingInProgress
   };
 }
