@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, isBefore } from "date-fns";
+import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,8 +12,10 @@ export function useBooking(propertyId: string, onClose: () => void) {
   const [isBookingInProgress, setIsBookingInProgress] = useState(false);
 
   const { data: viewingData, isLoading } = useQuery({
-    queryKey: ["viewingSlots", propertyId, selectedDate],
+    queryKey: ["viewingSlots", propertyId],
     queryFn: async () => {
+      console.log("Fetching slots for property:", propertyId);
+      
       const { data: slots, error: slotsError } = await supabase
         .from("property_viewing_slots")
         .select("*")
@@ -22,7 +24,12 @@ export function useBooking(propertyId: string, onClose: () => void) {
         .order("slot_date")
         .order("start_time");
 
-      if (slotsError) throw slotsError;
+      if (slotsError) {
+        console.error("Error fetching slots:", slotsError);
+        throw slotsError;
+      }
+
+      console.log("Retrieved slots:", slots);
 
       // Filter out slots that are already booked
       const { data: bookings, error: bookingsError } = await supabase
@@ -30,29 +37,41 @@ export function useBooking(propertyId: string, onClose: () => void) {
         .select("viewing_slot_id")
         .eq("property_id", propertyId);
 
-      if (bookingsError) throw bookingsError;
+      if (bookingsError) {
+        console.error("Error fetching bookings:", bookingsError);
+        throw bookingsError;
+      }
+
+      console.log("Retrieved bookings:", bookings);
 
       const bookedSlotIds = new Set(bookings?.map(b => b.viewing_slot_id));
       const availableSlots = slots?.filter(slot => !bookedSlotIds.has(slot.id)) || [];
+
+      console.log("Available slots after filtering:", availableSlots);
 
       return {
         slots: availableSlots,
       };
     },
-    enabled: true,
   });
 
   const availableDates = viewingData?.slots 
     ? [...new Set(viewingData.slots.map(slot => slot.slot_date))]
     : [];
 
+  console.log("Available dates:", availableDates);
+
   const getAvailableTimeSlots = () => {
     if (!selectedDate || !viewingData?.slots) return [];
 
     const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+    console.log("Getting slots for date:", selectedDateStr);
+    
     const daySlots = viewingData.slots.filter(
       (slot) => slot.slot_date === selectedDateStr
     );
+
+    console.log("Slots for selected date:", daySlots);
 
     return daySlots.map(slot => ({
       start: format(new Date(`2000-01-01T${slot.start_time}`), 'HH:mm'),
