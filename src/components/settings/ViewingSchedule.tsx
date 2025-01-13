@@ -111,22 +111,33 @@ export function ViewingSchedule() {
       return date.getDate() === today.getDate() &&
              date.getMonth() === today.getMonth() &&
              date.getFullYear() === today.getFullYear();
+    },
+    selected: (date: Date) => {
+      if (!selectedDate) return false;
+      return date.getDate() === selectedDate.getDate() &&
+             date.getMonth() === selectedDate.getMonth() &&
+             date.getFullYear() === selectedDate.getFullYear();
     }
-  }), [daysWithSlots]);
+  }), [daysWithSlots, selectedDate]);
 
   // Custom modifier styles using the site's color scheme
   const modifiersStyles = {
     hasSlots: {
-      backgroundColor: 'hsl(var(--primary) / 0.1)',
       color: 'hsl(var(--primary))',
-      fontWeight: 'bold',
+      backgroundColor: 'hsl(var(--primary) / 0.1)',
       borderRadius: 'var(--radius)'
     },
     today: {
-      backgroundColor: 'hsl(var(--accent))',
-      color: 'hsl(var(--accent-foreground))',
-      fontWeight: 'bold',
-      borderRadius: 'var(--radius)'
+      color: 'white',
+      backgroundColor: 'hsl(var(--primary))',
+      borderRadius: 'var(--radius)',
+      fontWeight: 'bold'
+    },
+    selected: {
+      color: 'white',
+      backgroundColor: 'hsl(var(--primary))',
+      borderRadius: 'var(--radius)',
+      fontWeight: 'bold'
     }
   };
 
