@@ -17,7 +17,6 @@ export function TimeWindowManager() {
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isAddWindowDialogOpen, setIsAddWindowDialogOpen] = useState(false);
-  const [editingWindow, setEditingWindow] = useState<TimeWindow | null>(null);
 
   const { data: session } = useQuery({
     queryKey: ["session"],
@@ -47,7 +46,15 @@ export function TimeWindowManager() {
     },
   });
 
-  const { timeWindows, handleAddWindow, handleEditWindow, handleDeleteWindow, refetchWindows } = useTimeWindows({
+  const {
+    timeWindows,
+    editingWindow,
+    setEditingWindow,
+    handleAddWindow,
+    handleEditWindow,
+    handleDeleteWindow,
+    refetchWindows
+  } = useTimeWindows({
     selectedProperty,
     selectedDate,
     session,

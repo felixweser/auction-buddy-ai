@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 interface UseTimeWindowsProps {
   selectedProperty: string | null;
@@ -14,6 +15,7 @@ interface UseTimeWindowsProps {
 export function useTimeWindows({ selectedProperty, selectedDate, session }: UseTimeWindowsProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [editingWindow, setEditingWindow] = useState<TimeWindow | null>(null);
 
   const { data: timeWindows, refetch: refetchWindows } = useQuery({
     queryKey: ["time-windows", selectedProperty, selectedDate],
@@ -125,6 +127,7 @@ export function useTimeWindows({ selectedProperty, selectedDate, session }: UseT
       });
 
       refetchWindows();
+      setEditingWindow(null);
     } catch (error) {
       console.error("Error updating time window:", error);
       toast({
@@ -160,6 +163,8 @@ export function useTimeWindows({ selectedProperty, selectedDate, session }: UseT
 
   return {
     timeWindows,
+    editingWindow,
+    setEditingWindow,
     handleAddWindow,
     handleEditWindow,
     handleDeleteWindow,

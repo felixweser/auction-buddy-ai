@@ -24,12 +24,14 @@ interface TimeSlot {
 }
 
 interface TimeWindowsListProps {
+  date: Date;
   windows: TimeWindow[];
   onEdit: (window: TimeWindow) => void;
   onDelete: (windowId: string) => void;
+  onOpenDialog: () => void;
 }
 
-export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListProps) {
+export function TimeWindowsList({ date, windows, onEdit, onDelete, onOpenDialog }: TimeWindowsListProps) {
   const [expandedWindows, setExpandedWindows] = useState<Record<string, boolean>>({});
 
   // Fetch slots for all dates in the windows
