@@ -66,7 +66,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
   const images = [imageUrl, imageUrl, imageUrl];
 
   // Fetch viewing slots and existing bookings
-  const { data: viewingData, isLoading } = useQuery({
+  const { data: viewingData, isLoading, refetch } = useQuery({
     queryKey: ["viewingSlots", details.property_id, selectedDate],
     queryFn: async () => {
       // Fetch viewing slots
@@ -229,6 +229,9 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         return;
       }
 
+      // Refetch the slots to update the UI
+      await refetch();
+      
       setShowConfirmDialog(false);
       setShowSuccessDialog(true);
     } catch (error) {
