@@ -100,17 +100,13 @@ export function ViewingSchedule() {
   };
 
   // Custom modifiers for the calendar
+
+  // Custom modifiers for the calendar
   const modifiers = useMemo(() => ({
     hasSlots: (date: Date) => {
       // Only show slots for future dates
       if (isPastDate(date)) return false;
       return daysWithSlots.has(date.getDay());
-    },
-    today: (date: Date) => {
-      const today = new Date();
-      return date.getDate() === today.getDate() &&
-             date.getMonth() === today.getMonth() &&
-             date.getFullYear() === today.getFullYear();
     },
     selected: (date: Date) => {
       if (!selectedDate) return false;
@@ -126,12 +122,6 @@ export function ViewingSchedule() {
       color: 'hsl(var(--primary))',
       backgroundColor: 'hsl(var(--primary) / 0.1)',
       borderRadius: 'var(--radius)'
-    },
-    today: {
-      color: 'white',
-      backgroundColor: 'hsl(var(--primary))',
-      borderRadius: 'var(--radius)',
-      fontWeight: 'bold'
     },
     selected: {
       color: 'white',
