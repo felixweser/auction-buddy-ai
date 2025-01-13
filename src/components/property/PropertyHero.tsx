@@ -74,7 +74,8 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         .from("property_viewing_slots")
         .select("*")
         .eq("property_id", details.property_id)
-        .order("day_of_week")
+        .gte("slot_date", startOfDay(new Date()).toISOString())
+        .order("slot_date")
         .order("start_time");
 
       if (slotsError) throw slotsError;
@@ -100,17 +101,18 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     enabled: showViewingDialog,
   });
 
-  // Get unique days of the week with available slots
-  const availableDays = viewingData?.slots 
-    ? [...new Set(viewingData.slots.map(slot => slot.day_of_week))]
+  // Get unique available dates from slots
+  const availableDates = viewingData?.slots 
+    ? [...new Set(viewingData.slots.map(slot => slot.slot_date))]
     : [];
 
   // Get available slots for the selected date
   const getAvailableTimeSlots = () => {
     if (!selectedDate || !viewingData?.slots) return [];
 
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
     const daySlots = viewingData.slots.filter(
-      (slot) => slot.day_of_week === selectedDate.getDay()
+      (slot) => slot.slot_date === selectedDateStr
     );
 
     const timeSlots = [];
@@ -259,9 +261,9 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     // Disable past dates
     if (isBefore(date, startOfDay(new Date()))) return true;
     
-    // Disable days without available slots
-    const dayOfWeek = date.getDay();
-    return !availableDays.includes(dayOfWeek);
+    // Disable dates without available slots
+    const dateStr = date.toISOString().split('T')[0];
+    return !availableDates.includes(dateStr);
   };
 
   const availableTimeSlots = getAvailableTimeSlots();
