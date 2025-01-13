@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TimeWindow {
   id: string;
@@ -10,6 +12,14 @@ interface TimeWindow {
   is_available: boolean;
 }
 
+interface TimeSlot {
+  id: string;
+  start_time: string;
+  end_time: string;
+  slot_duration_minutes: number;
+  buffer_minutes: number;
+}
+
 interface TimeWindowsListProps {
   windows: TimeWindow[];
   onEdit: (window: TimeWindow) => void;
@@ -17,6 +27,23 @@ interface TimeWindowsListProps {
 }
 
 export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListProps) {
+  const { data: slotsData } = useQuery({
+    queryKey: ["timeWindowSlots"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("property_viewing_slots")
+        .select("*")
+        .in(
+          "slot_date",
+          windows.map((w) => w.date)
+        );
+
+      if (error) throw error;
+      return data as TimeSlot[];
+    },
+    enabled: windows.length > 0,
+  });
+
   if (windows.length === 0) {
     return (
       <p className="text-muted-foreground">
@@ -25,37 +52,61 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
     );
   }
 
+  const getSlotsByDate = (date: string) => {
+    return slotsData?.filter((slot) => slot.slot_date === date) || [];
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {windows.map((window) => (
         <div
           key={window.id}
-          className="flex items-center justify-between p-4 bg-muted rounded-lg"
+          className="space-y-2"
         >
-          <div className="space-y-1">
-            <div>
-              {format(new Date(window.date), "dd.MM.yyyy", { locale: de })}
+          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div className="space-y-1">
+              <div>
+                {format(new Date(window.date), "dd.MM.yyyy", { locale: de })}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {format(new Date(`2024-01-01T${window.window_start}`), "HH:mm", { locale: de })} -{" "}
+                {format(new Date(`2024-01-01T${window.window_end}`), "HH:mm", { locale: de })}
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground">
-              {format(new Date(`2024-01-01T${window.window_start}`), "HH:mm", { locale: de })} -{" "}
-              {format(new Date(`2024-01-01T${window.window_end}`), "HH:mm", { locale: de })}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(window)}
+              >
+                Bearbeiten
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDelete(window.id)}
+              >
+                Löschen
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(window)}
-            >
-              Bearbeiten
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onDelete(window.id)}
-            >
-              Löschen
-            </Button>
+          
+          {/* Display slots for this time window */}
+          <div className="ml-4 space-y-2">
+            {getSlotsByDate(window.date).map((slot) => (
+              <div
+                key={slot.id}
+                className="p-2 bg-muted/50 rounded text-sm flex justify-between items-center"
+              >
+                <span>
+                  {format(new Date(`2024-01-01T${slot.start_time}`), "HH:mm", { locale: de })} -{" "}
+                  {format(new Date(`2024-01-01T${slot.end_time}`), "HH:mm", { locale: de })}
+                </span>
+                <span className="text-muted-foreground">
+                  {slot.slot_duration_minutes} Min. + {slot.buffer_minutes} Min. Puffer
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       ))}

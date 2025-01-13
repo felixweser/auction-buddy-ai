@@ -294,6 +294,7 @@ export type Database = {
           date: string
           id: string
           is_available: boolean
+          property_id: string | null
           updated_at: string
           user_id: string
           window_end: string
@@ -304,6 +305,7 @@ export type Database = {
           date: string
           id?: string
           is_available?: boolean
+          property_id?: string | null
           updated_at?: string
           user_id: string
           window_end: string
@@ -314,12 +316,21 @@ export type Database = {
           date?: string
           id?: string
           is_available?: boolean
+          property_id?: string | null
           updated_at?: string
           user_id?: string
           window_end?: string
           window_start?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "time_windows_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
