@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { TimeSlotsList } from "./TimeSlotsList";
 import { SlotForm } from "./SlotForm";
+import { generateTimeSlots } from "@/utils/slotGenerationUtils";
 
 export function ViewingSchedule() {
   const { toast } = useToast();
@@ -104,66 +105,46 @@ export function ViewingSchedule() {
       return;
     }
 
-    const formattedDate = format(selectedDate, 'yyyy-MM-dd'); // Format date correctly
-
-    const { error } = await supabase.from("property_viewing_slots").insert({
-      property_id: selectedProperty,
-      slot_date: formattedDate,
-      start_time: startTime,
-      end_time: endTime,
-      slot_duration_minutes: parseInt(slotDuration),
-      buffer_minutes: parseInt(bufferTime),
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+    const slots = generateTimeSlots({
+      startTime,
+      endTime,
+      slotDuration: parseInt(slotDuration),
+      bufferTime: parseInt(bufferTime),
+      date: formattedDate,
     });
 
-    if (error) {
+    try {
+      // Insert all generated slots
+      const { error } = await supabase.from("property_viewing_slots").insert(
+        slots.map(slot => ({
+          property_id: selectedProperty,
+          slot_date: formattedDate,
+          start_time: slot.start,
+          end_time: slot.end,
+          slot_duration_minutes: parseInt(slotDuration),
+          buffer_minutes: parseInt(bufferTime),
+        }))
+      );
+
+      if (error) throw error;
+
+      toast({
+        title: "Erfolg",
+        description: "Besichtigungstermine erfolgreich hinzugefügt",
+      });
+
+      setIsAddSlotDialogOpen(false);
+      resetForm();
+      refetchSlots();
+    } catch (error) {
+      console.error("Error adding viewing slots:", error);
       toast({
         title: "Fehler",
-        description: "Fehler beim Hinzufügen des Besichtigungstermins",
+        description: "Fehler beim Hinzufügen der Besichtigungstermine",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Erfolg",
-      description: "Besichtigungstermin erfolgreich hinzugefügt",
-    });
-
-    setIsAddSlotDialogOpen(false);
-    resetForm();
-    refetchSlots();
-  };
-
-  const handleDeleteSlot = async (slotId: string) => {
-    const { error } = await supabase
-      .from("property_viewing_slots")
-      .delete()
-      .eq("id", slotId);
-
-    if (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Löschen des Besichtigungstermins",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Erfolg",
-      description: "Besichtigungstermin erfolgreich gelöscht",
-    });
-
-    refetchSlots();
-  };
-
-  const handleEditSlot = (slot: any) => {
-    setStartTime(slot.start_time);
-    setEndTime(slot.end_time);
-    setSlotDuration(slot.slot_duration_minutes.toString());
-    setBufferTime(slot.buffer_minutes.toString());
-    setEditingSlotId(slot.id);
-    setIsAddSlotDialogOpen(true);
   };
 
   const resetForm = () => {
