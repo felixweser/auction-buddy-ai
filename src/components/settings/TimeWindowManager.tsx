@@ -147,7 +147,18 @@ export function TimeWindowManager() {
     if (!editingWindow || !session?.user) return;
 
     try {
-      const { error } = await supabase
+      // First, delete existing slots for this time window
+      const { error: deleteError } = await supabase
+        .from("property_viewing_slots")
+        .delete()
+        .eq("slot_date", editingWindow.date)
+        .gte("start_time", editingWindow.window_start)
+        .lte("end_time", editingWindow.window_end);
+
+      if (deleteError) throw deleteError;
+
+      // Then update the time window
+      const { error: updateError } = await supabase
         .from("time_windows")
         .update({
           window_start: startTime,
@@ -156,7 +167,7 @@ export function TimeWindowManager() {
         })
         .eq("id", editingWindow.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       toast({
         title: "Erfolg",

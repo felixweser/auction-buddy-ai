@@ -34,7 +34,7 @@ export function TimeWindowsList({ windows, onEdit, onDelete }: TimeWindowsListPr
 
   // Fetch slots for all dates in the windows
   const { data: slotsData } = useQuery({
-    queryKey: ["timeWindowSlots", windows.map(w => w.date).join(',')],
+    queryKey: ["timeWindowSlots", windows.map(w => `${w.date}-${w.window_start}-${w.window_end}`).join(',')],
     queryFn: async () => {
       if (windows.length === 0) return [];
       
