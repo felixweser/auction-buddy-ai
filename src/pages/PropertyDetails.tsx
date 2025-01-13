@@ -12,14 +12,11 @@ import { KeyMetrics } from "@/components/property/KeyMetrics";
 import { SatelliteView } from "@/components/property/SatelliteView";
 import { LocationAnalysis } from "@/components/property/LocationAnalysis";
 import { PropertySpecs } from "@/components/property/PropertySpecs";
-import { BookingDialog } from "@/components/property/BookingDialog";
-import { useState } from "react";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   const { data: property, isLoading, error } = useQuery({
     queryKey: ["property", id],
@@ -128,13 +125,6 @@ const PropertyDetails = () => {
         price={property.price}
         isNegotiable={property.is_negotiable}
         description={property.description}
-      />
-
-      <BookingDialog
-        propertyId={property.id}
-        propertyTitle={property.title}
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
       />
     </div>
   );
