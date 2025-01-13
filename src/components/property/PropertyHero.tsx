@@ -65,11 +65,9 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
 
   const images = [imageUrl, imageUrl, imageUrl];
 
-  // Fetch viewing slots and existing bookings
   const { data: viewingData, isLoading, refetch } = useQuery({
     queryKey: ["viewingSlots", details.property_id, selectedDate],
     queryFn: async () => {
-      // Fetch viewing slots
       const { data: slots, error: slotsError } = await supabase
         .from("property_viewing_slots")
         .select("*")
@@ -80,7 +78,6 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
 
       if (slotsError) throw slotsError;
 
-      // If a date is selected, fetch bookings for that date
       let bookings = [];
       if (selectedDate) {
         const { data: bookingsData, error: bookingsError } = await supabase
@@ -101,12 +98,10 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
     enabled: showViewingDialog,
   });
 
-  // Get unique available dates from slots
   const availableDates = viewingData?.slots 
     ? [...new Set(viewingData.slots.map(slot => slot.slot_date))]
     : [];
 
-  // Get available slots for the selected date
   const getAvailableTimeSlots = () => {
     if (!selectedDate || !viewingData?.slots) return [];
 
@@ -128,14 +123,12 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         const currentTimeStr = format(currentTime, 'HH:mm:ss');
         const slotEndTimeStr = format(slotEndTime, 'HH:mm:ss');
 
-        // Check if there's any booking that overlaps with this time slot
         const isBooked = viewingData.bookings.some(booking => {
           const bookingStart = new Date(`2024-01-01T${booking.start_time}`);
           const bookingEnd = new Date(`2024-01-01T${booking.end_time}`);
           const slotStart = new Date(`2024-01-01T${currentTimeStr}`);
           const slotEnd = new Date(`2024-01-01T${slotEndTimeStr}`);
 
-          // Check for any overlap between the booking and the slot
           return (
             (slotStart <= bookingEnd && slotEnd >= bookingStart) ||
             (bookingStart <= slotEnd && bookingEnd >= slotStart)
@@ -187,7 +180,6 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         return;
       }
 
-      // Check if the slot is already booked
       const { data: existingBooking, error: checkError } = await supabase
         .from("property_viewing_bookings")
         .select("*")
@@ -243,7 +235,6 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         return;
       }
 
-      // Refetch the slots to update the UI
       await refetch();
       
       setShowConfirmDialog(false);
@@ -258,10 +249,8 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
   };
 
   const isDateDisabled = (date: Date) => {
-    // Disable past dates
     if (isBefore(date, startOfDay(new Date()))) return true;
     
-    // Disable dates without available slots
     const dateStr = date.toISOString().split('T')[0];
     return !availableDates.includes(dateStr);
   };
@@ -311,7 +300,8 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
                     modifiers={{
                       hasSlots: (date) => {
                         if (isBefore(date, startOfDay(new Date()))) return false;
-                        return availableDays.includes(date.getDay());
+                        const dateStr = date.toISOString().split('T')[0];
+                        return availableDates.includes(dateStr);
                       }
                     }}
                     modifiersStyles={{
