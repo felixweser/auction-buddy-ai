@@ -217,54 +217,6 @@ export type Database = {
           },
         ]
       }
-      property_viewing_bookings: {
-        Row: {
-          booked_by: string
-          booking_date: string
-          created_at: string
-          end_time: string
-          id: string
-          property_id: string
-          start_time: string
-          viewing_slot_id: string
-        }
-        Insert: {
-          booked_by: string
-          booking_date: string
-          created_at?: string
-          end_time: string
-          id?: string
-          property_id: string
-          start_time: string
-          viewing_slot_id: string
-        }
-        Update: {
-          booked_by?: string
-          booking_date?: string
-          created_at?: string
-          end_time?: string
-          id?: string
-          property_id?: string
-          start_time?: string
-          viewing_slot_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_viewing_bookings_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_viewing_bookings_viewing_slot_id_fkey"
-            columns: ["viewing_slot_id"]
-            isOneToOne: false
-            referencedRelation: "property_viewing_slots"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       property_viewing_settings: {
         Row: {
           buffer_time: number
