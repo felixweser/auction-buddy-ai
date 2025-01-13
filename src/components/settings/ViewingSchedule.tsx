@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -27,6 +28,7 @@ import { SlotForm } from "./SlotForm";
 
 export function ViewingSchedule() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isAddSlotDialogOpen, setIsAddSlotDialogOpen] = useState(false);
@@ -36,17 +38,30 @@ export function ViewingSchedule() {
   const [bufferTime, setBufferTime] = useState("15");
   const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
 
+  // Check authentication status
+  const { data: session, isLoading: sessionLoading } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        navigate("/auth");
+        throw error || new Error("No session found");
+      }
+      return session;
+    },
+  });
+
   // Fetch properties
   const { data: properties, isLoading: propertiesLoading } = useQuery({
     queryKey: ["my-properties"],
+    enabled: !!session?.user,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!session?.user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("created_by", user.id);
+        .eq("created_by", session.user.id);
 
       if (error) throw error;
       return data as Property[];
@@ -56,7 +71,7 @@ export function ViewingSchedule() {
   // Fetch viewing slots for the selected date and property
   const { data: viewingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["viewing-slots", selectedProperty, selectedDate],
-    enabled: !!selectedProperty && !!selectedDate,
+    enabled: !!selectedProperty && !!selectedDate && !!session?.user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("property_viewing_slots")
@@ -70,6 +85,16 @@ export function ViewingSchedule() {
   });
 
   const handleAddSlot = async () => {
+    if (!session?.user) {
+      toast({
+        title: "Nicht authentifiziert",
+        description: "Bitte melden Sie sich an",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
     if (!selectedProperty || !selectedDate || !startTime || !endTime) {
       toast({
         title: "Fehlende Informationen",
@@ -149,8 +174,12 @@ export function ViewingSchedule() {
     setEditingSlotId(null);
   };
 
-  if (propertiesLoading) {
+  if (sessionLoading || propertiesLoading) {
     return <div>Laden...</div>;
+  }
+
+  if (!session) {
+    return null; // The useQuery hook will handle the redirect
   }
 
   return (
