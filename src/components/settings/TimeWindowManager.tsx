@@ -91,6 +91,15 @@ export function TimeWindowManager() {
     },
   });
 
+  const validateTimeWindow = (start: string, end: string) => {
+    const startTime = new Date(`2000-01-01T${start}`);
+    const endTime = new Date(`2000-01-01T${end}`);
+    
+    if (startTime >= endTime) {
+      throw new Error("Die Startzeit muss vor der Endzeit liegen");
+    }
+  };
+
   const handleAddWindow = async () => {
     if (!session?.user) {
       toast({
@@ -111,9 +120,11 @@ export function TimeWindowManager() {
       return;
     }
 
-    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-
     try {
+      validateTimeWindow(startTime, endTime);
+      
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+
       const { error } = await supabase.from("time_windows").insert({
         user_id: session.user.id,
         property_id: selectedProperty,
@@ -137,7 +148,7 @@ export function TimeWindowManager() {
       console.error("Error adding time window:", error);
       toast({
         title: "Fehler",
-        description: "Fehler beim Hinzufügen des Zeitfensters",
+        description: error instanceof Error ? error.message : "Fehler beim Hinzufügen des Zeitfensters",
         variant: "destructive",
       });
     }
@@ -147,6 +158,8 @@ export function TimeWindowManager() {
     if (!editingWindow || !session?.user) return;
 
     try {
+      validateTimeWindow(startTime, endTime);
+
       // First, delete existing slots for this time window
       const { error: deleteError } = await supabase
         .from("property_viewing_slots")
@@ -182,7 +195,7 @@ export function TimeWindowManager() {
       console.error("Error updating time window:", error);
       toast({
         title: "Fehler",
-        description: "Fehler beim Aktualisieren des Zeitfensters",
+        description: error instanceof Error ? error.message : "Fehler beim Aktualisieren des Zeitfensters",
         variant: "destructive",
       });
     }
