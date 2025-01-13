@@ -87,12 +87,12 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
           .eq("booking_date", selectedDate.toISOString().split('T')[0]);
 
         if (bookingsError) throw bookingsError;
-        bookings = bookingsData;
+        bookings = bookingsData || [];
       }
 
       return {
         slots: slots || [],
-        bookings: bookings || []
+        bookings: bookings
       };
     },
     enabled: showViewingDialog,
@@ -110,12 +110,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
       (slot) => slot.slot_date === selectedDateStr
     );
 
-    const timeSlots = [];
+    const bookedSlots = viewingData.bookings || [];
+    const availableSlots = [];
+
     for (const slot of daySlots) {
       const startTime = new Date(`2024-01-01T${slot.start_time}`);
       const endTime = new Date(`2024-01-01T${slot.end_time}`);
-
       let currentTime = startTime;
+
       while (isBefore(currentTime, endTime)) {
         const slotEndTime = addMinutes(currentTime, slot.slot_duration_minutes);
         if (!isBefore(slotEndTime, endTime)) break;
@@ -123,20 +125,14 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         const currentTimeStr = format(currentTime, 'HH:mm:ss');
         const slotEndTimeStr = format(slotEndTime, 'HH:mm:ss');
 
-        const isBooked = viewingData.bookings.some(booking => {
-          const bookingStart = new Date(`2024-01-01T${booking.start_time}`);
-          const bookingEnd = new Date(`2024-01-01T${booking.end_time}`);
-          const slotStart = new Date(`2024-01-01T${currentTimeStr}`);
-          const slotEnd = new Date(`2024-01-01T${slotEndTimeStr}`);
-
-          return (
-            (slotStart <= bookingEnd && slotEnd >= bookingStart) ||
-            (bookingStart <= slotEnd && bookingEnd >= slotStart)
-          );
-        });
+        const isBooked = bookedSlots.some(booking => 
+          booking.start_time === currentTimeStr && 
+          booking.end_time === slotEndTimeStr &&
+          booking.viewing_slot_id === slot.id
+        );
 
         if (!isBooked) {
-          timeSlots.push({
+          availableSlots.push({
             start: format(currentTime, 'HH:mm'),
             end: format(slotEndTime, 'HH:mm'),
             slotId: slot.id
@@ -147,7 +143,7 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
       }
     }
 
-    return timeSlots;
+    return availableSlots;
   };
 
   const handleVirtualTour = () => {
@@ -180,66 +176,34 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         return;
       }
 
-      const { data: existingBooking, error: checkError } = await supabase
-        .from("property_viewing_bookings")
-        .select("*")
-        .eq("viewing_slot_id", selectedSlot.slotId)
-        .eq("booking_date", selectedDate.toISOString().split('T')[0])
-        .eq("start_time", `${selectedSlot.start}:00`)
-        .maybeSingle();
-
-      if (checkError) {
-        toast({
-          title: "Fehler",
-          description: "Der Termin konnte nicht überprüft werden. Bitte versuchen Sie es später erneut.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (existingBooking) {
-        toast({
-          title: "Termin nicht verfügbar",
-          description: "Dieser Termin wurde leider bereits gebucht. Bitte wählen Sie einen anderen Termin.",
-          variant: "destructive",
-        });
-        setShowConfirmDialog(false);
-        return;
-      }
+      const bookingData = {
+        viewing_slot_id: selectedSlot.slotId,
+        property_id: details.property_id,
+        booked_by: user.id,
+        booking_date: selectedDate.toISOString().split('T')[0],
+        start_time: `${selectedSlot.start}:00`,
+        end_time: `${selectedSlot.end}:00`,
+      };
 
       const { error } = await supabase
         .from("property_viewing_bookings")
-        .insert({
-          viewing_slot_id: selectedSlot.slotId,
-          property_id: details.property_id,
-          booked_by: user.id,
-          booking_date: selectedDate.toISOString().split('T')[0],
-          start_time: `${selectedSlot.start}:00`,
-          end_time: `${selectedSlot.end}:00`,
-        });
+        .insert(bookingData);
 
       if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Termin nicht verfügbar",
-            description: "Dieser Termin wurde leider bereits gebucht. Bitte wählen Sie einen anderen Termin.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Fehler",
-            description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
-            variant: "destructive",
-          });
-        }
+        console.error('Booking error:', error);
+        toast({
+          title: "Fehler",
+          description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
+          variant: "destructive",
+        });
         return;
       }
 
       await refetch();
-      
       setShowConfirmDialog(false);
       setShowSuccessDialog(true);
     } catch (error) {
+      console.error('Booking error:', error);
       toast({
         title: "Fehler",
         description: "Der Termin konnte nicht gebucht werden. Bitte versuchen Sie es später erneut.",
@@ -250,7 +214,6 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
 
   const isDateDisabled = (date: Date) => {
     if (isBefore(date, startOfDay(new Date()))) return true;
-    
     const dateStr = date.toISOString().split('T')[0];
     return !availableDates.includes(dateStr);
   };
@@ -283,6 +246,9 @@ export const PropertyHero = ({ imageUrl, title, price, details }: PropertyHeroPr
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Besichtigungstermin auswählen</DialogTitle>
+            <DialogDescription>
+              Wählen Sie einen Tag und eine Uhrzeit für die Besichtigung aus.
+            </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             {isLoading ? (
